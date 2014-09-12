@@ -1,9 +1,12 @@
 \begin{thebibliography}{1}
 
 \bibitem{YapCo2013}
-A.
+Ako.
 \newblock Title.
 \newblock {\em Journal}, 2(3), 2014.
+
+\bibitem{ISO9798}
+Information technology – security techniques – entity authentication, 2010.
 
 \bibitem{YapCo2014}
 Matthew~Co Kiefer~Yap.
