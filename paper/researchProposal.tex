@@ -1,12 +1,48 @@
-\documentclass [a4paper, 11pt]
-			{article}
-\begin 	{document}
-			{\bf Hello World}
-\author	{Jon Kiefer S. Yap, Matthew Kendrick Co}
+\documentclass[a4paper, 12pt]{article}
+\begin{document}
 
-	{\par Hello CS 198 \cite{YapCo2013} \cite{YapCo2014} \cite{ISO9798}}
-	
-	\bibliography {biblio}
-	\bibliographystyle {plain}
+\title{Authentication Mechanisms \\ Using Raspberry Pi}
+\author{Jon Kiefer S. Yap and Matthew Kendrick Co \\
+University of the Philippines Diliman}
+\maketitle
 
-\end		{document}
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+\section{Literature Review}
+\subsection{Identification and Authentication}
+
+Authentication generally comes in two parts. The first step, \textbf{identification}, is the act of claiming an identity, a set of attributes that describes an entity (e.g. a user is identified by its username). Once the entity is identified, \textbf{authentication} is done to verify that the entity is indeed who it says it is. \cite{Pasupathinathan2009}
+
+\subsection{Types of Authentication}
+\begin{enumerate}
+    \item \textbf{Hardware-based} authentication systems grant access to users based on something they have, e.g. smart cards.
+    \item \textbf{Software-based} authentication systems grant access to users based on something they know, e.g. passwords, or something they are, e.g. fingerprints.
+\end{enumerate}
+
+\subsection{Modern Authentication Methods}
+\subsubsection{Hardware-Based}
+\begin{enumerate}
+    \item \textbf{Smart cards} contain cryptographic keys that are based on the public key infrastructure (PKI). \cite{AAMHS2011}
+    Examples of smart card implementation include the "Design and implementation of a smart card based health care information system" in the health care industry. \cite{KardasTunali2006}
+    \item \textbf{Radio-frequency identification tags} are typically attached to objects which they identify and transfer information about using electromagnetic or radio waves.
+\end{enumerate}
+
+\subsubsection{Software-Based}
+\begin{enumerate}
+    \item \textbf{Password/PIN} are the most commonly used knowledge-based authentication method. Longer passwords mean better security since it takes more time to crack. Over the course of transmission, the passwords are encrypted using the Transport Layer Security (TLS) or the Secure Socket Layer (SSL) features, which provide and encrypted channel for data exchange.
+    \item \textbf{Browser certificates} are digital certificates that are based on public key infrastructure and are installed in a browser. They are currently being used by Internet browsers such as Mozilla Firefox and Google Chrome to authenticate websites. \cite{AAMHS2011}
+\end{enumerate}
+
+\subsection{Open Problems}
+
+\subsection{Specific Problems}
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{biblio}
+
+\end{document}
