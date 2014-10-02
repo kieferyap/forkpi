@@ -1,0 +1,17 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: main.aux
+The style file: plain.bst
+Database file #1: biblio.bib
+I was expecting a `,' or a `}'---line 53 of file biblio.bib
+ :     
+ :     link = {http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=1246384}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--to sort, need author or key in InfoSecurity2012
+Warning--to sort, need author or key in KeylexPin
+Warning--to sort, need author or key in MiwaLock
+Warning--to sort, need author or key in LodgemartMiwaLock
+Warning--to sort, need author or key in MegaMatcher
+Warning--to sort, need author or key in MegaMatcherPrices
+Warning--to sort, need author or key in ChurchTrac
+Warning--to sort, need author or key in CardwerkSmartCard
+(There was 1 error message)

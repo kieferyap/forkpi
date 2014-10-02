@@ -1,0 +1,43 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage{url}
+
+\begin{document}
+
+\title{Authentication Mechanisms Using Raspberry Pi}
+\input{authors}
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\section{Introduction}
+
+\section{Literature Review}
+\input{lit-review}
+
+\section{Problem Statement}
+\input{problem-stmt}
+
+\section{Methodology}
+% How to define success? metrics, benchmarks
+% 1) security
+%    PIN - 4-digit, 6-digit PINS
+%          brute force permutations to try = (nPerms)/2
+%    RFID - stolen tokens
+%           8-digit codes, reprogrammed codes can fool reader?
+%      vulnerable to "keyloggers"? reprogram a tag to match authorized code
+%    Fing - FalsePosRate, FalseNegRate
+%           can be fooled by non-human or dead finger?
+% 2) usability - survey
+%    PIN - how many seconds to input a PIN
+%    RFID - how fast to recognize code
+%    Fing - how fast to recognize print, log capacity, fingerprint db size
+% 3) cost - compare to previous
+% demonstrate the scientific method
+
+\section{Conclusion}
+
+\bibliographystyle{plain}
+\bibliography{biblio}
+
+\end{document}
