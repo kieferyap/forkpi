@@ -1,0 +1,14 @@
+*.debhelper
+*.log
+*.substvars
+autoreconf.after
+autoreconf.before
+files
+libnfc-bin/
+libnfc-dev/
+libnfc-examples/
+libnfc-pn53x-examples/
+libnfc4.debhelper.log
+libnfc4/
+libnfc4-dbg/
+tmp/
