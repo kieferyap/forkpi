@@ -1,0 +1,11 @@
+prefix=/usr
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libnfc
+Description: Near Field Communication (NFC) library
+Version: 1.7.1
+Requires: 
+Libs: -L${libdir} -lnfc
+Cflags: -I${includedir}

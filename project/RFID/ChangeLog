@@ -1,0 +1,724 @@
+Feb 24, 2014 - 1.7.1
+------------------
+
+Fixes:
+ - Fix several issues reported by Coverity Scan
+   (mem leaks, buff overflows, reuse after free, etc)
+ - More robust when several conflicting uart drivers are in the config
+ - Fix racing condition with uart_flush_input()
+ - Silent pn53x_check_communication error messages when scanning
+ - Fix nfc_target_init(), was returning success in case of timeout
+ - Windows: fix several compilation issues
+ - On tag selection, save current target info also for ISO14443B*
+ - nfc-read-forum-tag3: fix incomplete NDEF retrieval and size of output file
+
+Improvements:
+ - nfc-list: New option to choose which technologies to poll for
+ - UART: drivers now supported under kFreeBSD
+ - New LIBNFC_DEVICE env var to use one reader and exclude all other readers
+   while LIBNFC_DEFAULT_DEVICE only prepends it to the configured devices list
+ - New LIBNFC_AUTO_SCAN env var to enable(default)/disable auto scan
+ - On tag selection, save current target info even if pnt=NULL
+ - On tag selection, grant NP_INFINITE_SELECT also for ISO14443B*
+ - Save & restore NP_INFINITE_SELECT status when changing it internally
+ - nfc-mfclassic: add format/wipe command (thanks to Adam Laurie)
+ - nfc-jewel: new utility to read/write Topaz/Jewel tags (thanks to Pim 't Hart)
+ - nfc_initiator_select_passive_target() provides defaults if pbtInitData=NULL
+ - nfc-read-forum-tag3: add -q option, add full parsing of NDEF Attribute Block
+
+Fixes & improvements specific to nfc_initiator_target_is_present():
+ - Supports fully PN532 & PN533, not tested on other chips
+ - Fix usage after nfc_initiator_poll_target()
+ - Set correctly last_error
+ - Fix issue when there was no saved target
+ - Allow NULL pointer to tag
+ - Fix issues in case of tear off conditions
+ - Now works with:
+    * MFUL, MFC, MFC Mini, MFC 7-byte (re-selection: you'll need to auth again)
+    * ISO14443-4A, ISO14443-4B
+    * ISO14443-4B', ASK CTx, ST SRx
+    * Jewel
+    * FeliCa
+
+Sep 03, 2013 - 1.7.0
+--------------------
+
+Fixes:
+ - pn53x: only create a current target when at least one have been found
+ - pn532_uart: fix 'operation abort' feature with this driver
+ - pn532_uart: let more time to PN532 to wake-up, this fix some specific cases
+   where PN532 shown one of two runs (Thanks to Marcello Morena)
+ - nfc-mfclassic: allow option f for read operation too
+ - Avoid clash with system's htole32 if it exists
+ - Include <stdlib.h>, required for getenv(3)
+ - usb: fix USB enumeration issue (Thanks to Mike Auty)
+ - acr122_pcsc: fix compilation on Mac OSX 10.8.4
+ - Fix pn53x_initiator_transceive_bytes_timed() measures for TypeB
+ - Various minor fixes: warnings, style, etc.
+
+Improvements:
+ - New PN532 over I2C driver, see contrib/libnfc/pn532_i2c_on_rpi.conf.sample
+ - ACR122/Touchatag: misc improvements
+ - ReadMobib/ReadNavigo: improve shell script portability
+ - Add ISO14443-4 chaining support for RX (MI)
+ - UART: add support for BeagleBone serial ports (Thanks to Johan Henselmans)
+ - nfc-mfultralight: allow setting of UID for special 'chinese' ultralight cards
+
+Special thanks to:
+ - Laurent Latil (new pn532_i2c driver for linux)
+ - Nobuhiro Iwamatsu (warning fixes and debian package)
+
+Apr 05, 2013 - 1.7.0-rc7 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - Fix bug when compiling without libusb
+ - Fix several memory leaks in error handling conditions
+ - Remove calls to exit() from the library
+ - Create safer snprint_nfc_*() instead of sprint_nfc_*() functions
+ - Fix warnings returned by cppcheck & clang/scan-build
+   - Obsolete function 'usleep' => nanosleep()
+   - Non reentrant function 'readdir' => readdir_r()
+   - Non reentrant function 'strtok' => new connstring_decode()
+   - Buffer may not be null-terminated after call to strncpy()
+   - scanf without field width limits can crash with huge input data
+   - Resource leaks: missing fclose()
+   - Dead code, unused vars & vars scopes warnings
+ - Unify copyright notices & update authors lists
+ - Windows: Fix compilation due to new usbbus file
+ - Windows: Clean up compiler/linker warnings
+   - Fixed the suppression of the auto-fixup for linking against MS built libs
+   - Fixed all the formatting warnings by shifting to inttypes.h specifiers
+   - shifted to %lu for DWORD printf
+ - nfc-anticol: fix ATS length
+ - nfc-mfclassic: fix reporting of processed blocks total
+ - nfc-mfclassic: detect MIFARE Plus 2K as 2K instead of 1K
+ - pn53x_usb/acr122_usb: check usb_open() returns before using it
+
+Improvements:
+ - New PN532 over SPI driver, see contrib/libnfc/pn532_spi_on_rpi.conf.sample
+ - Devels HACKING file: introduce clang/scan-build & cppcheck for better code
+ - Better internal dependencies handling (bus <> drivers)
+ - Cleaner handling of portability patches
+ - Windows: logging via OutputDebugString(), ease debugging
+ - nfc-mfclassic: use smaller files for cards < 4k
+ - nfc-mfclassic: by defaut don't authorise wrong keyfile, use "f" to force
+ - quick_start_example1.c: remove err.h dependency, easier for Windowsians
+ - nfc-mfclassic: support some new magic cards with writeable sector #0
+ - nfc-anticol: add -t option to use timed functions
+
+Changes:
+ - Upon malloc error, nfc_init() doesn't force exit() anymore
+   so now you should test if context != NULL after nfc_init() call
+ - API: nfc_initiator_target_is_present() & str_nfc_target()
+   now take a pointer to nfc_target as argument instead of passing by value
+
+Special thanks to:
+ - Eugeny Boger (new pn532_spi driver for linux)
+
+Mar 03, 2013 - 1.7.0-rc6 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - Fix several memory leaks (nfc_drivers, libusb, config parser)
+ - Fix stack smash while displaying long data transmission (LOG_HEX)
+ - pn53x-tamashell: allow larger commands up to full extended frame
+ - Add missing windows file in archive (version.rc.in)
+ - Fix compilation warnings & potential bugs
+ - Fix documentation
+ - Fix missing malloc() calls checks
+ - Fix missing free() calls in some error handlers
+
+Improvements:
+ - Allow to disable conffils & envvar supports on embedded platforms
+ - Add option to nfc-mfclassic to tolerate RW errors
+
+Changes:
+ - Replace usb_set_debug() in applications by LIBNFC_LOG_LEVEL libusb group
+
+Feb 16, 2013 - 1.7.0-rc5 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - Add missing sample configuration file in archive
+ - Add missing windows files in archive
+ - Preserve error code while using pn53x_set_property_bool() with
+   NP_AUTO_ISO14443_4 flag
+
+Improvements:
+ - New nfc_register_driver() function allowing to hook custom drivers
+ - New nfc_free() function to free allocated buffers
+
+Special thanks to:
+ - Ahti Legonkov (new nfc_register_driver())
+
+Feb 04, 2013 - 1.7.0-rc4 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - Fix tag selection for nfc-mfclassic, nfc-mfultralight, nfc-read-forum-tag3
+   and nfc-relay-picc
+ - Fix crash in nfc-relay-picc -i/-t if fd3 or fd4 is missing
+
+Improvements:
+ - Windows support build with CMake
+
+Changes:
+ - Configuration directory (ie. libnfc.conf) can now be set a compile-time
+ - Log can be enabled/disabled using CMake
+
+Special thanks to:
+ - Alex Lian (Windows support improvements)
+ - Nobuhiro Iwamatsu (Debian package improvements)
+
+Jan 31, 2013 - 1.7.0-rc3 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - Fix pn53x_usb bulk write timeout
+ - Fix BCC in nfc-emulate-uid example
+ - Fix nfc-relay-picc example
+ - Fix a miss returned value within some internal functions (user program could
+   be affected)
+ - Fix nfc-scan-device -i option
+ - Remove wrong exit() calls in library
+ - Fix issue in driver acr122_usb affecting Touchatag
+ - Reenable some idle in all drivers, add selectively PowerDown when possible
+
+Changes:
+ - nfc_emulate_target() now takes timeout parameter
+
+Special thanks to:
+ - Alex Lian (Windows support refresh)
+
+Jan 20, 2013 - 1.7.0-rc2 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - Fix API version in debian files
+ - Fix wrong condition to display a warning when user disables autoscan
+ - Fix unit tests
+ - Fix ISO14443B' ATS
+
+Improvements:
+ - Allow device.optional=true to tolerate missing device
+
+Changes:
+ - pn532_uart driver is now enabled by default
+
+Dec 09, 2012 - 1.7.0-rc1 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - nfc_initiator_deselect_target() now returns 0 on success (as expected by caller)
+ - example/pn532-sam: Fix few bugs
+ - Fix ACR122S device detection when no ACR122S device available (endless UART receive)
+ - Suppress a lot of compiler warnings !.. which fixes many potential bugs
+ - Display right driver name while detecting PCSC
+ - Correctly handle PCSC header files on Mac OS X
+ - Fix nfc-emulation (now works with utils/nfc-emulate-forum-tag4 and Nexus S)
+
+Improvements:
+ - New nfc_initiator_init_secure_element() function to set SAM as wired card (only relevant with a PN532 SAM-equipped)
+ - New str_nfc_target(), str_nfc_modulation_type(), str_nfc_baud_rate() function to convert some libnfc's types into allocated string
+ - New nfc_device_target_is_present() to check if passed target is in the field
+ - --enable-serial-autoprobe option at compile time to replace it with some run-time options
+ - New -i option to nfc-scan-device to allow intrusive scan
+ - New feature, libnfc now uses configuration files:
+   * main configuration file can be used to set options (ie. intrusive, autoscan, log-level)
+   * main configuration file can contains a device as default device, HIGHLY recommended for UART devices users
+   * multiple devices files can be used to declare multiple devices and ordered them
+ - UART port scan now includes ttyAMA* to detect UART-devices connected on Raspberry Pi (e.g. `nfc-scan-device -i`)
+ - Support for OpenPCD2 (with a dedicated firmware)
+ - Support for FTDI dongle under MacOS
+ - Enhance messages display
+ - Provides modprobe configuration file and instructions for Linux >3.1 with PN533 users.
+ - Greatly improve log facility with log level filter, configurable using conf file (ie. /etc/nfc/libnfc.conf) or environment var LIBNFC_LOG_LEVEL
+ - New man page for nfc-read-forum-tag3 utility (Thanks to UNFORGiVEN512)
+ - New man page for nfc-scan-device utility
+ - New man page for  nfc-emulate-forum-tag2 example
+ - README: Add few words about device permissions and udev/devd rules available in package
+ - utils/nfc-emulate-forum-tag4: add support for v2.0 of the spec
+ - New "make style" command to have a beautiful code
+ - Code cleanup (indentation, white spaces, etc.)
+
+Changes:
+ - New nfc_device_get_information_about() now allocates returned string
+ - No more in/out paramaters in nfc_initiator_transceive_*() functions
+ - Rename nfc-probe to nfc-scan-device
+ - Rename abtUid from struct mifare_param_auth into abtAuthUid: this is not the UID while using 7-bytes UID MIFARE Classic tags.
+ - utils/nfc-list: always display the card type when a card is found
+ - nfc-utils: new fingerprinting method closer to AN10833, (Thanks to Balazs Bucsay)
+
+See NEWS file for major changes (ie. API changes)
+
+Special thanks to:
+ - Ludovic Rousseau (Code cleanup, tests under MacOS, etc.)
+ - Frank Morgner
+
+Feb 27, 2012 - 1.6.0-rc1 (release candidate)
+--------------------------------------------
+
+Fixes:
+ - utils/nfc-mfclassic: use MIFARE instead of Mifare typo
+ - utils/nfc-list: continue to attempt to reach devices after a connection failure
+ - libnfc: avoid readline auto-detection when cross-compiling
+ - driver/pn53x_usb: fix path usage for FreeBSD
+ - doc: quick_start_example1.c fixed
+ - utils/*: verbose option back for nfc-list, and newly implemented in nfc-poll
+
+Improvements:
+ - libnfc: enhanced documentation
+ - libnfc: debug facility back without external depends
+ - libnfc: add nfc_device_get_supported_modulation() and nfc_device_get_supported_baud_rate() functions
+ - libnfc: enhanced code indent
+ - drivers: implement driver for ACR122S device
+ - utils/nfc-mfclassic: remove non-conscistent "extract payload" option in nfc-mfclassic
+ - utils/nfc-emulate-forum-tag2: add missing manpage
+ - utils/nfc-read-forum-tag3: add missing manpage
+ - tests/*: fix some warnings in test
+ - tests/test_dep*: add some DEP tests (Active/Passive in several baud rates)
+ - doc: quick_start_example1 is now compiled when running make check or distcheck
+ - libnfc: a printf-based logging replaces log4c
+ - libnfc: various minor fixes/enhancements
+ - utils/*: nfc-probe example added to show devices connection strings
+
+Changes:
+ - PN53x specific errors are not public anymore;
+ - Timeouts are now integers instead of timeval structure
+ - Removes libusb types workaround (r200) as it seems to not be needed anymore but may disturb compiler
+ - Removes parse_args() from nfc-utils.[hc]
+ - Move nfc-emulate-forum-tag2 from utils to examples.
+ - contrib: move udev and devd files into contrib/
+ - debian: udev rules file renamed
+
+See NEWS file for major changes (ie. API changes)
+
+Special thanks to:
+ - Thomas Hood (Debian packages and various fixes/contributions)
+ - Anugrah Redja (ACR122S driver)
+
+Oct 17, 2011 - 1.5.1 (unstable)
+-------------------------------
+
+Fixes:
+ - libnfc: fix invalid memory access when a new driver is probing for hardware and the number of requested devices was already reached
+ - chips/pn53x: fix bug in _timed fcts
+ - drivers/pn53x_usb: fix crash when usb_bulk_read() fails.
+ - drivers/pn53x_usb: continue to search a available device on usb errors (ie. Device Busy)
+ - drivers/pn53x_usb: make PN53x usb connection more stable
+ - examples/nfc-relay: fix UID problem
+ - windows: fix uart_receive() under Win32 platform
+
+Improvements:
+ - libnfc: add logging facility using log4c.
+ - libnfc: abort mecanism is now implemented in driver layer, so it can use pipe-based mecanism (as PN532_UART or ARYGON driver does under POSIX system) or flag-based mecanism.
+ - libnfc: add ISO/IEC 14443 B' aka Type B' modulation partial support
+ - libnfc: add partial support (list) for ISO14443B-3 ST SRx & ASK CTx cards
+ - libnfc: compile unit tests only on demand unless using --enable-debug.
+ - libnfc: error handling improvements
+ - libnfc: new function nfc_idle() to set the NFC device in idle mode
+ - libnfc: add partial support for Sony S360 reader
+ - libnfc: some manual test reports have been added
+ - libnfc: list_targets support for ASK CTS512B (no anticol support yet)
+ - libnfc: nfc_disconnect() now switches NFC device into idle before disconnecting
+ - libnfc: nfc_initiator_poll_target() is now available for all devices
+ - libnfc: implement software polling for non-PN532 equipped device
+ - chips/pn53x: add pn53x_data_new() function to alloc and init pn53x_data structure
+ - chips/pn53x: add some SFR registers description
+ - chips/pn53x: implement WriteBack cache
+ - chips/pn53x: new pn53x_PowerDown wrapper for PowerDown (PN532) command
+ - chips/pn53x: prints a debug trace when reading PN53x registers
+ - chips/pn53x: set some parameters in ISO/IEC 14443A when using DEP mode (ie. SAK says ISO/IEC 18092 compliant) (Android NFC stack now detects the target as DEP)
+ - chips/pn53x: some optimisations in registers initialisation
+ - chips/pn53x: list_passive_targets() fixed for TypeB on LoGO
+ - chips/pn53x: pn53x_data now have a operating_mode enum to know the current running mode (initiator, target or idle)
+ - drivers/*: all commands are now abortable
+ - drivers/pn532_uart,arygon: make valgrind happy with UART-based drivers
+ - drivers/pn53x*: use shared pn53x_ack_frame[] and pn53x_nack_frame[] instead of local declaration
+ - drivers/pn53x_usb: all USB errors are now reported in text format
+ - drivers/pn53x_usb: enable progressive field on init to allow pn53x-tamashell to works (note: it does not distrib progressive field enabling when nfc_list_passive_target() is used)
+ - drivers/pn53x_usb: implement PN53x extended information frames with USB devices
+ - drivers/pn53x_usb: use progressive field on/off only for ISO14443 Type B target listing
+ - buses/uart: now provides an abort mecanism for windows users
+ - buses/uart: UART based drivers could now use uart_flush_input() to discard junk bytes on input.
+ - examples/nfc-anticol: add -f option to force RATS
+ - examples/nfc-mfclassic: handle 7-byte UID cards & MFC Mini
+ - examples/nfc-anticol: now use nfc_abort_command()
+ - examples/nfc-dep-*: disconnect from NFC device on error.
+ - examples/nfc-emulate-forum-tag2: add new example to emulate a NFC Forum Tag Type 2
+ - examples/nfc-emulate-forum-tag4: add document references.
+ - examples/nfc-emulate-forum-tag4: this example now fails with ENOTSUPP when used with a non-PN532 chip.
+ - examples/nfc-mfclassic: write special Mifare 1K cards, including Block 0 / UID
+ - examples/nfc-mfsetuid: add a new example to set UID of special Mifare 1K cards
+ - examples/nfc-read-forum-tag3: add new example to read a NFC Forum Tag Type 3
+ - examples/pn53x-tamashell-scripts: minor enhancements
+ - tests/test-dep: add a threaded DEP test to check DEP communication between two local devices
+ - debian: enable all drivers at compile time
+ - debian: improve debian packaging (Thanks to Thomas Hood)
+ - debian: use a numbering that allow to have libnfc pre-version and debian package pre-version too. (Thanks to Thomas Hood)
+ - freebsd: add FreeBSD devd(8) snippet configuration for Sony S330 readers.
+ - windows: implement abort mecanism in pn532_uart driver (Based on provided patch: many thanks to Edwin Evans)
+ - windows: USB drivers now relies on libusb-win32 with version >= 1.2.4.x (1.2.4.6 recommended) (Many thanks to Glenn)
+ - windows: implement automatic uart port detection and input flush (Thanks to Edwin Evans)
+
+Changes:
+ - libnfc: add 'struct timeval *timeout' parameter for pn53x_transceive(), pn53x_target_receive_bytes() and pn53x_target_send_bytes().
+
+
+
+Apr 29, 2011 - 1.5.0 (unstable)
+-------------------------------
+
+Fixes:
+ - libnfc: silent warnings with more strict CFLAGS
+ - libnfc: update devd(8) rules file for FreeBSD
+ - libnfc: make libnfc compile under Windows
+ - libnfc: fix nfc_pick_device() when called from nfc_connect with NULL nfc_device_desc_t parameter
+ - chips/pn53x: fix a bug when value is larger than mask when using WriteRegister
+ - chips/pn53x: adapt MaxRetries to avoid issue with 2 tags on PN531
+ - examples/nfc-mfclassic: UID was shown reverse-ordered
+
+Improvements:
+ - libnfc: use a new way to handle drivers, introduce a real HAL
+ - libnfc: use absolute include path instead of relative ones
+ - libnfc: move some nfc_device_t members in a better place
+ - libnfc: improve nfc_driver_t struct to embedded HAL API
+ - libnfc: nfc_device_t now embeddeds driver data and chip data pointers (useful to be more generic)
+ - libnfc: use more readable variables instead of strange coding convention
+ - libnfc: move PRINT_HEX macro into nfc-internal.h
+ - libnfc: introduce an abort mecanism
+ - libnfc: suppress any PN53x references in nfc.c
+ - libnfc: nfc-mfclassic and nfc-mfcultralight examples are now compiled under Windows
+ - chips/pn53x: use the powerful C99 writing to construct PN53x commands
+ - chips/pn53x: remove almost all memcpy()
+ - chips/pn53x: WriteRegister, ReadRegister and SetParameters command wrappers are correctly named
+ - chips/pn53x: introduce chip state (SLEEP, NORMAL or EXECUTE)
+ - chips/pn53x: add SAMConfiguration command wrapper (need to be improved)
+ - chips/pn53x: remove almost all const arrays
+ - chips/pn53x: use human readable defines for commands instead of hex values
+ - chips/pn53x: in debug mode, the PN53x command is shown in human-readable string, awesome isn't it? ;-)
+ - chips/pn53x: try to determine IC version instead of hardcode it.
+ - chips/pn53x: new fonction to build frames instead of build them in each driver
+ - chips/pn53x: enable aborting blocking commands (e.g. TgInitAsTarget) and refactor *_check_communication() as pn53x_check_communication().
+ - chips/pn53x: add timed versions of transceive_bytes/bits, allow to detect emulated/non-emulated tags and more...
+ - chips/pn53x: support CRC auto-handling in ...transceive_bytes_timed
+ - drivers/pn53x_usb: ASK LoGO: enable progressive field feature.
+ - drivers/pn532_uart: major improvement of UART handling
+ - drivers/pn532_uart: check PN53x frames when received
+ - drivers/pn53x_usb: enhance ASK LoGO dedicated code
+ - drivers/pn53x_usb: add LEDs support for ASK LoGO and SCL3711
+ - drivers/pn532_uart: implement extended frame send/receive for PN532_UART driver.
+ - drivers/arygon: use the new way to drive UART (its far more stable)
+ - drivers/arygon: do not hard code PN532 chip type: pn53x_init() determine it and ARYGON device seems to not need to be waken up.
+ - drivers/arygon: reject too heavy payload (ARYGON does not support PN53x extended frame even with PN532 equipped device)
+ - drivers/pn532_uart & arygon: now runs almost twice faster than the previous stable release
+ - buses/uart: receive() is now based on expected bytes instead of calculated timeouts..
+ - buses/uart: simplify uart_send() on POSIX systems.
+ - examples/nfc-emulate-tag: minor comments improvements.
+ - examples: remove nfc-message.h usage from examples.
+ - examples/nfc-emulate-forum-tag4: fully reworked example: it now support all NFC-Forum device in read and write mode
+ - examples/pn53x-tamashell: add an example for LoGO LEDs
+ - examples/pn53x-tamashell: add a script to read Mobib card.
+ - examples/pn53x-tamashell: add a script to read Navigo card.
+
+Changes:
+ - libnfc: merge macros from nfc-messages.h into nfc-internal.h
+ - libnfc: remove useless files: nfc-messages.h, buses.h and chips.h
+ - API: new nfc_emulate_target() that ease target emulation for developer
+ - macros: show PRINT_HEX result on stderr in debug mode (that helps to sync with debug msg which are printed on standard error output.)
+ - drivers: split transceive() into send() and receive() to be able to handle more cases (differed replies, abort commands, etc) later
+ - drivers: use a const structure of functions instead of -dirty- callbacks array
+ - drivers/pn53x_usb: pn531_usb and pn533_usb drivers are now merged and use the pn53x IC version autodetection
+ - buses/uart: use a smart way to determine available ports on POSIX systems (tested on Linux and FreeBSD)
+
+
+
+Feb 21, 2011 - 1.4.2
+--------------------
+
+Fixes:
+ - libnfc: fgets instead of getline, bring MacOSX / BSD without glibc alive
+ - libnfc: add missing CMake files to generated tarball needed by windows users (Thanks to Glenn)
+ - drivers/pn532_uart: fix pn532 wakeup response handling
+ - buses/uart: prevent from retrieving more than buffer length (potential buffer overflow)
+ - buses/uart: intent to speed up interface
+ - nfc-emulate-uid: use a correct UID
+ - nfc-mfclassic: fixes a segfault when using only 1 argument
+
+Improvements:
+ - libnfc: silent some compilation warnings
+ - drivers/pn533_usb: support new device: ASK / LoGO. (Thanks to ASK for sending one sample)
+ - chips/pn53x: set register directly if mask cover whole value.
+ - pn53x-tamashell: accepts script as arg, this makes shebang possible
+ - pn53x-tamashell: add pause command & doc
+ - documentation: add a README-Windows.txt file
+ - documentation: add more pcsc-lite related instruction in README
+
+
+
+Feb 1, 2011 - 1.4.1
+-------------------
+
+Fixes:
+ - libnfc: fix missing pn53x-tamashell-scripts in generated tarball. (Thanks to usermeister)
+ - buses/uart: improved UART communication on POSIX systems: slower devices can be detected and high speed devices works better
+ - buses/uart: serial autoprobe now skips invalid devices but checks all ports in the list
+ - drivers/pn53x_usb: prevent from stack corruption when using PN533-based device and add errors handling for ReadRegister and WriteRegister
+ - drivers/arygon: fix polling on ARYGON devices
+ - examples/nfc-emulate-tag: switch off easy framing when we are not emulating a ISO14443-4 target
+ - examples/nfc-mfclassic: fix crash when file cannot be opened for writing
+ - examples/nfc-mfultralight: fix 7 bytes UID display
+
+Improvements:
+ - libnfc: add a "troubleshooting" section in README to document ACR122 problems with pcsclite.
+ - libnfc: inform user if target UID can not be emulated
+ - example/nfc-mfultralight: handle lock page writing
+ - examples/nfc-emulate-tag: handle HALT & READ
+ - tests: add register access test
+
+Experimental: Windows platform support (Thanks to Glenn Ergeerts)
+
+
+
+Nov 17, 2010 - 1.4.0
+--------------------
+
+Fixes:
+ - libnfc: fix Felica listing
+ - libnfc: fix storage of ISO14443B targets data
+ - libnfc: fix MacOS build
+ - libnfc: fix some errors string (ie. well-known "Invalid Parameter")
+ - libnfc: fix memory leak while using *_pick()
+ - drivers/pn53x_usb: fix ZLP USB issue
+ - drivers/pn53x_usb: workaround for PN532 toggle bit USB bug
+ - drivers/pn53x_usb: fix timeout problem in emulation mode
+ - drivers/pn53x_usb,pn532_uart,arygon: more robust recovery from unstable states such as interrupted emulation modes
+ - drivers/acr122: fix escape ioctl under Linux
+ - buses/uart: fix UART default serial ports under Linux.
+ - examples/nfc-anticol: fix bug preventing to run nfc-anticol after some other programs
+ - examples/nfc-anticol: fix display of UID
+ - ... and many other minor fixes
+
+Improvements:
+ - libnfc: major emulation improvements: libnfc can now be used to emulate ISO/IEC 14443 type A tag (MIFARE, ISO14443-4), FeliCa and D.E.P. target
+ - libnfc: documentation improvements
+ - libnfc: decode select/initialization datas for almost all supported target types (ISO14443 A/B, Jewel/Topaz, FeliCa)
+ - libnfc: add ISO/IEC 14443B baud rates: 212, 424 and 847 kbps
+ - libnfc: cache some chip registers for faster communication
+ - libnfc: greatly improved D.E.P. support
+ - buses/uart: adjust UART's timeouts from baud rate: faster communication at high speed and more reliable at low speed (affect pn532_uart and arygon drivers)
+ - drivers/arygon: retrieve ARYGON µC firmware version
+ - examples/nfc-anticol: adds support for CL3
+ - examples/nfc-anticol: cascade based on SAK rather than CT, better for educational purpose
+ - examples/nfc-anticol: Computes CRC rather than hardcoded one.
+ - examples/nfc-utils: print_iso14443b_info() now displays many decoded information in verbose mode
+ - examples/nfc-utils: print_iso14443a_info() now displays many decoded information and shows attempt to determine tag name in verbose mode
+ - examples/nfc-list: new option -v for verbose mode
+ - examples/nfc-list: now support for Jewel/Topaz too
+ - examples/nfc-poll: now poll using all supported modulations
+ - examples/nfc-dep-target: add hack to allow to use two devices on the same machine (for tests/debug purpose)
+ - examples/pn53x-tamashell: New PN53x TAMA communication demonstration shell (support scripting)
+ - examples/nfc-relay-picc: New tool to relay ISO14443-4 communications (even over network... Enjoy!)
+ - examples/nfc-emulate-forum-tag4: New example to emulate a NFC Forum tag type 4
+ - examples/nfc-emulate-tag: New example to emulate tags
+ - examples: add missing man pages
+ - ... and many other minor improvements
+
+Changes:
+ - API: Many changes, see NEWS file for more info how to migrate
+ - buses/uart: split UART implementations: one file for POSIX and another one for Windows
+ - examples: nfcip-* renamed to nfc-dep-*
+ - examples: nfc-sam renamed to pn53x-sam
+ - examples: nfc-emulate renamed to nfc-emulate-uid
+ - examples: change examples license for the sake of consistency: LGPL covers library, re-usable examples code is now under BSD license.
+
+
+
+Aug 31, 2010 - 1.3.9
+--------------------
+
+Fixes:
+ - libnfc: fix ATS
+ - pn53x_usb: fix USB issues
+ - nfc-mfultralight: fix read and write counters
+
+Improvments:
+ - libnfc: rearrange source code
+ - libnfc: enhance documentation
+ - libnfc: add regression tests (not as much as expected but its here!)
+ - build: configure script now supports --with-drivers option instead of --disable-pcsclite and --disable-libusb (see --help)
+ - nfc-mfultralight: we now can write OTP bytes if user want to
+
+Changes:
+ - API: nfc_initiator_select_tag() is now nfc_initiator_select_passive_target()
+ - API: nfc_initiator_deselect_tag() is now nfc_initiator_deselect_target()
+ - API: new function nfc_initiator_list_passive_targets() to list available targets in field
+ - API: new nfc_perror(), nfc_strerror() and nfc_strerror_r() functions to handle errors
+ - API: new types: nfc_target_type_t and nfc_target_t
+ - API: new configuration option NDO_AUTO_ISO14443_4 to enable/disable auto iso14443-4 mode.
+ - API: new configuration option NDO_EASY_FRAMING to enable/disable auto frames encapsulation and chaining
+ - API: nfc_initiator_transceive_dep_bytes(), nfc_target_receive_dep_bytes() and nfc_target_send_dep_bytes() have been removed (unset NDO_EASY_FRAMING instead of these functions)
+ - API: (experimental) new nfc_initiator_poll_targets() which allow to use hardware polling function
+ - examples: add draft of a new example: nfc-sam. It tests the comunication with a connected SAM (Secure Access Module)
+ - examples: add new example to show how to use new polling function
+ - examples: add new example to diagnose basic elements (communication, rom and ram) of pn53x
+ - nfc-mfultralight: on write failure, continue if authenticate works.
+ - nfc-mfclassic: take care of 16-blocks-long sectors of Mifare Classic 4K in the nfc-mfclassic example's blocks counting routine.
+ - nfc-mfclassic: now fails ealier when something goes wrong (this allow to prevent from false-success).
+ - nfc-mfclassic: disable ISO14443-4 auto-switching in order to read devices that emulate Mifare Classic with ISO14443-4 compliance.(e.g. Nokia 6212 Classic)
+
+Note: This release will not install extra headers (like mifare.h), programs that depends on should copy theses files into their sources.
+
+
+
+Apr 6, 2010 - 1.3.4
+--------------------
+
+Fixes:
+ - Fix CT (Cascade Tag) byte when using 10 bytes long UID.
+ - Strip CT (Cascade Tag) from UIDs in nfc_initiator_select_tag().
+ - Fix CMake build (mainly on Windows related stuff)
+ - Minors fixes in documentation.
+ - Suppress almost all compilation warnings.
+
+Changes:
+ - API: Provide ISO14443A CRC function.
+ - Remove annoying info message when probing uart devices while serial autoprobing is disabled.
+ - Rename README-Windows.txt (compilation using CMake) into CMake-Windows.txt
+ - Add README for Windows compilation using win32/Makefile.
+
+Note: Windows users could now take main tarball using CMake to build or Windows specific archive using MinGW GNU/Make.
+
+
+
+Feb 17, 2010 - 1.3.3
+--------------------
+
+Fixes:
+ - libnfc: Attempt to fix build on Windows using CMake;
+ - libnfc: Fix build on NetBSD;
+ - libnfc: Fix build on MacOS X;
+ - nfc-relay: fix usage of two devices that use the same driver.
+
+
+
+Feb 01, 2010 - 1.3.2
+--------------------
+
+Fixes:
+ - libnfc: Fix compilation issue under FreeBSD (should now compile on FreeBSD 6, 7 and 8).
+
+Note: Experimental CMake files are provided with this release, issues reports are welcome.
+
+
+
+Jan 20, 2010 - 1.3.1
+--------------------
+
+Fixes:
+ - libnfc: Fix compilation issue under Windows;
+ - uart bus: Fix possible invalid file descriptor in uart_close();
+ - uart bus: Serial autoprobing is now DISABLED to avoid UART disturbing. (Feature can be enabled using –enable-serial-autoprobe option while configure).
+
+
+
+Jan 14, 2010 - 1.3.0
+--------------------
+
+Fixes:
+ - build: Add workarounds for libusb when compiling using C99;
+ - build: Attempt to fix rpath issue on linux platform (it is already deprecated in main distributions. i.e. http://wiki.debian.org/RpathIssue);
+ - build: wrong paths in pkg-config file;
+ - libnfc: Remove warnings when compiling;
+ - libnfc: Various code fixes and cleanup;
+ - bus uart: Added support for recv/send of larger data chunks (>default_os_buffer);
+ - bus uart: Fix some some buffer synchronization problems under POSIX system;
+ - bus uart: Add configure option: --disable-serial-autoprobe to disable autoprobing;
+ - libnfc: Fix nfc_target_init doesn't correctly reset the parity during initalization;
+ - libnfc: added support for WUPA and 7,10 byte UID in nfc_initiator_select_tag();
+ - libnfc: Fix tag re-selection with UID length > 4 bytes (like DESFire or Ultralight);
+ - nfc-mfclassic: Fix authenticated only with KEYA;
+
+Improvements:
+ - build: Build on FreeBSD;
+ - build: Add alternative build system (CMake);
+ - build: Add new files usefull for desktop GNU/Linux users: some rules for udev to allow non-root access to PN53x USB devices;
+ - build: Update msinttypes up to revision 26. (used when compiling under Windows);
+ - build: Add "make doc" directive: it will build API documentation using Doxygen. (--enable-doc flag is required at configure time);
+ - libnfc: Add C++ compatibility;
+ - libnfc: Add driver agnostic nfc_pick_device(), nfc_list_devices();
+ - libnfc: It is now possible to specify a wanted device using new struct "nfc_device_desc_t";
+ - libnfc: Add device name to device descriptions (nfc_device_desc_t) to select a given PCSC device;
+ - libnfc: Finally removed all dirty globals, it 'should' be thread-safe now;
+ - libnfc: Less confusing message for bitstreams display;
+ - libnfc: chips level introduction with pn53x.h/c;
+ - drivers: Add PN532 UART driver;
+ - drivers pn533_usb and pn531_usb: Lets search continuing to find other USB readers if any in PN531 and PN533 USB drivers;
+ - drivers pn533_usb and pn531_usb: Support for the generic vendorid/productid of the NXP chip;
+ - drivers pn533_usb and pn531_usb: Consolidate duplicated code;
+ - examples: Add MIFARE Ultratag tool;
+ - examples: Add man page for nfc-mfultool;
+ - examples: MIFARE examples (mftool and mfultool) have now a better help message;
+ - examples: Add NFCIP (NDEP) as experimental feature;
+ - examples: add quiet mode to improve timing of emulate, relay and anticol commands;
+ - nfc-list: List all devices in nfc-list(1);
+ - nfc-list: Simply turns off the RF field upon exit;
+ - nfc-emulate: allow UID to be specified;
+ - nfc-relay: Initialize initiator device explicitly;
+ - nfc-relay: Capture ctrl-c for quitting cleanly the relay attack application;
+ - nfc-relay: exit properly if emulator initialization failed;
+ - nfc-mfclassic: Add default keys tries;
+
+Changes:
+ - API: Rename tag_info to nfc_target_info_t;
+ - API: Rename init_modulation to nfc_modulation_t;
+ - API: Rename dev_config_option to nfc_device_option_t;
+ - API: Use NULL instead of INVALID_DEVICE_INFO to know if device is valid;
+ - API: Rename chip_type to nfc_chip_t;
+ - API: Rename dev_spec to nfc_device_spec_t;
+ - API: Rename dev_info struct to nfc_device_t;
+ - API: Variables have been renamed to match coding conventions;
+ - API: Changed length parmeters from uint32_t to size_t;
+ - Files: Remove defines.h public header;
+ - Files: Prefix messages.h and types.h headers by "nfc-";
+ - Files: Revamp libnfc source tree;
+ - Files: Move examples into src/examples subdirectory;
+ - Examples: Rename nfc-mftool to nfc-mfclassic;
+ - Examples: Rename nfc-mfultool to nfc-mfultralight;
+
+
+
+Jul 24, 2009 - 1.2.1
+--------------------
+
+ - Fix ACR122 on 64 bits architecture under GNU/Linux.
+
+
+
+Jul 22, 2009 - 1.2.0
+--------------------
+
+ - License changed from GPLv3 to LGPLv3
+ - ARYGON ADRA-USB/ADRB-USB reader support
+ - PN533 support
+ - C99 standard (all custom defined types have been renamed)
+ - Autotoolized for GNU/Linux, *BSD and MacOSX
+ - nfc examples (anticol, emulate, list, mftool, relay) are now prefixed by "nfc-"
+
+
+
+Mar 27, 2009 - 1.1.0
+--------------------
+
+ - Next generation, support for ACR122v2 and PN531 USB devices
+
+
+
+Feb 12, 2009 - 1.0.0
+--------------------
+
+ - Initial release
+
+
+
