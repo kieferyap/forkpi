@@ -1,4 +1,0 @@
-# Headers
-FILE(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-INSTALL(FILES ${headers} DESTINATION ${INCLUDE_INSTALL_DIR}/nfc COMPONENT headers)
-

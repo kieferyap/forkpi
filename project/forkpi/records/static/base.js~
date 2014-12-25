@@ -1,0 +1,276 @@
+$(document).ready(function() {
+	var editableTextTrigger = false;
+	var readyToClick = 1;
+	var curListId = 0;
+
+	$(document.body).on('click', '.editable-text', function(){
+		var current = $(this).html();
+		
+		if(current.trim() == '- - -'){
+			current = '';
+		}
+		
+		current = '<input type="text" class="editing-text col-md-8" value="'+current.trim()+'"/>';
+		
+		var doneButton = '&nbsp;<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
+		$(this).parent().html(current+doneButton);
+		
+		editableTextTrigger = true;
+		
+		$('.editing-text').on('click', function(e){
+			e.stopPropagation();
+		});
+		
+	}).on('click', '.task-editbox', function(){
+		var current = $(this).parent().attr('ajaxVal');
+		curListId = $(this).parent().attr('ajaxId');
+				
+		current = '<input type="text" class="col-md-8 editing-text datepicker" style="border: 1px solid #AAAAAA" id="datepicker-'+curListId+'" data-date-format="yyyy/mm/dd" value="'+current.trim()+'"/>';
+				
+		var doneButton = '&nbsp;<div class="completed-check editable-done-date"><span class="glyphicon glyphicon-ok-sign"></span></div>';
+		$(this).parent().html(current+doneButton);
+
+		$('#datepicker-'+curListId).datepicker({
+			weekStart: 1
+		});
+
+		
+		editableTextTrigger = true;
+		
+		$('.editing-text').on('click', function(e){
+			e.stopPropagation();
+		});
+		
+		
+	}).on('click', '.editable-done', function(){
+		var ajaxUrl = $(this).parent().attr('ajaxUrl');
+		var ajaxId = $(this).parent().attr('ajaxId');
+		var ajaxField = $(this).parent().attr('ajaxField');
+		var ajaxValue = $(this).parent().children('input').val().replace('/', '&sol;').trim();
+		
+		$('.editing-text').off('click');
+			
+		editableTextTrigger = false;
+		readyToClick = 1;
+		
+		var newValue = '<span class="editable-text">- - -</span>';
+		
+		if($(this).parent().children('input').val().trim() != ''){
+			newValue = '<span class="editable-text">'+$(this).parent().children('input').val().trim()+'</span>';
+		}
+				
+		$(this).parent().html(newValue);	
+
+		$.ajax({
+			type: 'POST',
+			url: ajaxUrl,
+			data: {
+				'listid': ajaxId,
+				'field': ajaxField,
+				'value': ajaxValue,
+				'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+			},
+			success: function(msg){
+				
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?')
+			}
+		});		
+	}).on('click', '.editable-done-date', function(){
+		var ajaxUrl = $(this).parent().attr('ajaxUrl');
+		var ajaxId = $(this).parent().attr('ajaxId');
+		var ajaxField = $(this).parent().attr('ajaxField');
+		var ajaxValue = $(this).parent().children('input').val();
+		$(this).parent().attr('ajaxVal', ajaxValue);
+		$('#dateDueOfItem-'+ajaxId).html('('+ajaxValue+')');
+		
+		$('.editing-text').off('click');
+			
+		editableTextTrigger = false;
+		readyToClick = 1;
+		
+		var newValue = '<button class="btn btn-danger task-cancelbox list-btn" id="'+curListId+'">Cancel</button> <button class="btn btn-success task-editbox list-btn" id="'+curListId+'">Edit Date</button>';
+				
+		$(this).parent().html(newValue);
+
+		$.ajax({
+			type: 'POST',
+			url: ajaxUrl,
+			data: {
+				'listid': ajaxId,
+				'field': ajaxField,
+				'value': ajaxValue,
+				'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+			},
+			success: function(msg){
+		
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?')
+			}
+		});	
+	});
+
+	$(document).on('click', function(e){
+		if(editableTextTrigger){
+			readyToClick -= 1;
+		}
+		if(readyToClick < 0){
+			$('.editable-done').trigger('click');
+			$('.editable-textarea-done').trigger('click');
+		}
+	});
+
+
+	$('.task-checkbox').click(function(){
+		var listId = $(this).attr('id');
+		
+		$('#icon-'+listId).html('<span class="glyphicon glyphicon-refresh"></span>');	
+		$('#status-'+listId).html('Loading...');
+		$('#action-'+listId).html('');
+
+		ajaxUrl = '/lists/completetask'
+		$.ajax({
+			type: 'POST',
+			url: ajaxUrl,
+			data: {
+				'listid': listId,
+				'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+			},
+			success: function(msg){
+				$('#task-'+listId).attr('class', 'task-done');		
+				$('#icon-'+listId).html('<span class="glyphicon glyphicon-ok"></span>');	
+				$('#status-'+listId).html('Done');	
+				$('#action-'+listId).html('');	
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?')
+			}
+		});
+	});
+
+	$('.task-cancelbox').click(function(){
+		var listId = $(this).attr('id');
+		
+		$('#icon-'+listId).html('<span class="glyphicon glyphicon-refresh"></span>');	
+		$('#status-'+listId).html('Loading...');
+		$('#action-'+listId).html('');
+
+		ajaxUrl = '/lists/canceltask'
+		$.ajax({
+			type: 'POST',
+			url: ajaxUrl,
+			data: {
+				'listid': listId,
+				'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+			},
+			success: function(msg){
+				$('#task-'+listId).attr('class', 'task-cancelled');		
+				$('#icon-'+listId).html('<span class="glyphicon glyphicon-remove"></span>');	
+				$('#status-'+listId).html('Cancelled');	
+				$('#action-'+listId).html('');
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?')
+			}
+		});
+	});
+
+	$('.delete-user-btn').click(function(){
+		var userid = $(this).attr('id');		
+		deleteUser(userid);		
+	});	
+
+	$('.promote-user-btn').click(function(){
+		var userid = $(this).attr('id');
+		promoteUser(userid);
+	});	
+
+	$('.demote-user-btn').click(function(){
+		var userid = $(this).attr('id');		
+		demoteUser(userid);		
+	});	
+
+    $('#task-datepicker').datepicker({
+		weekStart: 1
+	});
+
+	$("#dev-table").tablesorter(); 
+	
+	var d2 = [];
+	
+	$("tr").each(function(){
+		d2.push([new Date($(this).find('.dateCompleted').html()).getTime(), $(this).find('.total').html()]);
+	});
+
+	$.plot("#placeholder", [d2], {xaxis: {
+		mode: "time",
+		timeformat: "%Y/%m/%d",
+		tickSize: [1, "day"]
+	}});
+
+});
+
+function deleteUser(userId){
+	$('#userRow-'+userId).hide(256);
+
+	ajaxUrl = '/lists/deleteuser';
+
+	$.ajax({
+		type: 'POST',
+		url: ajaxUrl,
+		data: {
+			'userid': userId,
+			'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+		},
+		success: function(msg){
+		},
+		error: function(msg){
+			alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+		}
+	});
+}
+
+function promoteUser(userId){	
+	$('#adminActions-'+userId).html('Loading...');
+
+	ajaxUrl = '/lists/promoteuser';
+	$.ajax({
+		type: 'POST',
+		url: ajaxUrl,
+		data: {
+			'userid': userId,
+			'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+		},
+		success: function(msg){
+			$('#isAdmin-'+userId).html('<span class="glyphicon glyphicon-star usertype-admin" title="This user is an admin."></span>');
+			$('#adminActions-'+userId).html('<button class="btn btn-danger delete-user-btn list-btn" onclick="deleteUser('+userId+');" id="'+userId+'">Delete</button> <button class="btn btn-warning demote-user-btn list-btn" onclick="demoteUser('+userId+');" id="'+userId+'">Demote</button>');
+		},
+		error: function(msg){
+			alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+		}
+	});		
+	
+}
+
+function demoteUser(userId){
+	$('#adminActions-'+userId).html('Loading...');
+
+	ajaxUrl = '/lists/demoteuser';
+	$.ajax({
+		type: 'POST',
+		url: ajaxUrl,
+		data: {
+			'userid': userId,
+			'csrfmiddlewaretoken': 'UaD3waTpAftyGQBXiAWBx3NsyOJC5hJZ'
+		},
+		success: function(msg){
+			$('#isAdmin-'+userId).html('<span class="glyphicon glyphicon-user usertype-user" title="This user is not an admin."></span>');
+			$('#adminActions-'+userId).html('<button class="btn btn-danger delete-user-btn list-btn" onclick="deleteUser('+userId+');" id="'+userId+'">Delete</button> <button class="btn btn-success promote-user-btn list-btn" onclick="promoteUser('+userId+');" id="'+userId+'">Promote</button>');
+		},
+		error: function(msg){
+			alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+		}
+	});
+}

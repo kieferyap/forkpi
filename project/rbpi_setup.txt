@@ -1,0 +1,42 @@
+Raspberry Pi Setup
+
+1.	Installing the OS
+---------------------
+
+	1.1.	Download NOOBS_vX_X_XX.zip from http://www.raspberrypi.org/downloads/
+			and send these files to your SD.
+
+	1.2.	The SD Card must have the following specifications:
+
+			1.2.1.	At least 8GB of data
+			1.2.2.	Format system: FAT32
+			1.2.3.	Allocation unit size: 8192 bytes
+
+	1.3.	Insert SD Card to Raspberry Pi and boot
+
+	1.4.	Once the installation window shows up, click on the checkbox
+			for "Raspbian" and hit "I" (Install)
+
+	1.5.	Default login information:
+
+			1.5.1.	username: pi
+			1.5.2.	password: raspberry
+
+	1.6.	After the installation, a menu in blue background will pop up.
+			(To access this menu again in the future, do "sudo raspi-config")
+			Do the following:
+
+			1.6.1.	Go to Option 3: "Enable Boot to Desktop/Scratch Choose 
+			whether to boot into a desktop environment, Scratch, or the 
+			command line" and hit enter.
+
+			1.6.2.	Select the boot option "Desktop Log in as user 'pi' at
+			the graphical desktop."
+
+			1.6.3.	Hit "FINISH" and reboot. Congrats! Your desktop should be
+			all set and you're ready to go.
+
+2. Preliminaries
+----------------
+
+	2.1.	

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>ForkPi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<link href="/static/base.css" rel="stylesheet" media="screen">
+	<link href="/static/datepicker.css" rel="stylesheet" media="screen">
+	<link href="/static/examples.css" rel="stylesheet" media="screen">
+	
+	<script type="text/javascript" src="/static/jquery-2.1.0.min.js"></script>	
+	<script type="text/javascript" src="/static/bootstrap-datepicker.js"></script>
+	<script type="text/javascript" src="/static/jquery.tablesorter.js"></script>
+	
+	<script type="text/javascript" src="/static/jquery.flot.js"></script>
+	<script type="text/javascript" src="/static/jquery.flot.time.js"></script>
+	<script type="text/javascript" src="/static/jquery.flot.time.min.js"></script>
+	<script type="text/javascript" src="/static/base.js"></script>
+	<script type="text/javascript">
+		
+	</script>
+</head>
+
+<body>
+	<div class="container">
+		<br/>
+		<nav class="navbar navbar-default navbar-fixed-top navbar-inverse" role="navigation">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<a class="navbar-brand" href="/">ForkPi</a>
+				</div>
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" aria-expanded="false">
+					<ul class="nav navbar-nav">
+						<li><p class="navbar-text">{{ loginText }}</p></li>
+					</ul>
+
+					<ul class="nav navbar-nav navbar-right">
+						{% for flk, flv in userActions.items %}
+							<li><a href="/{{ flv.url }}">{{ flv.name }}</a></li>
+						{% endfor %}
+					</ul>
+				</div><!-- /.navbar-collapse -->
+			</div><!-- /.container-fluid -->
+		</nav>
+		<br/>
+		<br/>
+		<br/>
+		<div class="container row col-md-12">
+			{% if messages %}
+				{% for message in messages %}
+					<div class="row col-md-8 col-md-offset-2">
+						<div class="alert alert-{% if message.tags %}{{ message.tags }}{% endif %}">
+							{{ message }}
+						</div>
+					</div>
+				{% endfor %}
+			{% endif %}
+			<br/>
+			{% block content%}
+			{% endblock %}
+			<br/>
+			<br/>
+		</div>
+	</div>
+</body>
+</html>
