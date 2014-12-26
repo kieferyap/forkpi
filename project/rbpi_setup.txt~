@@ -111,12 +111,7 @@ Raspberry Pi Setup
 
 			3.1.5.	sh OLEDinstall.sh
 
-	3.2.	Installation for the RFID
-
-			3.2.0.  sudo raspi-config
-					Use the arrow keys to navigate to: 8 Advanced Options
-					Choose "A7 Serial"
-					Choose No
+	3.2.	Installation for the RFID (?)
 
 			3.2.1.	wget https://libnfc.googlecode.com/archive/libnfc-1.7.0.tar.gz
 					Make sure to navigate to the right folder first.

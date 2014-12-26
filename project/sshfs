@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# To mount
+# sshfs -o idmap=user -o allow_root matthew@10.40.87.107:/home/matthew/Dropbox ~/Dropbox
+sshfs -o idmap=user -o allow_root kiefer@192.168.0.100:/home/kiefer/Dropbox/CSGThesis ~/Dropbox
+
+# To unmount
+# fusermount -u ~/Dropbox

@@ -68,6 +68,30 @@ $(document).ready(function() {
 		}
 	});
 
+	$('.scan-button').on('click', function(e){
+		ajaxUrl = '/addrfid';
+
+		var x = $(this);
+
+		$('#inputUid').val('Waiting for RFID data... Please swipe your RFID tag.');
+		x.hide(256);
+
+		$.ajax({
+			type: 'POST',
+			url: ajaxUrl,
+			data: {
+				'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+			},
+			success: function(msg){
+				x.show(256);
+				$('#inputUid').val(msg);
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+			}
+		});
+	});
+
 	$(document.body).on('click', '.delete-btn', function(){
 		deleteKeypair($(this).attr('id'))
 	});

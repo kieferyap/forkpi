@@ -1,0 +1,5 @@
+Scan RFID close window while polling
+Edit RFID UID
+Encode DB, passing of keypairs from views to templates
+main.py and Swipe RFID polling at the same time causes crash
+flash messages lol

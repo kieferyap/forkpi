@@ -5,8 +5,10 @@ from django.contrib import messages
 
 import datetime
 import hashlib
-import reportlab
 
+from spoonpi.nfc_reader import NFCReader
+
+import reportlab
 from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.pagesizes import letter
@@ -14,6 +16,14 @@ from reportlab.lib.styles import getSampleStyleSheet
 
 from records.models import Users
 from records.models import Kiefers
+
+is_polling = False
+
+def index(request):
+	if request.session.get('userid'):
+		return redirect('/keypairs')
+	else:
+		return redirect('/login')
 
 ####################
 # Session Handling #
@@ -161,11 +171,20 @@ def keypairs(request):
 	keypairs = Kiefers.objects.all()
 	return render(request, 'keypairs.html',  {'loginText': loginText, 'userActions': userActions, 'keypairs': keypairs})
 
+def addrfid(request):
+	global is_polling
+	if not is_polling:
+		is_polling = True
+		uid = NFCReader().read_tag()
+		is_polling = False
+		return HttpResponse(uid)
+	return HttpResponse("Please try again at a later time. Sorry for the inconvenience.")
+
 def addpair(request):
 	Kiefers.objects.create(
 		name = request.POST['name'],
 		pin = request.POST['pin'],
-		rfid_uid = request.POST['uid']
+		rfid_uid = request.POST['rfid_uid']
 	)
 	return redirect('/keypairs')
 
@@ -185,11 +204,12 @@ def deletekeypair(request):
 	Kiefers.objects.filter(id = request.POST['kid']).delete()
 	return HttpResponse("Successful.")
 
+
 # Attempt: print as PDF
 def pdflist(request):
 	# Create the HttpResponse object with the appropriate PDF headers.
 	response = HttpResponse(content_type='application/pdf')
-	response['Content-Disposition'] = 'attachment; filename="mylist.pdf"'
+	response['Content-Disposition'] = 'attachment; filename="forkpi_keypairs.pdf"'
 
 	doc = SimpleDocTemplate(response, pagesize=letter)
 	elements = []
@@ -210,3 +230,4 @@ def pdflist(request):
 	doc.build(elements)
 
 	return response
+	

@@ -7,7 +7,7 @@ urlpatterns = patterns('',
     # url(r'^blog/', include('blog.urls')),
 
     # url(r'^admin/', include(admin.site.urls)),
-	url(r'^$', 'records.views.login', name='login'),
+	url(r'^$', 'records.views.index', name='index'),
 
     url(r'^keypairs$', 'records.views.keypairs', name='keypairs'),
     url(r'^addpair$', 'records.views.addpair', name='addpair'),
@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     url(r'^editpin$', 'records.views.editpin', name='editpin'),
     url(r'^edituid$', 'records.views.edituid', name='edituid'),
     url(r'^deletekeypair$', 'records.views.deletekeypair', name='deletekeypair'),
+    url(r'^addrfid$', 'records.views.addrfid', name='addrfid'),
     url(r'^pdflist$', 'records.views.pdflist', name='pdflist'),
 
     url(r'^login$', 'records.views.login', name='login'),
