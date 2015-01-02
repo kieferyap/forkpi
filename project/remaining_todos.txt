@@ -1,0 +1,20 @@
+write paper
+	Cost
+	[x] Assembling the components
+	[x] Testing the components
+	[x] Introduction
+	Abstract
+	[x] Results and discussion
+Scan RFID close window while polling
+main.py and Swipe RFID polling at the same time causes crash
+[x] delete old logs
+[x] name editing must reflect with the RFID_UID and PIN
+[x] lock out after entering wrong pin 5 times in a row
+[x] save log
+[x] Edit RFID UID
+[x] Encode DB, passing of keypairs from views to templates
+[x] flash messages lol
+[x] salted passwords
+[x] check valid pin and rfid uid
+[x] check valid pin for editing
+

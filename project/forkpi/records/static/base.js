@@ -1,9 +1,16 @@
 $(document).ready(function() {
+	$(".tablesorter").tablesorter();
+
 	var editableTextTrigger = false;
 	var readyToClick = 1;
 	var curListId = 0;
 
 	$(document.body).on('click', '.editable-text', function(){
+		if(editableTextTrigger){
+			$('.editable-done').trigger('click');
+			editableTextTrigger = false;
+		}
+
 		var current = $(this).html();
 		
 		if(current.trim() == '- - -'){
@@ -12,7 +19,12 @@ $(document).ready(function() {
 		
 		current = '<input type="text" class="editing-text col-md-8" value="'+current.trim()+'"/>';
 		
-		var doneButton = '&nbsp;<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
+		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
+		
+		if($(this).parent().attr('type') == 'rfid'){
+			doneButton = '<div class="scan-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
+		}
+
 		$(this).parent().html(current+doneButton);
 		
 		editableTextTrigger = true;
@@ -53,28 +65,23 @@ $(document).ready(function() {
 			success: function(msg){
 			},
 			error: function(msg){
-				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?')
+				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+				location.reload();
 			}
 		});		
-	});
-
-	$(document).on('click', function(e){
-		if(editableTextTrigger){
-			readyToClick -= 1;
-		}
-		if(readyToClick < 0){
-			$('.editable-done').trigger('click');
-			$('.editable-textarea-done').trigger('click');
-		}
-	});
-
-	$('.scan-button').on('click', function(e){
+	}).on('click', '.scan-button, .scan-rfid', function(e){
 		ajaxUrl = '/addrfid';
+		var isEditing = $(this).parent().attr('type') == 'rfid';
 
 		var x = $(this);
 
-		$('#inputUid').val('Waiting for RFID data... Please swipe your RFID tag.');
-		x.hide(256);
+		if(isEditing)
+			textSelector = '.editing-text';
+		else
+			textSelector = '#inputUid';
+	
+		x.hide(256);	
+		$(textSelector).val('Waiting for RFID data...');
 
 		$.ajax({
 			type: 'POST',
@@ -84,13 +91,24 @@ $(document).ready(function() {
 			},
 			success: function(msg){
 				x.show(256);
-				$('#inputUid').val(msg);
+				$(textSelector).val(msg);
 			},
 			error: function(msg){
 				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
 			}
 		});
 	});
+
+	// $(document).on('click', function(e){
+	// 	alert("Got in?");
+	// 	if(editableTextTrigger){
+	// 		readyToClick -= 1;
+	// 	}
+	// 	if(readyToClick < 0){
+	// 		$('.editable-done').trigger('click');
+	// 		$('.editable-textarea-done').trigger('click');
+	// 	}
+	// });
 
 	$(document.body).on('click', '.delete-btn', function(){
 		deleteKeypair($(this).attr('id'))

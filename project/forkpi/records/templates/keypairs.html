@@ -20,7 +20,7 @@
 				<div class="form-group">
 					<label for="rfid_uid" class="col-md-2 control-label">RFID UID</label>
 					<div class="col-md-8">
-						<input type="text" class="form-control" id="inputUid" name="rfid_uid" placeholder="abcdef12" readonly>
+						<input type="text" class="form-control" id="inputUid" name="rfid_uid" placeholder="abcdef12">
 					</div>
 					<input type="button" class="btn btn-success scan-button" name="scan-button" value="Scan RFID">
 				</div>
@@ -67,12 +67,16 @@
 								<!-- PIN -->
 								<td ajaxUrl="editpin" ajaxId="{{ keypair.id }}" ajaxField="pin">
 									<span class="editable-text">
-									{{ keypair.pin }}
+									{% if keypair.pin %}
+										{{ keypair.pin }}
+									{% else %}
+										- - -
+									{% endif %}
 									</span>
 								</td>
 
 								<!-- UID -->
-								<td ajaxUrl="edituid" ajaxId="{{ keypair.id }}" ajaxField="uid">
+								<td ajaxUrl="edituid" ajaxId="{{ keypair.id }}" ajaxField="uid" type="rfid">
 									<span class="editable-text">
 									{{ keypair.rfid_uid }}
 									</span>

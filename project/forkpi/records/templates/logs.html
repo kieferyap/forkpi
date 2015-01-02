@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content%}
+<div class="row">
+	<div class="col-md-10 col-md-offset-1">
+		<div class="row col-md-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">Logs</b></h3>
+					<div class="pull-right">
+					</div>
+				</div>
+				<table class="table table-hover tablesorter" id="dev-table">
+					<thead>
+						<tr>
+							<th class="col-md-1">#</th>
+							<th class="col-md-5">Date <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+							<th class="col-md-6">Message <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% if logs|length > 0 %}
+							{% for log in logs %}
+							<tr>
+								<td>{{ log.id }}</td>
+								<td>{{ log.created_on }}</td>
+								<td>{{ log.text }}</td>
+							</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td colspan="5" style="text-align:center">No logs found.</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

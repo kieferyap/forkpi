@@ -80,7 +80,7 @@ table {
 	border: 1px solid #ADADAD;
 }
 
-.editable-done, .editable-done-date{
+.editable-done, .editable-done-date, .scan-rfid{
 	display: inline-block;	
 	padding-right: 4px;
 	padding-left: 4px;
@@ -89,7 +89,7 @@ table {
 	cursor: pointer;
 }
 
-.completed-check{
+.completed-check, .scan-rfid{
 	position: relative;
 	top: 3px;
 	font-size: 20px;

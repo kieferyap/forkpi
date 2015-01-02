@@ -9,6 +9,8 @@ urlpatterns = patterns('',
     # url(r'^admin/', include(admin.site.urls)),
 	url(r'^$', 'records.views.index', name='index'),
 
+    url(r'^logs$', 'records.views.logs', name='logs'),
+
     url(r'^keypairs$', 'records.views.keypairs', name='keypairs'),
     url(r'^addpair$', 'records.views.addpair', name='addpair'),
     url(r'^editname$', 'records.views.editname', name='editname'),
