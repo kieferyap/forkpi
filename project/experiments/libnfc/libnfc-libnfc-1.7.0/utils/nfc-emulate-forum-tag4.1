@@ -1,0 +1,63 @@
+.Dd March 12, 2011
+.Dt NFC-EMULATE-FORUM-TAG4 1 URM
+.Sh NAME
+.Nm nfc-emulate-forum-tag4
+.Nd NFC Forum tag type 4 emulation command line demonstration tool
+.Sh SYNOPSIS
+.Nm
+.Op -1
+.Op infile Op outfile
+.Sh DESCRIPTION
+.Nm 
+is a demonstration tool that emulates a NFC Forum tag type 4 v2.0 (or v1.0) with NDEF content.
+.Pp
+.Ar -1
+can be provided to force old Tag Type 4 version 1.0 behavior.
+.Pp
+.Ar infile
+is the file which contains NDEF message you want to share with the NFC-Forum
+compliant initiator device (e.g. Nokia 6212 Classic for a v1.0 tag)
+.Pp
+If you want to save a shared content by the initiator device, we have to give 
+.Ar outfile
+argument to point where the NDEF message will be saved.
+.Pp
+This example uses the hardware capability of PN532 to handle ISO/IEC 14443-4
+low-level frames like RATS/ATS, WTX, etc.
+.Pp
+All devices compliant with NFC-Forum Tag Type 4 (Version 2.0 or 1.0) can be used with
+this example in read-write mode.
+.Pp
+If no argument is given, a default NDEF file is available.
+.Sh IMPLEMENTATION NOTES
+You can specify the same 
+.Ar infile
+and 
+.Ar outfile
+.Sh IMPORTANT
+Only PN532 equipped devices can use this example. (e.g. PN532 breakout board)
+.Pp
+ACR122 devices (like touchatag, etc.) can be used by this example, but if
+something goes wrong, you will have to unplug/replug your device.
+This is not a
+.Em libnfc's
+bug, this problem is due to ACR122's internal MCU in front of NFC chip (PN532).
+.Sh BUGS
+Please report any bugs on the
+.Em libnfc
+issue tracker at:
+.Em http://code.google.com/p/libnfc/issues
+.Sh LICENCE
+.Em libnfc
+is licensed under the GNU Lesser General Public License (LGPL), version 3.
+.Em libnfc-utils
+and 
+.Em libnfc-examples
+are covered by the BSD 2-Clause license.
+.Sh AUTHORS
+.An Roel Verdult Aq roel@libnfc.org
+.An Romain Tartière Aq romain@libnfc.org
+.An Romuald Conty Aq romuald@libnfc.org
+.Pp
+This manual page was written by Romuald Conty.
+It is licensed under the terms of the GNU GPL (version 2 or later).

@@ -17,4 +17,9 @@ main.py and Swipe RFID polling at the same time causes crash
 [x] salted passwords
 [x] check valid pin and rfid uid
 [x] check valid pin for editing
+PIN remove from pdf
+Deactivate/disable keypairs
+Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
+Filter logs by date, allowed/denied, uid
+Change lock-out time / attempt limit
 

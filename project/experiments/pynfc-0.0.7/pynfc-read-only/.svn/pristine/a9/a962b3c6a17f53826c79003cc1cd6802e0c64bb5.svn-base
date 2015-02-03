@@ -111,7 +111,6 @@ class NFCReader(object):
                 if not ((self._card_uid and self._card_present and uid == self._card_uid) and \
                                     time.mktime(time.gmtime()) <= self._card_last_seen + self.card_timeout):
                     self._setup_device()
-                    # self.write_card(uid, "")
                     self.read_card(uid)
             self._card_uid = uid
             self._card_present = True
@@ -158,7 +157,6 @@ class NFCReader(object):
         res = nfc.nfc_initiator_transceive_bytes(self.__device, ctypes.pointer(abttx), len(abttx),
                                                  ctypes.pointer(abtrx), len(abtrx), 0)
         if res < 0:
-            print "Got here?"
             raise IOError("Error reading data")
         return "".join([chr(abtrx[i]) for i in range(res)])
 
@@ -202,9 +200,9 @@ class NFCReader(object):
         """
         # Reselect the card so that we can reauthenticate
         self.select_card()
-        # res = self._authenticate(block, uid, key)
-        # if res >= 0:
-        return self._read_block(block)
+        res = self._authenticate(block, uid, key)
+        if res >= 0:
+            return self._read_block(block)
         return ''
 
     def auth_and_write(self, block, uid, data, key = "\xff\xff\xff\xff\xff\xff"):
@@ -212,9 +210,8 @@ class NFCReader(object):
 
         """
         res = self._authenticate(block, uid, key)
-        # print "res: ", res
-        # if res >= 0:
-        return self.__write_block(block, data)
+        if res >= 0:
+            return self.__write_block(block, data)
         self.select_card()
         return ""
 
@@ -225,28 +222,13 @@ class NFCReader(object):
         self._card_uid = self.select_card()
         self._authenticate(0x00, uid, key)
         block = 0
-        print "Test"
         for block in range(64):
-            print "Nani?"
             data = self.auth_and_read(block, uid, key)
-            print str(block), ": (", str(data), ") "
-            # print block, data.encode("hex"), "".join([ x if x in string.printable else "." for x in data])
-        print "End test"
+            print block, data.encode("hex"), "".join([ x if x in string.printable else "." for x in data])
 
     def write_card(self, uid, data):
         """Accepts data of the recently read card with UID uid, and writes any changes necessary to it"""
-        """Takes a uid, reads the card and return data for use in writing the card"""
-        key = "\xff\xff\xff\xff\xff\xff"
-        print "Writing card", uid.encode("hex")
-        self._card_uid = self.select_card()
-        self._authenticate(0x00, uid, key)
-        block = 0
-        print "Test"
-        for block in range(64):
-            data = self.auth_and_write(block, uid, "\xDA", key)
-            print "Writing: ", str(block), "Data? ", data
-            # print block, data.encode("hex"), "".join([ x if x in string.printable else "." for x in data])
-        print "End test"
+        raise NotImplementedError
 
 if __name__ == '__main__':
     logger = logging.getLogger("cardhandler").info

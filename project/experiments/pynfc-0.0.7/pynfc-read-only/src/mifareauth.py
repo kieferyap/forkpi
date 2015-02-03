@@ -22,6 +22,7 @@ import logging
 import ctypes
 import string
 import nfc
+import sys
 
 def hex_dump(string):
     """Dumps data as hexstrings"""
@@ -111,7 +112,6 @@ class NFCReader(object):
                 if not ((self._card_uid and self._card_present and uid == self._card_uid) and \
                                     time.mktime(time.gmtime()) <= self._card_last_seen + self.card_timeout):
                     self._setup_device()
-                    # self.write_card(uid, "")
                     self.read_card(uid)
             self._card_uid = uid
             self._card_present = True
@@ -157,8 +157,15 @@ class NFCReader(object):
         abtrx = (ctypes.c_uint8 * 250)()
         res = nfc.nfc_initiator_transceive_bytes(self.__device, ctypes.pointer(abttx), len(abttx),
                                                  ctypes.pointer(abtrx), len(abtrx), 0)
+        print "Huh?", abttx[0]
+        # sent_bytes = nfc.nfc_target_send_bytes(self.__device, ctypes.pointer(abttx), len(abttx), 0)
+        # received_bytes = nfc.nfc_target_send_bytes(self.__device, ctypes.pointer(abtrx), len(abtrx), 0)
+        #                                          ctypes.pointer(abtrx), len(abtrx), 0)
+        print "Huh.", res
+        # print "Sent? ", sent_bytes, "Received? ", received_bytes
+        sys.exit(0)
+        
         if res < 0:
-            print "Got here?"
             raise IOError("Error reading data")
         return "".join([chr(abtrx[i]) for i in range(res)])
 
@@ -192,8 +199,14 @@ class NFCReader(object):
         for i in range(4):
             abttx[i + 8] = ord(uid[i])
         abtrx = (ctypes.c_uint8 * 250)()
+        # print "Device? ", self.__device
+        # print "Pointer 1? ", abttx
+        # print "Size of Pointer 1? ", len(abttx)
+        # print "Pointer 2? ", abtrx
+        # print "Size of Pointer 2? ", len(abtrx)
+        # sys.exit(0)
         return nfc.nfc_initiator_transceive_bytes(self.__device, ctypes.pointer(abttx), len(abttx),
-                                                  ctypes.pointer(abtrx), len(abtrx), 0)
+                                                  ctypes.pointer(abtrx), len(abtrx), -1)
 
     def auth_and_read(self, block, uid, key = "\xff\xff\xff\xff\xff\xff"):
         """Authenticates and then reads a block
@@ -203,6 +216,7 @@ class NFCReader(object):
         # Reselect the card so that we can reauthenticate
         self.select_card()
         # res = self._authenticate(block, uid, key)
+        # print "Res? ", res
         # if res >= 0:
         return self._read_block(block)
         return ''
@@ -212,9 +226,8 @@ class NFCReader(object):
 
         """
         res = self._authenticate(block, uid, key)
-        # print "res: ", res
-        # if res >= 0:
-        return self.__write_block(block, data)
+        if res >= 0:
+            return self.__write_block(block, data)
         self.select_card()
         return ""
 
@@ -225,28 +238,13 @@ class NFCReader(object):
         self._card_uid = self.select_card()
         self._authenticate(0x00, uid, key)
         block = 0
-        print "Test"
         for block in range(64):
-            print "Nani?"
             data = self.auth_and_read(block, uid, key)
-            print str(block), ": (", str(data), ") "
-            # print block, data.encode("hex"), "".join([ x if x in string.printable else "." for x in data])
-        print "End test"
+            print block, data.encode("hex"), "".join([ x if x in string.printable else "." for x in data])
 
     def write_card(self, uid, data):
         """Accepts data of the recently read card with UID uid, and writes any changes necessary to it"""
-        """Takes a uid, reads the card and return data for use in writing the card"""
-        key = "\xff\xff\xff\xff\xff\xff"
-        print "Writing card", uid.encode("hex")
-        self._card_uid = self.select_card()
-        self._authenticate(0x00, uid, key)
-        block = 0
-        print "Test"
-        for block in range(64):
-            data = self.auth_and_write(block, uid, "\xDA", key)
-            print "Writing: ", str(block), "Data? ", data
-            # print block, data.encode("hex"), "".join([ x if x in string.printable else "." for x in data])
-        print "End test"
+        raise NotImplementedError
 
 if __name__ == '__main__':
     logger = logging.getLogger("cardhandler").info
