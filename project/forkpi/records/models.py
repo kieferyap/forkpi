@@ -9,10 +9,13 @@ class Users(models.Model):
 
 class Kiefers(models.Model):
 	name = models.TextField(default="")
-	pin = models.CharField(max_length=4)
+	pin = models.TextField()
 	rfid_uid = models.CharField(max_length=8)
 	is_active = models.BooleanField(default=True)
 
 class Logs(models.Model):
 	created_on = models.DateTimeField(auto_now_add=True, default=datetime.now)
-	text = models.TextField(default="")
+	action = models.TextField(default="")
+	details = models.TextField(default="")
+	pin = models.TextField(default="")
+	rfid_uid = models.CharField(max_length=8, default="")

@@ -1,5 +1,18 @@
 $(document).ready(function() {
-	$(".tablesorter").tablesorter();
+	$(".tablesorter").tablesorter({
+		cssChildRow: "tablesorter-childRow",
+		sortList: [[1,1]],
+		widgets: ["filter"],
+		widgetOptions: {
+			filter_childRows: false,
+			filter_columnFilters: true,
+			filter_cssFilter: "tablesorter-filter",
+			filter_ignoreCase: true,
+			filter_searchDelay: 300,
+			filter_saveFilters: true
+		}
+	});
+	$('.tablesorter-childRow td').hide();
 
 	var editableTextTrigger = false;
 	var readyToClick = 1;

@@ -2,7 +2,8 @@
 Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
 	Or: Remove limits on max length; min length is 4
 Mass-delete disabled keypairs
-Filter logs by date, allowed/denied, uid
+Filter logs by date, allowed/denied, uid, pin
+[x] Sort logs by date, allowed/denied, uid, pin
 Change lock-out time / attempt limit
 Change sign-up process
 	Admins can approve new users, edit db and view logs

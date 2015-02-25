@@ -41,7 +41,7 @@ def getUserActions(request):
 	if request.session.get('userid'):
 		userActions = {}
 		userActions[0] = {'name':'Logs', 'url':'logs'}
-		userActions[1] = {'name':'My Keypairs', 'url':'keypairs'}
+		userActions[1] = {'name':'Keypairs', 'url':'keypairs'}
 		userActions[2] = {'name':'Logout', 'url':'logout'}
 		return userActions
 	else:

@@ -10,12 +10,15 @@
 					<div class="pull-right">
 					</div>
 				</div>
-				<table class="table table-hover tablesorter" id="dev-table">
+				<table id="logs_table" class="table table-hover tablesorter" id="dev-table">
 					<thead>
 						<tr>
 							<th class="col-md-1">#</th>
-							<th class="col-md-5">Date <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
-							<th class="col-md-6">Message <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+							<th class="col-md-4">Date <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+							<th class="col-md-3">Action <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+							<th class="col-md-4">Details <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+							<th class="col-md-2">PIN <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
+							<th class="col-md-4">RFID UID <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -23,8 +26,11 @@
 							{% for log in logs %}
 							<tr>
 								<td>{{ log.id }}</td>
-								<td>{{ log.created_on|date:"Y-m-d H:i:s" }}</td>
-								<td>{{ log.text }}</td>
+								<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
+								<td>{{ log.action }}</td>
+								<td>{{ log.details }}</td>
+								<td>{{ log.pin }}</td>
+								<td>{{ log.rfid_uid }}</td>
 							</tr>
 							{% endfor %}
 						{% else %}
