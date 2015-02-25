@@ -7,7 +7,7 @@ Change lock-out time / attempt limit
 Change sign-up process
 	Admins can approve new users, edit db and view logs
 	Regular users can edit db and view logs
-Access ForkPi over the local network using its host name
+[x] Access ForkPi over the local network using its host name
 Change key used to encrypt keypairs to AES key transferred using RSA
 Scan RFID close window while polling -> next poll causes crash
 
