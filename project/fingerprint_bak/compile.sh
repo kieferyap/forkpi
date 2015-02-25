@@ -1,0 +1,1 @@
+g++ -o main fingerprint.cpp Pi_Fingerprint.cpp Pi_Serial.cpp -lwiringPi && sudo ./main

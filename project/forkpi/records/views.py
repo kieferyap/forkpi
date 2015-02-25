@@ -39,27 +39,15 @@ def getLoginText(request):
 
 def getUserActions(request):
 	if request.session.get('userid'):
-
 		userActions = {}
-		userActions[0] = {}
-		userActions[0]["name"] = "Logs"
-		userActions[0]["url"] = "logs"
-		userActions[1] = {}
-		userActions[1]["name"] = "My Keypairs"
-		userActions[1]["url"] = "keypairs"
-		userActions[2] = {}
-		userActions[2]["name"] = "Logout"
-		userActions[2]["url"] = "logout"
-
+		userActions[0] = {'name':'Logs', 'url':'logs'}
+		userActions[1] = {'name':'My Keypairs', 'url':'keypairs'}
+		userActions[2] = {'name':'Logout', 'url':'logout'}
 		return userActions
 	else:
 		userActions = {}
-		userActions[0] = {}
-		userActions[0]["name"] = "Login"
-		userActions[0]["url"] = "login"
-		userActions[1] = {}
-		userActions[1]["name"] = "Signup"
-		userActions[1]["url"] = "signup"	
+		userActions[0] = {'name':'Login', 'url':'login'}
+		userActions[1] = {'name':'Signup', 'url':'signup'}
 		return userActions
 	
 # Login display
@@ -68,7 +56,6 @@ def login(request):
 		messages.add_message(request, messages.ERROR, 'You have already logged in. Kindly log out first to access the login page.')
 		return redirect('/keypairs')
 	else:
-		
 		userActions = getUserActions(request)
 		loginText = getLoginText(request)
 		return render(request, 'login.html', {'loginText': loginText, 'userActions': userActions})
@@ -268,6 +255,11 @@ def deletekeypair(request):
 	Kiefers.objects.filter(id = request.POST['kid']).delete()
 	return HttpResponse("Successful.")
 
+def toggleactivekeypair(request):
+	keypair = Kiefers.objects.get(id = request.POST['kid'])
+	keypair.is_active = not keypair.is_active
+	keypair.save()
+	return HttpResponse("Successful.")	
 
 # Attempt: print as PDF
 def pdflist(request):
@@ -278,16 +270,22 @@ def pdflist(request):
 	doc = SimpleDocTemplate(response, pagesize=letter)
 	elements = []
 	styles = getSampleStyleSheet()
-
+	style = styles['Normal']
 	keypairs = Kiefers.objects.all()
 
 	data = []
-	data.append(['Name', 'PIN', 'RFID UID'])
+	data.append(['Name', 'RFID UID'])
 
 	for keypair in keypairs:
-		data.append([Paragraph(str(keypair.name), styles['Normal']), keypair.pin, keypair.rfid_uid])
+		cipher = aes.AES(keypair.name)
+		rfid_uid = cipher.decrypt(keypair.rfid_uid)
+		if keypair.is_active:
+			style.textColor = colors.black
+		else:
+			style.textColor = colors.gray
+		data.append([Paragraph(str(keypair.name), style), Paragraph(str(rfid_uid), style)])
 	
-	t = Table(data, colWidths=[300, 80, 100])
+	t = Table(data, colWidths=[300, 100])
 	t.setStyle(TableStyle([('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),('BOX', (0,0), (-1,-1), 0.25, colors.black),]))
 
 	elements.append(t)

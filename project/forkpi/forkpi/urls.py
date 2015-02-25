@@ -17,6 +17,7 @@ urlpatterns = patterns('',
     url(r'^editpin$', 'records.views.editpin', name='editpin'),
     url(r'^edituid$', 'records.views.edituid', name='edituid'),
     url(r'^deletekeypair$', 'records.views.deletekeypair', name='deletekeypair'),
+    url(r'^toggleactivekeypair$', 'records.views.toggleactivekeypair', name='toggleactivekeypair'),
     url(r'^addrfid$', 'records.views.addrfid', name='addrfid'),
     url(r'^pdflist$', 'records.views.pdflist', name='pdflist'),
 

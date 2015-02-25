@@ -44,7 +44,7 @@
 				<table class="table table-hover tablesorter" id="dev-table">
 					<thead>
 						<tr>
-							<th class="col-md-1">#</th>
+							<th class="col-md-1"># <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
 							<th class="col-md-3">Name <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
 							<th class="col-md-2">PIN <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
 							<th class="col-md-3">RFID UID <span class="glyphicon glyphicon-sort" style="cursor:pointer"></span></th>
@@ -54,7 +54,11 @@
 					<tbody>
 						{% if keypairs|length > 0 %}
 							{% for keypair in keypairs %}
-							<tr id="kp-{{ keypair.id }}">
+							<tr id="kp-{{ keypair.id }}" class="
+								{% if not keypair.is_active %}
+									greyed
+								{% endif %}
+							">
 								<td>{{ keypair.id }}</td>
 
 								<!-- Name -->
@@ -84,6 +88,11 @@
 								
 								<!-- Actions -->
 								<td id="action-{{ keypair.id }}" ajaxUrl="deletekeypair">
+									{% if keypair.is_active %}
+										<button class="btn btn-warning task-cancelbox deactivate-btn" id="{{ keypair.id }}">Deactivate</button>
+									{% else %}
+										<button class="btn btn-success task-cancelbox activate-btn" id="{{ keypair.id }}">Activate</button>
+									{% endif %}
 									<button class="btn btn-danger task-cancelbox delete-btn" id="{{ keypair.id }}">Delete</button>
 								</td>
 							</tr>

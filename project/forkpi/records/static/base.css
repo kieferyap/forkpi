@@ -104,3 +104,6 @@ table {
 .control-label{
 	padding-top: 0px !important;
 }
+.greyed{
+	color: #CCCCCC;
+}

@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: pynfc
+Version: 0.0.7
+Summary: Python bindings for libnfc
+Home-page: http://code.google.com/p/pynfc/
+Author: Mike Auty
+Author-email: UNKNOWN
+License: GPL-2
+Description: UNKNOWN
+Platform: UNKNOWN

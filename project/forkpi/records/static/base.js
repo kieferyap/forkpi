@@ -113,7 +113,41 @@ $(document).ready(function() {
 	$(document.body).on('click', '.delete-btn', function(){
 		deleteKeypair($(this).attr('id'))
 	});
+	$(document.body).on('click', '.deactivate-btn', function(){
+		// alert($(this).attr('class'));
+		$(this).parent().parent().addClass('greyed');
+		$(this).removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
+		$(this).html("Activate")
+		toggleActiveKeypair($(this).attr('id'))
+	});
+	$(document.body).on('click', '.activate-btn', function(){
+		// alert($(this).attr('class'));
+		$(this).parent().parent().removeClass('greyed');
+		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
+		$(this).html("Deactivate")
+		toggleActiveKeypair($(this).attr('id'))
+	});
 });
+
+function toggleActiveKeypair(kid){
+	ajaxUrl = '/toggleactivekeypair';
+
+	$.ajax({
+		type: 'POST',
+		url: ajaxUrl,
+		data: {
+			'kid': kid,
+			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+		},
+		success: function(msg){
+			// alert(msg);
+		},
+		error: function(msg){
+			alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+			location.reload();
+		}
+	});
+}
 
 function deleteKeypair(kid){
 	$('#kp-'+kid).hide(256);

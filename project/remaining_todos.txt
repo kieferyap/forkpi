@@ -1,12 +1,24 @@
-write paper
-	Cost
+
+Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
+	Or: Remove limits on max length; min length is 4
+Mass-delete disabled keypairs
+Filter logs by date, allowed/denied, uid
+Change lock-out time / attempt limit
+Change sign-up process
+	Admins can approve new users, edit db and view logs
+	Regular users can edit db and view logs
+Access ForkPi over the local network using its host name
+Change key used to encrypt keypairs to AES key transferred using RSA
+Scan RFID close window while polling -> next poll causes crash
+
+[x] write paper
+	[x] Cost
 	[x] Assembling the components
 	[x] Testing the components
 	[x] Introduction
-	Abstract
+	[x] Abstract
 	[x] Results and discussion
-Scan RFID close window while polling
-main.py and Swipe RFID polling at the same time causes crash
+[.] main.py and Swipe RFID polling at the same time causes crash - issue avoided since ForkPi and SpoonPi are never together on one machine
 [x] delete old logs
 [x] name editing must reflect with the RFID_UID and PIN
 [x] lock out after entering wrong pin 5 times in a row
@@ -17,4 +29,5 @@ main.py and Swipe RFID polling at the same time causes crash
 [x] salted passwords
 [x] check valid pin and rfid uid
 [x] check valid pin for editing
-
+[x] PIN remove from pdf
+[x] Deactivate/disable keypairs

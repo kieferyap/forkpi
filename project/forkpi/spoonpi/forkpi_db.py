@@ -15,7 +15,7 @@ def find_pins_for(rfid_uid):
     with conn:
         c = conn.cursor()
         c.execute("CREATE TEMPORARY TABLE decrypted_kiefers(name, pin, rfid_uid, decrypted_rfid_uid)")
-        c.execute("INSERT INTO decrypted_kiefers SELECT name, pin, rfid_uid, decrypt(rfid_uid, name) FROM records_kiefers")
+        c.execute("INSERT INTO decrypted_kiefers SELECT name, pin, rfid_uid, decrypt(rfid_uid, name) FROM records_kiefers WHERE is_active = TRUE ")
         c.execute("SELECT decrypt(pin,name) FROM decrypted_kiefers WHERE decrypted_rfid_uid = '%s'" % rfid_uid)
         result = c.fetchall()
         result = map(lambda x: x[0], result)

@@ -23,7 +23,7 @@
 							{% for log in logs %}
 							<tr>
 								<td>{{ log.id }}</td>
-								<td>{{ log.created_on }}</td>
+								<td>{{ log.created_on|date:"Y-m-d H:i:s" }}</td>
 								<td>{{ log.text }}</td>
 							</tr>
 							{% endfor %}

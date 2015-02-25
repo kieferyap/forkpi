@@ -11,6 +11,7 @@ class Kiefers(models.Model):
 	name = models.TextField(default="")
 	pin = models.CharField(max_length=4)
 	rfid_uid = models.CharField(max_length=8)
+	is_active = models.BooleanField(default=True)
 
 class Logs(models.Model):
 	created_on = models.DateTimeField(auto_now_add=True, default=datetime.now)

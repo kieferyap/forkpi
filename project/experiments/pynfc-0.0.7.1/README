@@ -1,0 +1,73 @@
+Pynfc - Python bindings for libnfc
+==================================
+
+Requirements
+------------
+
+libnfc >= 1.5.1
+python >= 2.6 < 3.0
+
+
+
+Installation
+------------
+Use distutils as normal:
+
+python setup.py install
+
+
+Examples
+--------
+examples/rfid/libnfc/
+    mifareauth.py - Conducts simple mifare authentication.
+    dump.py - Dumps the contents of a MIFARE Classic card (the keys needs to known in advance).
+
+
+History
+-------
+v0.0.7__July 2012 - (Boris Mazic) Added a framework for reading from and writing to RFID cards 
+        based on the Perl's libnfc binding by Xant. Repackaged everything in the rfid.libnfc 
+        namespace. Updated some structures to reflect libnfc-1.5.1 layout.
+
+
+
+Examples
+--------
+
+There is an example program included for conducting simple mifare authentication:
+
+python mifareauth.py
+
+Example output (bulk of the raw hex excised for space):
+
+Connect to reader: True
+Initialize Reader: True
+Field Down: True
+CRC False: True
+Parity True: True
+Field Up: True
+key: A0A1A2A3A4A5
+...
+T -> R: A2 7F 33 EE
+TR == Next(TN, 96): True
+R -> T: 8F A4 FA D1
+T -> R: CA 9E 73 93
+
+This indicates that it successfully authenticated to the requested block.
+
+Documentation
+-------------
+
+The pynfc bindings should offer an intuitive, yet pythonic way of calling the standard libnfc API.
+
+The source code should feature document strings for all classes and objects, and the mifareauth example is commented.
+The python interface creates an nfc object that loosely wraps the pdi reference.
+As much as possible all libnfc commands are mirrored in the created nfc object.
+
+Please note this is in early development, and as such does not implement the full range of features found in libnfc itself.
+
+
+Author
+------
+Mike Auty
+
