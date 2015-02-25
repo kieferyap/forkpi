@@ -1,18 +1,19 @@
 $(document).ready(function() {
 	$(".tablesorter").tablesorter({
-		cssChildRow: "tablesorter-childRow",
+		headers: {4: {sorter: false}},
 		sortList: [[1,1]],
-		widgets: ["filter"],
+		widgets: ["filter", "columns"],
 		widgetOptions: {
 			filter_childRows: false,
 			filter_columnFilters: true,
-			filter_cssFilter: "tablesorter-filter",
 			filter_ignoreCase: true,
 			filter_searchDelay: 300,
-			filter_saveFilters: true
+			filter_startsWith: true,
+			filter_saveFilters: true,
+			sortReset      : true,
+			sortRestart    : true
 		}
 	});
-	$('.tablesorter-childRow td').hide();
 
 	var editableTextTrigger = false;
 	var readyToClick = 1;
