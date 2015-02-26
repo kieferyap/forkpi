@@ -1,8 +1,6 @@
 $(document).ready(function() {
 	$(".tablesorter").tablesorter({
-		headers: {4: {sorter: false}},
-		sortList: [[1,1]],
-		widgets: ["filter", "columns"],
+		widgets: ["filter"],
 		widgetOptions: {
 			filter_childRows: false,
 			filter_columnFilters: true,

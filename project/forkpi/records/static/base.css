@@ -19,18 +19,10 @@ table {
     word-wrap: break-word;
 }
 
-#logs_table td {
+#logs-table td {
     border: 1px solid #62ABEA;
     border-right: none;
     border-bottom: none;
-}
-
-.task-done{
-	color: #26A65B;
-}
-
-.task-cancelled{
-	color: #E74C3C;
 }
 
 .list-btn{
@@ -101,10 +93,6 @@ table {
 	font-size: 20px;
 	color: #60C739;
 	padding-left: 3px;
-}
-
-.dateDueTask{
-	color: #AAAAAA;
 }
 
 .control-label{

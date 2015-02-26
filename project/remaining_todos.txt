@@ -2,12 +2,10 @@
 Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
 	Or: Remove limits on max length; min length is 4
 Mass-delete disabled keypairs
-[x] Filter logs by date, allowed/denied, uid, pin
 Change lock-out time / attempt limit
 Change sign-up process
 	Admins can approve new users, edit db and view logs
 	Regular users can edit db and view logs
-[x] Access ForkPi over the local network using its host name
 Change key used to encrypt keypairs to AES key transferred using RSA
 Scan RFID close window while polling -> next poll causes crash
 
@@ -31,3 +29,5 @@ Scan RFID close window while polling -> next poll causes crash
 [x] check valid pin for editing
 [x] PIN remove from pdf
 [x] Deactivate/disable keypairs
+[x] Filter logs by date, allowed/denied, uid, pin
+[x] Access ForkPi over the local network using its host name
