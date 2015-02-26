@@ -6,10 +6,7 @@ from django.db import connection
 
 import datetime
 import hashlib
-import sqlite3
-from spoonpi import aes
 from spoonpi.nfc_reader import NFCReader
-from spoonpi import forkpi_db
 
 import reportlab
 from reportlab.lib import colors
@@ -162,7 +159,10 @@ def addrfid(request):
 		uid = NFCReader().read_tag()
 		is_polling = False
 		return HttpResponse(uid)
-	return HttpResponse("Please try again at a later time. Sorry for the inconvenience.")
+	else:
+		response = HttpResponse("Please try again at a later time. Sorry for the inconvenience.")
+		response.status_code = 400
+		return response
 
 def addpair(request):
 	name = request.POST['name']
@@ -217,9 +217,7 @@ def toggleactivekeypair(request):
 	keypair.save()
 	return HttpResponse("Successful.")	
 
-# Attempt: print as PDF
-def pdflist(request):
-	# Create the HttpResponse object with the appropriate PDF headers.
+def printpdf(request):
 	response = HttpResponse(content_type='application/pdf')
 	response['Content-Disposition'] = 'attachment; filename="forkpi_keypairs.pdf"'
 
@@ -233,20 +231,16 @@ def pdflist(request):
 	data.append(['Name', 'RFID UID'])
 
 	for keypair in keypairs:
-		cipher = aes.AES(keypair.name)
-		rfid_uid = cipher.decrypt(keypair.rfid_uid)
 		if keypair.is_active:
 			style.textColor = colors.black
 		else:
 			style.textColor = colors.gray
-		data.append([Paragraph(str(keypair.name), style), Paragraph(str(rfid_uid), style)])
+		data.append([Paragraph(str(keypair.name), style), Paragraph(str(keypair.rfid_uid), style)])
 	
 	t = Table(data, colWidths=[300, 100])
 	t.setStyle(TableStyle([('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),('BOX', (0,0), (-1,-1), 0.25, colors.black),]))
-
 	elements.append(t)
 	doc.build(elements)
-
 	return response
 
 def logs(request):

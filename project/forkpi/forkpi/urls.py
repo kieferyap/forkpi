@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     url(r'^deletekeypair$', 'records.views.deletekeypair', name='deletekeypair'),
     url(r'^toggleactivekeypair$', 'records.views.toggleactivekeypair', name='toggleactivekeypair'),
     url(r'^addrfid$', 'records.views.addrfid', name='addrfid'),
-    url(r'^pdflist$', 'records.views.pdflist', name='pdflist'),
+    url(r'^printpdf$', 'records.views.printpdf', name='printpdf'),
 
     url(r'^login$', 'records.views.login', name='login'),
     url(r'^loggingin$', 'records.views.loggingin', name='loggingin'),
