@@ -17,7 +17,7 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 
-from records.models import Users, Kiefers, Logs
+from records.models import User, Keypair, Log
 
 is_polling = False
 
@@ -40,8 +40,8 @@ def getLoginText(request):
 def getUserActions(request):
 	if request.session.get('userid'):
 		userActions = {}
-		userActions[0] = {'name':'Logs', 'url':'logs'}
-		userActions[1] = {'name':'Keypairs', 'url':'keypairs'}
+		userActions[0] = {'name':'Keypairs', 'url':'keypairs'}
+		userActions[1] = {'name':'Logs', 'url':'logs'}
 		userActions[2] = {'name':'Logout', 'url':'logout'}
 		return userActions
 	else:
@@ -69,8 +69,8 @@ def loggingin(request):
 
 	## Check if user is in the database	
 	try:
-		user = Users.objects.get(username=username, password=password_md5)
-	except Users.DoesNotExist:
+		user = User.objects.get(username=username, password=password_md5)
+	except User.DoesNotExist:
 		loginText = "You are not logged in."
 		userActions = getUserActions(request)
 		messages.add_message(request, messages.ERROR, 'I don\'t seem to recognize your username-password combination...')
@@ -112,8 +112,8 @@ def adduser(request):
 		return redirect('/signup')
 
 	## If the user already has an entry in the database...
-	byUsername = Users.objects.all().filter(username = username)
-	byEmailAdd = Users.objects.all().filter(email = email)
+	byUsername = User.objects.all().filter(username = username)
+	byEmailAdd = User.objects.all().filter(email = email)
 	if(len(byUsername) > 0 or len(byEmailAdd) > 0):
 		messages.add_message(request, messages.ERROR, 'Hmm. It looks like you already have an entry in my database...')
 		return redirect('/signup')
@@ -123,7 +123,7 @@ def adduser(request):
 	password_md5 = str(hash_object.hexdigest())
 
 	## Insert user into database
-	Users.objects.create(
+	User.objects.create(
 		username = username,
 		email = email,
 		password = password_md5
@@ -162,7 +162,7 @@ def keypairs(request):
 	userActions = getUserActions(request)
 	loginText = getLoginText(request)
 
-	keypairs = Kiefers.objects.all()
+	keypairs = Keypair.objects.all()
 	for keypair in keypairs:
 		cipher = aes.AES(keypair.name)
 		keypair.pin = cipher.decrypt(keypair.pin)
@@ -200,7 +200,7 @@ def addpair(request):
 	encrypted_pin = cipher.encrypt(pin)
 	encrypted_rfid_uid = cipher.encrypt(rfid_uid)
 
-	Kiefers.objects.create(
+	Keypair.objects.create(
 		name = name,
 		pin = encrypted_pin,
 		rfid_uid = encrypted_rfid_uid
@@ -209,12 +209,12 @@ def addpair(request):
 	return redirect('/keypairs')
 
 def editname(request):
-	old = Kiefers.objects.get(id = request.POST['kid'])
+	old = Keypair.objects.get(id = request.POST['kid'])
 	old_name = old.name
 
 	name = request.POST['value']
-	Kiefers.objects.filter(id = request.POST['kid']).update(name = name)
-	keypair = Kiefers.objects.get(id = request.POST['kid'])
+	Keypair.objects.filter(id = request.POST['kid']).update(name = name)
+	keypair = Keypair.objects.get(id = request.POST['kid'])
 
 	cipher = aes.AES(old_name)
 	rfid_uid = cipher.decrypt(keypair.rfid_uid)
@@ -237,7 +237,7 @@ def editpin(request):
 		response.status_code = 400
 		return response
 
-	keypair = Kiefers.objects.get(id = request.POST['kid'])
+	keypair = Keypair.objects.get(id = request.POST['kid'])
 	cipher = aes.AES(keypair.name)
 	keypair.pin = cipher.encrypt(pin)
 		
@@ -245,18 +245,18 @@ def editpin(request):
 	return HttpResponse("Successful.")
 
 def edituid(request):
-	keypair = Kiefers.objects.get(id = request.POST['kid'])
+	keypair = Keypair.objects.get(id = request.POST['kid'])
 	cipher = aes.AES(keypair.name)
 	keypair.rfid_uid = cipher.encrypt(request.POST['value'])
 	keypair.save()
 	return HttpResponse("Successful.")
 
 def deletekeypair(request):
-	Kiefers.objects.filter(id = request.POST['kid']).delete()
+	Keypair.objects.filter(id = request.POST['kid']).delete()
 	return HttpResponse("Successful.")
 
 def toggleactivekeypair(request):
-	keypair = Kiefers.objects.get(id = request.POST['kid'])
+	keypair = Keypair.objects.get(id = request.POST['kid'])
 	keypair.is_active = not keypair.is_active
 	keypair.save()
 	return HttpResponse("Successful.")	
@@ -271,7 +271,7 @@ def pdflist(request):
 	elements = []
 	styles = getSampleStyleSheet()
 	style = styles['Normal']
-	keypairs = Kiefers.objects.all()
+	keypairs = Keypair.objects.all()
 
 	data = []
 	data.append(['Name', 'RFID UID'])
@@ -301,23 +301,23 @@ def logs(request):
 
 	## Method 1: Raw SQL
 	## Status: Failure. Nothing happened!
-	# Logs.objects.raw("DELETE FROM records_logs WHERE julianday('now') - julianday(created_on) > 30")
+	# Log.objects.raw("DELETE FROM records_log WHERE julianday('now') - julianday(created_on) > 30")
 
 	## Method 2: Use the code from forkpi_db
-	## Status: Failure. It couldn't find records_logs
+	## Status: Failure. It couldn't find records_log
 	# with conn:
 	# 	c = conn.cursor()
-	# 	c.execute("DELETE FROM records_logs WHERE julianday('now') - julianday(created_on) > 30")
+	# 	c.execute("DELETE FROM records_log WHERE julianday('now') - julianday(created_on) > 30")
 
 	## Method 3: Import and execute 
-	## Status: Failure. Apparently, it couldn't find records_logs, just like Method 2
+	## Status: Failure. Apparently, it couldn't find records_log, just like Method 2
 	# forkpi_db.delete_logs()
 
 	## Method 4: Another direct SQL trial.
 	## Status: Worked!
 	cursor = connection.cursor()	
-	cursor.execute("DELETE FROM records_logs WHERE julianday('now') - julianday(created_on) > 30")
-	# cursor.execute("SELECT *, julianday('now'), julianday(created_on), julianday('now') - julianday(created_on) FROM records_logs")
+	cursor.execute("DELETE FROM records_log WHERE julianday('now') - julianday(created_on) > 30")
+	# cursor.execute("SELECT *, julianday('now'), julianday(created_on), julianday('now') - julianday(created_on) FROM records_log")
 	# print cursor.fetchone()
 	
 	if not request.session.get('userid'):
@@ -327,5 +327,5 @@ def logs(request):
 	loginText = getLoginText(request)
 
 
-	logs = Logs.objects.all()
+	logs = Log.objects.all()
 	return render(request, 'logs.html', {'logs': logs, 'loginText': loginText, 'userActions': userActions})

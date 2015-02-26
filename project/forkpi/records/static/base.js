@@ -1,6 +1,8 @@
 $(document).ready(function() {
 	$(".tablesorter").tablesorter({
 		widgets: ["filter"],
+		sortReset      : true,
+		sortRestart    : true,
 		widgetOptions: {
 			filter_childRows: false,
 			filter_columnFilters: true,
@@ -8,8 +10,6 @@ $(document).ready(function() {
 			filter_searchDelay: 300,
 			filter_startsWith: true,
 			filter_saveFilters: true,
-			sortReset      : true,
-			sortRestart    : true
 		}
 	});
 
