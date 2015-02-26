@@ -195,8 +195,8 @@ def editpin(request):
 	pin = request.POST['value']
 
 	if not (len(pin) == 0 or (len(pin) == 4 and pin.isdigit())):
+		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consist of 4 digits.')
 		response = HttpResponse("Invalid PIN")
-		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consists of 4 digits.')
 		response.status_code = 400
 		return response
 	else:
