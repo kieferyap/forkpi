@@ -59,8 +59,12 @@ WSGI_APPLICATION = 'forkpi.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'forkpi',
+        'USER': 'pi',
+        'PASSWORD': 'raspberry',
+        'HOST': 'forkpi.local', # Empty for localhost through domain sockets or'127.0.0.1' for localhost through TCP.
+        'PORT': '5432', # Set to empty string for default.
     }
 }
 
@@ -75,7 +79,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

@@ -50,15 +50,18 @@ def getUserActions(request):
 		userActions[1] = {'name':'Signup', 'url':'signup'}
 		return userActions
 	
+def renderWithLoginTextAndUserActions(request, template, passVars=dict()):
+	passVars['loginText'] = getLoginText(request)
+	passVars['userActions'] = getUserActions(request)
+	return render(request, template, passVars)
+
 # Login display
 def login(request):
 	if request.session.get('userid'):
 		messages.add_message(request, messages.ERROR, 'You have already logged in. Kindly log out first to access the login page.')
 		return redirect('/keypairs')
 	else:
-		userActions = getUserActions(request)
-		loginText = getLoginText(request)
-		return render(request, 'login.html', {'loginText': loginText, 'userActions': userActions})
+		return renderWithLoginTextAndUserActions(request, 'login.html')
 
 # Logging the user in
 def loggingin(request):
@@ -71,17 +74,12 @@ def loggingin(request):
 	try:
 		user = User.objects.get(username=username, password=password_md5)
 	except User.DoesNotExist:
-		loginText = "You are not logged in."
-		userActions = getUserActions(request)
 		messages.add_message(request, messages.ERROR, 'I don\'t seem to recognize your username-password combination...')
 		return redirect('/login')
 	else:
 		## Session handling
 		request.session['userid'] = user.userid
 		request.session['username'] = user.username
-
-		loginText = getLoginText(request)
-		userActions = getUserActions(request)
 
 		messages.add_message(request, messages.SUCCESS, 'Awesome! Your login was successful.')
 		return redirect('/keypairs')
@@ -97,9 +95,7 @@ def signup(request):
 		messages.add_message(request, messages.ERROR, 'You have already logged in. Kindly log out first to access the signup page.')
 		return redirect('/keypairs')
 	else:
-		userActions = getUserActions(request)
-		loginText = getLoginText(request)
-		return render(request, 'signup.html', {'loginText': loginText, 'userActions': userActions})
+		return renderWithLoginTextAndUserActions(request, 'signup.html')
 
 # Adding a user
 def adduser(request):
@@ -145,10 +141,7 @@ def logout(request):
 	except KeyError:
 		messages.add_message(request, messages.ERROR, 'Logout unsuccessful. Gee, I wonder why...')
 
-	userActions = getUserActions(request)
-	loginText = getLoginText(request)
-
-	return render(request, 'login.html', {'loginText': loginText, 'userActions': userActions})
+	return renderWithLoginTextAndUserActions(request, 'login.html')
 
 
 ######################
@@ -159,15 +152,8 @@ def keypairs(request):
 	if not request.session.get('userid'):
 		return HttpResponseNotFound('<h1>Page not found</h1>')
 
-	userActions = getUserActions(request)
-	loginText = getLoginText(request)
-
 	keypairs = Keypair.objects.all()
-	for keypair in keypairs:
-		cipher = aes.AES(keypair.name)
-		keypair.pin = cipher.decrypt(keypair.pin)
-		keypair.rfid_uid = cipher.decrypt(keypair.rfid_uid)
-	return render(request, 'keypairs.html',  {'loginText': loginText, 'userActions': userActions, 'keypairs': keypairs})
+	return renderWithLoginTextAndUserActions(request, 'keypairs.html',  {'keypairs': keypairs})
 
 def addrfid(request):
 	global is_polling
@@ -194,38 +180,15 @@ def addpair(request):
 		is_error = True
 
 	if is_error:
-		return redirect('/keypairs')	
+		return redirect('/keypairs')
 
-	cipher = aes.AES(name)
-	encrypted_pin = cipher.encrypt(pin)
-	encrypted_rfid_uid = cipher.encrypt(rfid_uid)
-
-	Keypair.objects.create(
-		name = name,
-		pin = encrypted_pin,
-		rfid_uid = encrypted_rfid_uid
-	)
+	Keypair.objects.create(name = name, pin = pin, rfid_uid = rfid_uid)
 	messages.add_message(request, messages.SUCCESS, 'Pair addition successful.')
 	return redirect('/keypairs')
 
 def editname(request):
-	old = Keypair.objects.get(id = request.POST['kid'])
-	old_name = old.name
-
 	name = request.POST['value']
-	Keypair.objects.filter(id = request.POST['kid']).update(name = name)
-	keypair = Keypair.objects.get(id = request.POST['kid'])
-
-	cipher = aes.AES(old_name)
-	rfid_uid = cipher.decrypt(keypair.rfid_uid)
-	pin = cipher.decrypt(keypair.pin)
-
-	cipher = aes.AES(name)
-	keypair.pin = cipher.encrypt(pin)
-	keypair.rfid_uid = cipher.encrypt(rfid_uid)
-		
-	keypair.save()
-
+	Keypair.objects.filter(id = request.POST['kid']).update(name=name)
 	return HttpResponse("Successful.")
 
 def editpin(request):
@@ -236,19 +199,12 @@ def editpin(request):
 		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consists of 4 digits.')
 		response.status_code = 400
 		return response
-
-	keypair = Keypair.objects.get(id = request.POST['kid'])
-	cipher = aes.AES(keypair.name)
-	keypair.pin = cipher.encrypt(pin)
-		
-	keypair.save()
-	return HttpResponse("Successful.")
+	else:
+		Keypair.objects.filter(id = request.POST['kid']).update(pin=pin)
+		return HttpResponse("Successful.")
 
 def edituid(request):
-	keypair = Keypair.objects.get(id = request.POST['kid'])
-	cipher = aes.AES(keypair.name)
-	keypair.rfid_uid = cipher.encrypt(request.POST['value'])
-	keypair.save()
+	Keypair.objects.filter(id = request.POST['kid']).update(rfid_uid=request.POST['value'])
 	return HttpResponse("Successful.")
 
 def deletekeypair(request):
@@ -294,38 +250,11 @@ def pdflist(request):
 	return response
 
 def logs(request):
-	"""
-	http://stackoverflow.com/questions/8432926/aggregate-difference-between-datetime-fields-in-djano
-	It is apparently not possible to do time differences in Django models.
-	"""
-
-	## Method 1: Raw SQL
-	## Status: Failure. Nothing happened!
-	# Log.objects.raw("DELETE FROM records_log WHERE julianday('now') - julianday(created_on) > 30")
-
-	## Method 2: Use the code from forkpi_db
-	## Status: Failure. It couldn't find records_log
-	# with conn:
-	# 	c = conn.cursor()
-	# 	c.execute("DELETE FROM records_log WHERE julianday('now') - julianday(created_on) > 30")
-
-	## Method 3: Import and execute 
-	## Status: Failure. Apparently, it couldn't find records_log, just like Method 2
-	# forkpi_db.delete_logs()
-
-	## Method 4: Another direct SQL trial.
-	## Status: Worked!
 	cursor = connection.cursor()	
-	cursor.execute("DELETE FROM records_log WHERE julianday('now') - julianday(created_on) > 30")
-	# cursor.execute("SELECT *, julianday('now'), julianday(created_on), julianday('now') - julianday(created_on) FROM records_log")
-	# print cursor.fetchone()
+	cursor.execute("DELETE FROM records_log WHERE now() - created_on > INTERVAL '30 days'")
 	
 	if not request.session.get('userid'):
 		return HttpResponseNotFound('<h1>Page not found</h1>')
 
-	userActions = getUserActions(request)
-	loginText = getLoginText(request)
-
-
 	logs = Log.objects.all()
-	return render(request, 'logs.html', {'logs': logs, 'loginText': loginText, 'userActions': userActions})
+	return renderWithLoginTextAndUserActions(request, 'logs.html', {'logs': logs})
