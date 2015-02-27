@@ -35,7 +35,7 @@
 
 					<ul class="nav navbar-nav navbar-right">
 						{% for action in userActions %}
-							<li><a href="/{{ action.url }}">{{ action.name }}</a></li>
+							<li><a href="{{ action.url }}">{{ action.name }}</a></li>
 						{% endfor %}
 					</ul>
 				</div><!-- /.navbar-collapse -->

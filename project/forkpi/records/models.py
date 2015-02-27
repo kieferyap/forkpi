@@ -1,25 +1,20 @@
-from django.db import models
+from django.db.models import *
+from django.contrib.auth.models import User
 from datetime import datetime
 
-class User(models.Model):
-	userid = models.AutoField(primary_key=True)
-	username = models.TextField(default='')
-	email = models.TextField(default='')
-	password = models.CharField(max_length=32)
+class Keypair(Model):
+	name = TextField(default='')
+	pin = TextField(default='', null=True, blank=True)
+	rfid_uid = CharField(max_length=8)
+	is_active = BooleanField(default=True)
 
-class Keypair(models.Model):
-	name = models.TextField(default='')
-	pin = models.TextField(default='', null=True, blank=True)
-	rfid_uid = models.CharField(max_length=8)
-	is_active = models.BooleanField(default=True)
+class Log(Model):
+	created_on = DateTimeField(auto_now_add=True, default=datetime.now)
+	action = TextField(default='')
+	details = TextField(default='', null=True, blank=True)
+	pin = TextField(default='', null=True, blank=True)
+	rfid_uid = CharField(max_length=8, default='')
 
-class Log(models.Model):
-	created_on = models.DateTimeField(auto_now_add=True, default=datetime.now)
-	action = models.TextField(default='')
-	details = models.TextField(default='', null=True, blank=True)
-	pin = models.TextField(default='', null=True, blank=True)
-	rfid_uid = models.CharField(max_length=8, default='')
-
-class Option(models.Model):
-	name = models.TextField(unique=True)
-	value = models.TextField(default='')
+class Option(Model):
+	name = TextField(unique=True)
+	value = TextField(default='')

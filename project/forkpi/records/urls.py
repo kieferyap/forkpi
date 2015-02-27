@@ -3,11 +3,16 @@ from django.contrib import admin
 from records.views import *
 
 urlpatterns = patterns('',
-    url(r'^$', index, name='index'),
+    url(r'^$', index_page, name='index'),
+    url(r'^logout$', logout, name='logout'),
 
-    url(r'^logs$', logs, name='logs'),
+    url(r'^login/$', login_page, name='login'),
+    url(r'^loggingin$', loggingin, name='loggingin'),
 
-    url(r'^keypairs$', keypairs, name='keypairs'),
+    url(r'^signup/$', signup_page, name='signup'),
+    url(r'^adduser$', adduser, name='adduser'),
+
+    url(r'^keypairs/$', keypairs_page, name='keypairs'),
     url(r'^addpair$', addpair, name='addpair'),
     url(r'^editname$', editname, name='editname'),
     url(r'^editpin$', editpin, name='editpin'),
@@ -17,9 +22,5 @@ urlpatterns = patterns('',
     url(r'^addrfid$', addrfid, name='addrfid'),
     url(r'^printpdf$', printpdf, name='printpdf'),
 
-    url(r'^login$', login, name='login'),
-    url(r'^loggingin$', loggingin, name='loggingin'),
-    url(r'^signup$', signup, name='signup'),
-    url(r'^adduser$', adduser, name='adduser'),
-    url(r'^logout$', logout, name='logout'),
+    url(r'^logs/$', logs_page, name='logs'),
 )
