@@ -34,8 +34,8 @@
 					</ul>
 
 					<ul class="nav navbar-nav navbar-right">
-						{% for flk, flv in userActions.items %}
-							<li><a href="/{{ flv.url }}">{{ flv.name }}</a></li>
+						{% for action in userActions %}
+							<li><a href="/{{ action.url }}">{{ action.name }}</a></li>
 						{% endfor %}
 					</ul>
 				</div><!-- /.navbar-collapse -->

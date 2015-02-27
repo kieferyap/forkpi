@@ -18,7 +18,7 @@ $(document).ready(function() {
 	var curListId = 0;
 
 	$(document.body).on('click', '.editable-text', function(){
-		if(editableTextTrigger){
+		if(editableTextTrigger){ // some other text is already being edited; close that first
 			$('.editable-done').trigger('click');
 			editableTextTrigger = false;
 		}
@@ -34,7 +34,7 @@ $(document).ready(function() {
 		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
 		
 		if($(this).parent().attr('type') == 'rfid'){
-			doneButton = '<div class="scan-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
+			doneButton = '<div class="scan-edit-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
 		}
 
 		$(this).parent().html(current+doneButton);
@@ -81,7 +81,7 @@ $(document).ready(function() {
 				location.reload();
 			}
 		});		
-	}).on('click', '.scan-button, .scan-rfid', function(e){
+	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
 		ajaxUrl = '/addrfid';
 		var isEditing = $(this).parent().attr('type') == 'rfid';
 
@@ -106,35 +106,22 @@ $(document).ready(function() {
 				$(textSelector).val(msg);
 			},
 			error: function(msg){
-				alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
 			}
 		});
 	});
-
-	// $(document).on('click', function(e){
-	// 	alert("Got in?");
-	// 	if(editableTextTrigger){
-	// 		readyToClick -= 1;
-	// 	}
-	// 	if(readyToClick < 0){
-	// 		$('.editable-done').trigger('click');
-	// 		$('.editable-textarea-done').trigger('click');
-	// 	}
-	// });
 
 	$(document.body).on('click', '.delete-btn', function(){
 		deleteKeypair($(this).attr('id'))
 	});
 	$(document.body).on('click', '.deactivate-btn', function(){
-		// alert($(this).attr('class'));
-		$(this).parent().parent().addClass('greyed');
+		$(this).parent().parent().addClass('greyed'); // grey out the corresponding row
 		$(this).removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
 		$(this).html("Activate")
 		toggleActiveKeypair($(this).attr('id'))
 	});
 	$(document.body).on('click', '.activate-btn', function(){
-		// alert($(this).attr('class'));
-		$(this).parent().parent().removeClass('greyed');
+		$(this).parent().parent().removeClass('greyed'); // ungrey the corresponding row
 		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
 		$(this).html("Deactivate")
 		toggleActiveKeypair($(this).attr('id'))
@@ -152,10 +139,9 @@ function toggleActiveKeypair(kid){
 			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
 		},
 		success: function(msg){
-			// alert(msg);
 		},
 		error: function(msg){
-			alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+			alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
 			location.reload();
 		}
 	});
@@ -176,7 +162,8 @@ function deleteKeypair(kid){
 		success: function(msg){
 		},
 		error: function(msg){
-			alert('Whoops, looks like something went wrong... Sorry \'bout that, could you please refresh for me?');
+			alert('Whoops, looks like something went wrong... Sorry \'bout that, let me refresh for you...');
+			location.reload();
 		}
 	});
 }

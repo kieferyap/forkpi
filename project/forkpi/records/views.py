@@ -36,15 +36,15 @@ def getLoginText(request):
 
 def getUserActions(request):
 	if request.session.get('userid'):
-		userActions = {}
-		userActions[0] = {'name':'Keypairs', 'url':'keypairs'}
-		userActions[1] = {'name':'Logs', 'url':'logs'}
-		userActions[2] = {'name':'Logout', 'url':'logout'}
+		userActions = list()
+		userActions.append({'name':'Keypairs', 'url':'keypairs'})
+		userActions.append({'name':'Logs', 'url':'logs'})
+		userActions.append({'name':'Logout', 'url':'logout'})
 		return userActions
 	else:
-		userActions = {}
-		userActions[0] = {'name':'Login', 'url':'login'}
-		userActions[1] = {'name':'Signup', 'url':'signup'}
+		userActions = dict()
+		userActions.append({'name':'Login', 'url':'login'})
+		userActions.append({'name':'Signup', 'url':'signup'})
 		return userActions
 	
 def renderWithLoginTextAndUserActions(request, template, passVars=dict()):
