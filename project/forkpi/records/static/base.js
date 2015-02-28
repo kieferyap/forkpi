@@ -56,13 +56,12 @@ $(document).ready(function() {
 			
 		editableTextTrigger = false;
 		readyToClick = 1;
-		
+
 		var newValue = '<span class="editable-text">- - -</span>';
 		
 		if($(this).parent().children('input').val().trim() != ''){
 			newValue = '<span class="editable-text">'+$(this).parent().children('input').val().trim()+'</span>';
 		}
-				
 		$(this).parent().html(newValue);	
 
 		$.ajax({

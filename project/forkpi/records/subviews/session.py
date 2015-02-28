@@ -10,7 +10,7 @@ def login_page(request):
 		return render(request, 'login.html')
 
 # Logging the user in
-def loggingin(request):
+def logging_in(request):
 	username = request.POST['username']
 	password = request.POST['password']
 
@@ -36,7 +36,7 @@ def logout(request):
 		messages.add_message(request, messages.ERROR, "If you're not logged in, how can you log out?")
 		return redirect_to_name('login')
 
-def mustbeloggedin(request):
+def must_be_logged_in(request):
 	messages.add_message(request, messages.ERROR, 'You must be logged in to access that page.')
 	return redirect_to_name('login')
 

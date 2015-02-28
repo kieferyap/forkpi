@@ -18,11 +18,18 @@
 						</tr>
 					</thead>
 					<tbody>
+					{% csrf_token %}
 						{% if options|length > 0 %}
 							{% for option in options %}
 							<tr>
-								<td>{{ option.name }}</td>
-								<td>{{ option.value }}</td>
+								<td>
+									{{ option.name }}
+								</td>
+								<td ajaxUrl={% url 'edit option value' %} ajaxId="{{ option.id }}" ajaxField="name">
+									<span class="editable-text">
+									{{ option.value }}
+									</span>
+								</td>
 							</tr>
 							{% endfor %}
 						{% else %}

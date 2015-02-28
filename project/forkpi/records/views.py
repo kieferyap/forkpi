@@ -38,8 +38,8 @@ def redirect_to_name(name):
 
 
 from subviews.keypairs import *
-from subviews.session import login_page, loggingin, logout, mustbeloggedin
-from subviews.signup import signup_page, adduser
+from subviews.session import login_page, logging_in, logout, must_be_logged_in
+from subviews.signup import signup_page, add_user
 from subviews.logs import logs_page
-from subviews.options import options_page
+from subviews.options import options_page, edit_option_value
 

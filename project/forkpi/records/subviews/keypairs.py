@@ -14,7 +14,7 @@ def keypairs_page(request):
 	return render(request, 'keypairs.html',  {'keypairs': keypairs})
 
 @login_required
-def addrfid(request):
+def scan_rfid(request):
 	global is_polling
 	if not is_polling:
 		is_polling = True
@@ -27,7 +27,7 @@ def addrfid(request):
 		return response
 
 @login_required
-def addpair(request):
+def new_keypair(request):
 	name = request.POST['name']
 	pin = request.POST['pin']
 	rfid_uid = request.POST['rfid_uid']
@@ -50,13 +50,13 @@ def addpair(request):
 	return redirect_to_name('keypairs')
 
 @login_required
-def editname(request):
+def edit_keypair_name(request):
 	name = request.POST['value']
 	Keypair.objects.filter(id = request.POST['kid']).update(name=name)
 	return HttpResponse("Successful.")
 
 @login_required
-def editpin(request):
+def edit_keypair_pin(request):
 	pin = request.POST['value']
 
 	if not (len(pin) == 0 or (len(pin) == 4 and pin.isdigit())):
@@ -69,24 +69,24 @@ def editpin(request):
 		return HttpResponse("Successful.")
 
 @login_required
-def edituid(request):
+def edit_keypair_uid(request):
 	Keypair.objects.filter(id = request.POST['kid']).update(rfid_uid=request.POST['value'])
 	return HttpResponse("Successful.")
 
 @login_required
-def deletekeypair(request):
+def delete_keypair(request):
 	Keypair.objects.filter(id = request.POST['kid']).delete()
 	return HttpResponse("Successful.")
 
 @login_required
-def toggleactivekeypair(request):
+def keypair_toggle_active(request):
 	keypair = Keypair.objects.get(id = request.POST['kid'])
 	keypair.is_active = not keypair.is_active
 	keypair.save()
 	return HttpResponse("Successful.")
 
 @login_required
-def printpdf(request):
+def print_pdf(request):
 	from reportlab.lib import colors
 	from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 	from reportlab.lib.pagesizes import letter

@@ -12,7 +12,7 @@ def signup_page(request):
 		return render(request, 'signup.html')
 
 # Adding a user
-def adduser(request):
+def add_user(request):
 	username = request.POST['username']
 	password = request.POST['password']
 	email = request.POST['email']
