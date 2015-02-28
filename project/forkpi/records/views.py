@@ -1,40 +1,40 @@
-from django.shortcuts import redirect, render
-from django.core.urlresolvers import reverse 
+from django.shortcuts import render as django_render
+from django.shortcuts import redirect as django_redirect
+from django.core.urlresolvers import reverse
 
 def index_page(request):
 	if request.user.is_authenticated():
-		return redirect('/keypairs/')
+		return redirect_to_name('keypairs')
 	else:
-		return redirect('/login/?next=keypairs')
+		return redirect_to_name('login')
 
-####################
-# Session Handling #
-####################
-
-def getLoginText(request):
+def get_login_text(request):
 	if request.user.is_authenticated():
 		return "Welcome back, " + request.user.username
 	else:
 		return "You are not logged in."
 
-def getUserActions(request):
+def get_user_actions(request):
 	if request.user.is_authenticated():
 		userActions = list()
-		userActions.append({'name':'Keypairs', 'url':'/keypairs/'})
-		userActions.append({'name':'Logs', 'url':'/logs/'})
-		userActions.append({'name':'Options', 'url':'/options/'})
-		userActions.append({'name':'Logout', 'url':'/logout'})
+		userActions.append({'name':'Keypairs', 'url':reverse('keypairs')})
+		userActions.append({'name':'Logs',     'url':reverse('logs')})
+		userActions.append({'name':'Options',  'url':reverse('options')})
+		userActions.append({'name':'Logout',   'url':reverse('logout')})
 		return userActions
 	else:
 		userActions = list()
-		userActions.append({'name':'Login', 'url':'/login/'})
-		userActions.append({'name':'Signup', 'url':'/signup/'})
+		userActions.append({'name':'Login',    'url':reverse('login')})
+		userActions.append({'name':'Signup',   'url':reverse('signup')})
 		return userActions
 	
-def renderWithLoginTextAndUserActions(request, template, passVars=dict()):
-	passVars['loginText'] = getLoginText(request)
-	passVars['userActions'] = getUserActions(request)
-	return render(request, template, passVars)
+def render(request, template, passVars=dict()):
+	passVars['loginText'] = get_login_text(request)
+	passVars['userActions'] = get_user_actions(request)
+	return django_render(request, template, passVars)
+
+def redirect_to_name(name):
+	return django_redirect(reverse(name))
 
 
 from subviews.keypairs import *

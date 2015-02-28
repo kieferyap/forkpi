@@ -82,7 +82,7 @@ $(document).ready(function() {
 			}
 		});		
 	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
-		ajaxUrl = '/scanrfid';
+		ajaxUrl = '/keypairs/scanrfid';
 		var isEditing = $(this).parent().attr('type') == 'rfid';
 
 		var x = $(this);
@@ -129,7 +129,7 @@ $(document).ready(function() {
 });
 
 function toggleActiveKeypair(kid){
-	ajaxUrl = '/toggleactivekeypair';
+	ajaxUrl = '/keypairs/toggleactive';
 
 	$.ajax({
 		type: 'POST',
@@ -150,7 +150,7 @@ function toggleActiveKeypair(kid){
 function deleteKeypair(kid){
 	$('#kp-'+kid).hide(256);
 
-	ajaxUrl = '/deletekeypair';
+	ajaxUrl = '/keypairs/delete';
 
 	$.ajax({
 		type: 'POST',

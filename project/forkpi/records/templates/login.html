@@ -3,7 +3,7 @@
 {% block content%}
 	<div class="col-md-4 col-md-offset-4 well">
 		<legend>Good to see you again!</legend>
-		<form accept-charset="UTF-8" action="/loggingin" method="post">
+		<form accept-charset="UTF-8" action={% url 'logging in' %} method="post">
 			<input class="col-md-12 signup-textbox" name="username" placeholder="Username" type="text"> 
 			<input class="col-md-12 signup-textbox" name="password" placeholder="Password" type="password"><br/>
 			{% csrf_token %}

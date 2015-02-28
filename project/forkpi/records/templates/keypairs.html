@@ -4,7 +4,7 @@
 <div class="row">
 	<div class="col-md-10 col-md-offset-1">
 		<div class="row col-md-12">
-			<form class="form-horizontal" accept-charset="UTF-8" action="/addpair" method="post">
+			<form class="form-horizontal" accept-charset="UTF-8" action={% url 'add keypair' %} method="post">
 				<div class="form-group">
 					<label for="name" class="col-md-2 control-label">Name</label>
 					<div class="col-md-10">
@@ -110,6 +110,7 @@
 </div>
 
 <div class="row">
-	<button class="btn btn-primary col-md-2 col-md-offset-5" onclick="window.location='/printpdf'">Download as PDF</button>
+	<button class="btn btn-primary col-md-2 col-md-offset-5"
+	        onclick="window.location='{% url 'print pdf' %}'">Download as PDF</button>
 </div>
 {% endblock %}

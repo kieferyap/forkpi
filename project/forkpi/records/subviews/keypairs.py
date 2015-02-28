@@ -1,8 +1,8 @@
-from django.shortcuts import redirect, HttpResponse
+from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
-from records.views import renderWithLoginTextAndUserActions
+from records.views import render, redirect_to_name
 from records.models import Keypair
 from spoonpi.nfc_reader import NFCReader
 
@@ -11,7 +11,7 @@ is_polling = False
 @login_required
 def keypairs_page(request):
 	keypairs = Keypair.objects.all()
-	return renderWithLoginTextAndUserActions(request, 'keypairs.html',  {'keypairs': keypairs})
+	return render(request, 'keypairs.html',  {'keypairs': keypairs})
 
 @login_required
 def addrfid(request):
@@ -43,11 +43,11 @@ def addpair(request):
 		is_error = True
 
 	if is_error:
-		return redirect('/keypairs/')
+		return redirect_to_name('keypairs')
 
 	Keypair.objects.create(name = name, pin = pin, rfid_uid = rfid_uid)
 	messages.add_message(request, messages.SUCCESS, 'Pair addition successful.')
-	return redirect('/keypairs/')
+	return redirect_to_name('keypairs')
 
 @login_required
 def editname(request):
