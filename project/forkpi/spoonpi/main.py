@@ -102,7 +102,7 @@ class SpoonPi:
 				lockout_row = self.find_lockout_row(rfid_uid)
 
 				if lockout_row[SpoonPi.COL_TIME_LEFT] > 0:
-					self.deny_access(rfid_uid, pin, reason="locked out",
+					self.deny_access(rfid_uid, '', reason="locked out",
 						led_message="Locked out\nfor %sm" % int(ceil(lockout_row[SpoonPi.COL_TIME_LEFT] / 60.0)))
 				else:
 					pin, timed_out = self.pin_authentication()
