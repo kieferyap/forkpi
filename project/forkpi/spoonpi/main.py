@@ -1,35 +1,51 @@
 from keypad import Keypad
 from oled import OLED
 from nfc_reader import NFCReader
-from forkpi_db import find_pins_for, log_allowed, log_denied
+from forkpi_db import ForkpiDB
 
 import time
+from math import ceil
 
 class SpoonPi:
 	# LOCKOUT TABLE columns [rfid_uid, incorrect_streak, lockout]
 	COL_UID, COL_STREAK, COL_TIME_LEFT = range(3)
 
 	def __init__(self):
+		print 'Loading OLED...'
 		self.led = OLED()
+		print 'Loading NFC Reader...'
 		self.nfc_reader = NFCReader()
+		print 'Loading keypad...'
 		self.keypad = Keypad()
 		self.pin_length = 4
-		self.attempt_limit = 2
-		self.lockout_time =  30 # 30 minutes
-		self.keypad_timeout = 5
+		print 'Loading the ForkPi database...'
+		self.db = ForkpiDB()
+		print 'Loading options...'
+		self.attempt_limit = self.load_option('attempt_limit', 5)
+		self.lockout_time = self.load_option('lockout_time_minutes', 30) * 60
+		self.keypad_timeout = self.load_option('keypad_timeout_seconds', 5)
 		self.lockout_table = list()
+
+	def load_option(self, name, default_value):
+		value = self.db.fetch_option(name)
+		if value.isdigit():
+			print '  from DB: {} = {}'.format(name, value)
+			return int(value)
+		else:
+			print '  default: {} = {}'.format(name, default_value)
+			return default_value
 
 	def allow_access(self, rfid_uid, pin):
 		message = "Allowed UID({}) PIN({})".format(rfid_uid, pin)
 		print message
-		log_allowed(rfid_uid=rfid_uid, pin=pin)
+		self.db.log_allowed(rfid_uid=rfid_uid, pin=pin)
 		self.led.clear_display()
 		self.led.puts("Access\ngranted")
 
 	def deny_access(self, rfid_uid, pin, reason, led_message="Access\ndenied"):
 		message = "Denied  UID({}) PIN({}) : {}".format(rfid_uid, pin, reason)
 		print message
-		log_denied(rfid_uid=rfid_uid, pin=pin, reason=reason)
+		self.db.log_denied(rfid_uid=rfid_uid, pin=pin, reason=reason)
 		self.led.clear_display()
 		self.led.puts(led_message)
 
@@ -37,7 +53,7 @@ class SpoonPi:
 		self.led.clear_display()
 		self.led.puts("Swipe RFID")
 		rfid_uid = self.nfc_reader.read_tag()
-		correct_pins = find_pins_for(rfid_uid)
+		correct_pins = self.db.find_pins_for(rfid_uid)
 		return rfid_uid, correct_pins
 
 	def pin_authentication(self):
@@ -86,7 +102,8 @@ class SpoonPi:
 				lockout_row = self.find_lockout_row(rfid_uid)
 
 				if lockout_row[SpoonPi.COL_TIME_LEFT] > 0:
-					self.deny_access(rfid_uid, pin, reason="locked out", led_message="Locked out\nfor %ss" % lockout_row[SpoonPi.COL_TIME_LEFT])
+					self.deny_access(rfid_uid, pin, reason="locked out",
+						led_message="Locked out\nfor %sm" % int(ceil(lockout_row[SpoonPi.COL_TIME_LEFT] / 60.0)))
 				else:
 					pin, timed_out = self.pin_authentication()
 					is_authenticated = True
