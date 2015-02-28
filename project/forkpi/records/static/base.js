@@ -82,7 +82,7 @@ $(document).ready(function() {
 			}
 		});		
 	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
-		ajaxUrl = '/addrfid';
+		ajaxUrl = '/scanrfid';
 		var isEditing = $(this).parent().attr('type') == 'rfid';
 
 		var x = $(this);

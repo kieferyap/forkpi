@@ -62,14 +62,14 @@
 								<td>{{ keypair.id }}</td>
 
 								<!-- Name -->
-								<td ajaxUrl="editname" ajaxId="{{ keypair.id }}" ajaxField="name">
+								<td ajaxUrl={% url 'edit keypair name' %} ajaxId="{{ keypair.id }}" ajaxField="name">
 									<span class="editable-text">
 									{{ keypair.name }}
 									</span>
 								</td>
 
 								<!-- PIN -->
-								<td ajaxUrl="editpin" ajaxId="{{ keypair.id }}" ajaxField="pin">
+								<td ajaxUrl={% url 'edit keypair pin' %} ajaxId="{{ keypair.id }}" ajaxField="pin">
 									<span class="editable-text">
 									{% if keypair.pin %}
 										{{ keypair.pin }}
@@ -80,7 +80,7 @@
 								</td>
 
 								<!-- UID -->
-								<td ajaxUrl="edituid" ajaxId="{{ keypair.id }}" ajaxField="uid" type="rfid">
+								<td ajaxUrl={% url 'edit keypair uid' %} ajaxId="{{ keypair.id }}" ajaxField="uid" type="rfid">
 									<span class="editable-text">
 									{{ keypair.rfid_uid }}
 									</span>

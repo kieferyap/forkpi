@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content%}
+<div class="row">
+	<div class="col-md-10 col-md-offset-1">
+		<div class="row col-md-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">Options</b></h3>
+					<div class="pull-right">
+					</div>
+				</div>
+				<table id="options-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
+					<thead>
+						<tr>
+							<th class="col-md-4" data-placeholder="Search...">Name</th>
+							<th class="col-md-5" data-placeholder="Search...">Value</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% if options|length > 0 %}
+							{% for option in options %}
+							<tr>
+								<td>{{ option.name }}</td>
+								<td>{{ option.value }}</td>
+							</tr>
+							{% endfor %}
+						{% else %}
+							<tr>
+								<td colspan="5" style="text-align:center">No options found.</td>
+							</tr>
+						{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
