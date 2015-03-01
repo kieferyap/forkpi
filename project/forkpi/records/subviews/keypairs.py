@@ -1,16 +1,33 @@
 from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
+
+import hashlib
 
 from records.views import render, redirect_to_name
 from records.models import Keypair
 from spoonpi.nfc_reader import NFCReader
+from records.aes import AES
 
 is_polling = False
+
+
+def encrypt(value):
+	return AES(settings.SECRET_KEY).encrypt(value)
+
+def decrypt(value):
+	return AES(settings.SECRET_KEY).decrypt(value)
+
+def hash_keypair(pin, rfid_uid):
+	return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
 
 @login_required
 def keypairs_page(request):
 	keypairs = Keypair.objects.all()
+	for keypair in keypairs:
+		keypair.pin = decrypt(keypair.pin)
+		keypair.rfid_uid = decrypt(keypair.rfid_uid)
 	return render(request, 'keypairs.html',  {'keypairs': keypairs})
 
 @login_required
@@ -26,6 +43,9 @@ def scan_rfid(request):
 		response.status_code = 400
 		return response
 
+def is_valid_pin(pin):
+	return len(pin) == 0 or (len(pin) == 4 and pin.isdigit())
+
 @login_required
 def new_keypair(request):
 	name = request.POST['name']
@@ -34,7 +54,7 @@ def new_keypair(request):
 
 	is_error = False
 
-	if not (len(pin) == 0 or (len(pin) == 4 and pin.isdigit())):
+	if not is_valid_pin(pin):
 		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consists of 4 digits.')
 		is_error = True
 
@@ -45,7 +65,9 @@ def new_keypair(request):
 	if is_error:
 		return redirect_to_name('keypairs')
 
-	Keypair.objects.create(name = name, pin = pin, rfid_uid = rfid_uid)
+	hashpass = hash_keypair(pin, rfid_uid)
+
+	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hashpass=hashpass)
 	messages.add_message(request, messages.SUCCESS, 'Pair addition successful.')
 	return redirect_to_name('keypairs')
 
@@ -59,18 +81,25 @@ def edit_keypair_name(request):
 def edit_keypair_pin(request):
 	pin = request.POST['value']
 
-	if not (len(pin) == 0 or (len(pin) == 4 and pin.isdigit())):
+	if is_valid_pin(pin):
+		keypair = Keypair.objects.get(id = request.POST['kid'])
+		keypair.pin = encrypt(pin)
+		keypair.hashpass = hash_keypair(pin, decrypt(keypair.rfid_uid))
+		keypair.save()
+		return HttpResponse("Successful.")
+	else:
 		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consist of 4 digits.')
 		response = HttpResponse("Invalid PIN")
 		response.status_code = 400
 		return response
-	else:
-		Keypair.objects.filter(id = request.POST['kid']).update(pin=pin)
-		return HttpResponse("Successful.")
 
 @login_required
 def edit_keypair_uid(request):
-	Keypair.objects.filter(id = request.POST['kid']).update(rfid_uid=request.POST['value'])
+	rfid_uid = request.POST['value']
+	keypair = Keypair.objects.get(id = request.POST['kid'])
+	keypair.rfid_uid = encrypt(rfid_uid)
+	keypair.hashpass = hash_keypair(decrypt(keypair.pin), rfid_uid)
+	keypair.save()
 	return HttpResponse("Successful.")
 
 @login_required

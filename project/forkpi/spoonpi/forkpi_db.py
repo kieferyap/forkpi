@@ -1,5 +1,6 @@
 import psycopg2
 from aes import AES
+import hashlib
 
 class ForkpiDB(object):
 
@@ -7,6 +8,7 @@ class ForkpiDB(object):
         self.conn = psycopg2.connect(database="forkpi", user="pi", password="raspberry", host="forkpi.local", port="5432")
         self.conn.autocommit = True
 
+    '''
     def encrypt(self, plaintext, name):
         cipher = AES(name)
         return cipher.encrypt(ciphertext)
@@ -21,9 +23,28 @@ class ForkpiDB(object):
         result = c.fetchall()
         result = map(lambda x: x[1], result)
         return result
+    '''
 
-    def log_allowed(self, pin='', rfid_uid=''):
-        self.log("Allowed", pin=pin, rfid_uid=rfid_uid)
+    def hash_keypair(self, pin, rfid_uid):
+        return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
+
+    def authorize(self, pin, rfid_uid):
+        '''
+        Returns (is_authorized, names)
+          is_authorized is True if there is an entry in the database
+          names is the comma-separated string of the name/s corresponding to the keypair entered
+            This is an empty string if is_authorized is False
+        '''
+        c = self.conn.cursor()
+        hashpass = self.hash_keypair(pin, rfid_uid)
+        c.execute("SELECT name FROM records_keypair WHERE hashpass = '%s' AND is_active=TRUE" % hashpass)
+        result = c.fetchall()
+        is_authorized = (len(result) > 0)
+        names = ', '.join(map(lambda x: x[0], result))
+        return is_authorized, names
+
+    def log_allowed(self, names, pin='', rfid_uid=''):
+        self.log("Allowed", details=names, pin=pin, rfid_uid=rfid_uid)
 
     def log_denied(self, reason, pin='', rfid_uid=''):
         self.log("Denied", details=reason, pin=pin, rfid_uid=rfid_uid)
@@ -31,14 +52,10 @@ class ForkpiDB(object):
     def log(self, action, details='', pin='', rfid_uid=''):
         c = self.conn.cursor()
         c.execute("INSERT INTO records_log(created_on, action, details, pin, rfid_uid) \
-                   VALUES (now(), '%s', '%s', '%s', '%s')" % (action, details, pin, rfid_uid))
+                     VALUES (now(), '%s', '%s', '%s', '%s')" % (action, details, pin, rfid_uid))
 
     def fetch_option(self, name):
         c = self.conn.cursor()
         c.execute("SELECT value FROM records_option WHERE name = '%s'" % name)
         result = c.fetchone()[0]
         return result
-
-
-if __name__ == '__main__':
-    print ForkpiDB().find_pins_for("83bd1fd0")
