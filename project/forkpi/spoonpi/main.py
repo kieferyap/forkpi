@@ -93,8 +93,14 @@ class SpoonPi:
 	def run(self):
 		while True:
 			time_started = time.time()
+			
 			rfid_uid = self.rfid_authentication()
 
+			time_elapsed = int(time.time() - time_started)
+			self.update_lockout_timers(time_elapsed)
+
+			time_started = time.time()
+			
 			is_authorized, names = self.db.authorize(pin='', rfid_uid=rfid_uid)
 			if is_authorized:
 				self.allow_access(names=names, pin='', rfid_uid=rfid_uid)
@@ -125,8 +131,7 @@ class SpoonPi:
 					else:
 						lockout_row[SpoonPi.COL_STREAK] += 1
 						if lockout_row[SpoonPi.COL_STREAK] >= self.attempt_limit:
-							time_elapsed = int(time.time() - time_started)
-							lockout_row[SpoonPi.COL_TIME_LEFT] = self.lockout_time + time_elapsed
+							lockout_row[SpoonPi.COL_TIME_LEFT] = self.lockout_time
 
 			time.sleep(2)
 			time_elapsed = int(time.time() - time_started)

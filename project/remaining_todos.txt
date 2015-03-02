@@ -9,7 +9,16 @@ Mass-delete disabled keypairs
 	Regular users can edit db and view logs
 Change key used to encrypt keypairs to AES key transferred using RSA
 BUG: Scan RFID close window while polling -> next poll causes crash
-BUG: Lockout timers are only updated after a transaction -> denied the first time you swipe after the timer expires
+Only forkpi has write keypair permission
+BUG: Can save keypair while waiting for rfid tag
+'#' enter, '*' backspace
+read secret key from file
+regenerate secret key
+show error message if forkpi is not running
+
+1) fixed length
+2) variable length enter key
+3) variable length check db for each keypress
 
 [x] write paper
 	[x] Cost
@@ -34,3 +43,4 @@ BUG: Lockout timers are only updated after a transaction -> denied the first tim
 [x] Filter logs by date, allowed/denied, uid, pin
 [x] Access ForkPi over the local network using its host name
 [x] Change lock-out time / attempt limit
+[x] BUG: Lockout timers are only updated after a transaction -> denied the first time you swipe after the timer expires
