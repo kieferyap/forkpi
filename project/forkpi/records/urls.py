@@ -28,4 +28,5 @@ urlpatterns = patterns('',
 
     url(r'^options/$', options_page, name='options'),
     url(r'^options/edit/value$', edit_option_value, name='edit option value'),
+    url(r'^options/regenerate$', regenerate_secret_key, name='regenerate secret key'),
 )

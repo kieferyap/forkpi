@@ -11,29 +11,29 @@ class SpoonPi:
 	COL_UID, COL_STREAK, COL_TIME_LEFT = range(3)
 
 	def __init__(self):
+		self.lockout_table = list()
+
 		print 'Loading OLED...'
 		self.led = OLED()
 		print 'Loading NFC Reader...'
 		self.nfc_reader = NFCReader()
 		print 'Loading keypad...'
 		self.keypad = Keypad()
-		self.pin_length = 4
 		print 'Loading the ForkPi database...'
 		self.db = ForkpiDB()
 		print 'Loading options...'
-		self.attempt_limit = self.load_option('attempt_limit', 5)
-		self.lockout_time = self.load_option('lockout_time_minutes', 30) * 60
-		self.keypad_timeout = self.load_option('keypad_timeout_seconds', 5)
-		self.lockout_table = list()
+		self.attempt_limit = self.load_option('attempt_limit')
+		self.lockout_time = self.load_option('lockout_time_minutes') * 60
+		self.keypad_timeout = self.load_option('keypad_timeout_seconds')
 
-	def load_option(self, name, default_value):
-		value = self.db.fetch_option(name)
+	def load_option(self, name):
+		value, default = self.db.fetch_option(name)
 		if value.isdigit():
-			print '  from DB: {} = {}'.format(name, value)
+			print '  custom : {} = {}'.format(name, value)
 			return int(value)
 		else:
-			print '  default: {} = {}'.format(name, default_value)
-			return default_value
+			print '  default: {} = {}'.format(name, default)
+			return int(default)
 
 	def allow_access(self, names, pin, rfid_uid):
 		pin = '*' * len(pin) # convert pin to asterisks so pin is not exposed in the logs
@@ -57,20 +57,27 @@ class SpoonPi:
 		return rfid_uid
 
 	def pin_authentication(self):
-		pin = ""
+		'''
+		Returns (pin, timeout) where
+		  pin = the pin entered (string)
+		  timeout = whether the keypad timed out (boolean)
+		'''
+		pin = ''
 		self.led.clear_display()
 		self.led.puts("Enter PIN:\n")
 
-		while len(pin) < self.pin_length:
+		while True:
 		    key = self.keypad.getch(timeout=self.keypad_timeout)
 		    if key == Keypad.TIMEOUT:
-		    	break
-		    #elif len(pin) == 0 and key == 0:
-		    #	print "First digit must not be zero."
-		    elif Keypad.is_numeric(key):
+		    	return pin, True
+		    elif key.isdigit():
 		        pin += str(key)
-		        self.led.puts("*")
-		return pin, key == Keypad.TIMEOUT
+		        self.led.puts('*')
+		    elif key == '*': # backspace
+		    	pin = pin[:-1]
+		    	self.led.puts('\b')
+		    elif key == '#': # enter
+		    	return pin, False
 
 	def find_lockout_row(self, rfid_uid):
 		lockout_row = None

@@ -4,7 +4,7 @@
 <div class="row">
 	<div class="col-md-10 col-md-offset-1">
 		<div class="row col-md-12">
-			<form class="form-horizontal" accept-charset="UTF-8" action={% url 'add keypair' %} method="post">
+			<form class="form-horizontal" accept-charset="UTF-8" action="{% url 'add keypair' %}" method="post">
 				<div class="form-group">
 					<label for="name" class="col-md-2 control-label">Name</label>
 					<div class="col-md-10">
@@ -62,14 +62,14 @@
 								<td>{{ keypair.id }}</td>
 
 								<!-- Name -->
-								<td ajaxUrl={% url 'edit keypair name' %} ajaxId="{{ keypair.id }}" ajaxField="name">
+								<td ajaxUrl="{% url 'edit keypair name' %}" ajaxId="{{ keypair.id }}" ajaxField="name">
 									<span class="editable-text">
 									{{ keypair.name }}
 									</span>
 								</td>
 
 								<!-- PIN -->
-								<td ajaxUrl={% url 'edit keypair pin' %} ajaxId="{{ keypair.id }}" ajaxField="pin">
+								<td ajaxUrl="{% url 'edit keypair pin' %}" ajaxId="{{ keypair.id }}" ajaxField="pin">
 									<span class="editable-text">
 									{% if keypair.pin %}
 										{{ keypair.pin }}
@@ -80,7 +80,7 @@
 								</td>
 
 								<!-- UID -->
-								<td ajaxUrl={% url 'edit keypair uid' %} ajaxId="{{ keypair.id }}" ajaxField="uid" type="rfid">
+								<td ajaxUrl="{% url 'edit keypair uid' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="rfid">
 									<span class="editable-text">
 									{{ keypair.rfid_uid }}
 									</span>

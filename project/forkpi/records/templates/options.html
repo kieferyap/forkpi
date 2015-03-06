@@ -14,7 +14,8 @@
 					<thead>
 						<tr>
 							<th class="col-md-4" data-placeholder="Search...">Name</th>
-							<th class="col-md-5" data-placeholder="Search...">Value</th>
+							<th class="col-md-4" data-placeholder="Search...">Value</th>
+							<th class="col-md-2" data-placeholder="Search...">Default</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -30,6 +31,10 @@
 									{{ option.value }}
 									</span>
 								</td>
+								<td>
+									{{ option.default }}
+									</span>
+								</td>
 							</tr>
 							{% endfor %}
 						{% else %}
@@ -40,6 +45,12 @@
 					</tbody>
 				</table>
 			</div>
+
+
+			<a class="btn btn-primary" id="regenerate-key-btn" href="{% url 'regenerate secret key' %}">
+				Regenerate secret key (you will be logged out)
+			</a>
+
 		</div>
 	</div>
 </div>

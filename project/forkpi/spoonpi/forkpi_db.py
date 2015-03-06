@@ -56,6 +56,6 @@ class ForkpiDB(object):
 
     def fetch_option(self, name):
         c = self.conn.cursor()
-        c.execute("SELECT value FROM records_option WHERE name = '%s'" % name)
-        result = c.fetchone()[0]
-        return result
+        c.execute("SELECT value, \"default\" FROM records_option WHERE name = '%s'" % name)
+        result = c.fetchone()
+        return result[0], result[1]

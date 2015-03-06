@@ -13,11 +13,15 @@ from records.aes import AES
 is_polling = False
 
 
-def encrypt(value):
-	return AES(settings.SECRET_KEY).encrypt(value)
+def encrypt(value, key=None):
+	if not key:
+		key = settings.SECRET_KEY
+	return AES(key).encrypt(value)
 
-def decrypt(value):
-	return AES(settings.SECRET_KEY).decrypt(value)
+def decrypt(value, key=None):
+	if not key:
+		key = settings.SECRET_KEY
+	return AES(key).decrypt(value)
 
 def hash_keypair(pin, rfid_uid):
 	return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
@@ -29,6 +33,16 @@ def keypairs_page(request):
 		keypair.pin = decrypt(keypair.pin)
 		keypair.rfid_uid = decrypt(keypair.rfid_uid)
 	return render(request, 'keypairs.html',  {'keypairs': keypairs})
+
+def reencrypt_keypairs(old_key, new_key):
+	keypairs = Keypair.objects.all()
+	for keypair in keypairs:
+		keypair.pin = decrypt(keypair.pin, key=old_key)
+		keypair.pin = encrypt(keypair.pin, key=new_key)
+		keypair.rfid_uid = decrypt(keypair.rfid_uid, key=old_key)
+		keypair.rfid_uid = encrypt(keypair.rfid_uid, key=new_key)
+		keypair.save()
+
 
 @login_required
 def scan_rfid(request):
@@ -44,7 +58,7 @@ def scan_rfid(request):
 		return response
 
 def is_valid_pin(pin):
-	return len(pin) == 0 or (len(pin) == 4 and pin.isdigit())
+	return len(pin)==0 or pin.isdigit()
 
 @login_required
 def new_keypair(request):
@@ -55,11 +69,7 @@ def new_keypair(request):
 	is_error = False
 
 	if not is_valid_pin(pin):
-		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consists of 4 digits.')
-		is_error = True
-
-	if not rfid_uid:
-		messages.add_message(request, messages.ERROR, 'The RFID UID must not be empty.')
+		messages.add_message(request, messages.ERROR, 'PIN must be blank or numeric.')
 		is_error = True
 
 	if is_error:
@@ -88,7 +98,7 @@ def edit_keypair_pin(request):
 		keypair.save()
 		return HttpResponse("Successful.")
 	else:
-		messages.add_message(request, messages.ERROR, 'PIN must be blank, or consist of 4 digits.')
+		messages.add_message(request, messages.ERROR, 'PIN must be blank or numeric.')
 		response = HttpResponse("Invalid PIN")
 		response.status_code = 400
 		return response

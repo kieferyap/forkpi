@@ -41,5 +41,5 @@ from subviews.keypairs import keypairs_page, scan_rfid, new_keypair, delete_keyp
 from subviews.session import login_page, logging_in, logout, must_be_logged_in
 from subviews.signup import signup_page, add_user
 from subviews.logs import logs_page
-from subviews.options import options_page, edit_option_value
+from subviews.options import options_page, edit_option_value, regenerate_secret_key
 

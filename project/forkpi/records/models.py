@@ -20,3 +20,4 @@ class Log(Model):
 class Option(Model):
 	name = TextField(unique=True)
 	value = TextField(default='')
+	default = TextField()

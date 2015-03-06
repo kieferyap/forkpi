@@ -4,10 +4,10 @@ import time
 
 class Keypad:
 
-    MATRIX = [  [ 1,  2,  3 ],
-                [ 4,  5,  6 ],
-                [ 7,  8,  9 ],
-                ['*', 0, '#']  ]
+    MATRIX = [ ['1', '2', '3' ],
+               ['4', '5', '6' ],
+               ['7', '8', '9' ],
+               ['*', '0', '#' ] ]
 
     ROWS = [7, 11, 13, 15]
     COLS = [12, 16, 18]
@@ -45,7 +45,3 @@ class Keypad:
         except Exception, err:
             print traceback.format_exc()
             GPIO.cleanup()
-            
-    @staticmethod
-    def is_numeric(key):
-        return str(key).isdigit()
