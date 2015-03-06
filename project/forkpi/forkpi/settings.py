@@ -21,9 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY_PATH = '/etc/forkpi_secret_key.txt'
 
-DEFAULT_SECRET_KEY = '0v=d5+o@wr#06rd0fg0s77j&-&!is#&=t5$)z(=ao4_8=mo6t@'
-
-SECRET_KEY = secret_key.read_secret_key(SECRET_KEY_PATH, DEFAULT_SECRET_KEY)
+SECRET_KEY = secret_key.read_secret_key(SECRET_KEY_PATH)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True

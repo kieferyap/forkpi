@@ -16,11 +16,10 @@ def regenerate_secret_key(path):
     write_to_path(path, new_key)
     return new_key
 
-def read_secret_key(path, default_key):
+def read_secret_key(path):
     try:
         with open(path) as f:
             key = f.read().strip()
             return key
     except IOError: # file does not exist; return default
-        write_to_path(path, default_key)
-        return default_key
+        return regenerate_secret_key(path)
