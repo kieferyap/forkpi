@@ -1,9 +1,4 @@
 
-Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
-	Or: Make PINs not necessarily uniform length; can be 4-10 digits
-		Might require the use of an 'Enter' button for security reasons
-
-Mass-delete disabled keypairs
 [.] Change sign-up process
 	Admins can approve new users, edit db and view logs
 	Regular users can edit db and view logs
@@ -38,6 +33,10 @@ restore all defaults for options
 [x] Change lock-out time / attempt limit
 [.] Change key used to encrypt keypairs to AES key transferred using RSA - issue avoided since acceptable security already achieved?
 [x] BUG: Lockout timers are only updated after a transaction -> denied the first time you swipe after the timer expires
+[.] Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
+	Or: Make PINs not necessarily uniform length; can be 4-10 digits
+		Might require the use of an 'Enter' button for security reasons
 [x] '#' enter, '*' backspace
 [x] read secret key from file
 [x] regenerate secret key
+[.] Mass-delete disabled keypairs - no mass disabling of keypairs so no need
