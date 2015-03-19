@@ -10,9 +10,6 @@ import time
 import binascii
 
 def delay(seconds):
-    '''
-    wait a number of secons 
-    '''
     time.sleep(seconds)
 
 if os.name == 'nt':
@@ -133,7 +130,7 @@ class Command_Packet(Packet):
         packetbytes[10] = self.GetLowByte(chksum)
         packetbytes[11] = self.GetHighByte(chksum)
 
-        return packetbytes;        
+        return packetbytes
     
     def ParameterFromInt(self, i):
         '''

@@ -225,3 +225,9 @@ class NFCReader(object):
     def write_card(self, uid, data):
         """Accepts data of the recently read card with UID uid, and writes any changes necessary to it"""
         raise NotImplementedError
+
+
+if __name__ == '__main__':
+    print "Please swipe an RFID tag"
+    uid = NFCReader().read_tag()
+    print "Found uid:", uid

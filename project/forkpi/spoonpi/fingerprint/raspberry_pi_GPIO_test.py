@@ -29,7 +29,7 @@ This may be works fine, if don't, try to change the fingerprint baud rate with b
 import FPS, sys
 
 if __name__ == '__main__':
-    fps =  FPS.FPS_GT511C3(device_name='/dev/ttyAMA0',baud=9600,timeout=2)
+    fps =  FPS.FPS_GT511C3(device_name='/dev/ttyAMA0',baud=9600,timeout=None)
     #fps.ChangeBaudRate(115200)
     fps.UseSerialDebug = True
     fps.SetLED(True) # Turns ON the CMOS LED
@@ -49,3 +49,11 @@ if __name__ == '__main__':
     fps.Close() # Closes serial connection
     pass
 
+
+fps = FingerprintScanner()
+fps.setLED(on=True)
+fps.isFingerPressed()
+fps.getRawImage()
+id = fps.enroll()
+id = fps.identify()
+boolean = fps.verify(id)
