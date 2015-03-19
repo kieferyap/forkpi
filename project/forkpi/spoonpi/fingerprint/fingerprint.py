@@ -223,10 +223,35 @@ class FingerprintScanner(object):
                 return _id
         return -1
 
-    def enroll_new(self, _id=None):
+    def enroll_finger(self, _id=None, tries=5):
         '''
+            Two-stage enrollment process
+            We merged Enroll1 and Enroll2 so you only have to remove and re-place your finger once
             Parameter: The ID to be enrolled (auto-searches for a free ID if not specified)
-            Returns: The enrolled ID if successful, -1 if not
+            Returns: The ID enrolled if successful, -1 if not
+        '''
+        if self.debug:
+            print 'Place your finger on the scanner'
+        _id = self.start_enroll(_id)
+        if _id >= 0:
+            if self.debug:
+                print 'Enrolling with id %s' % _id
+                self.wait(1)
+                print 'Remove your finger from the scanner'
+            # Wait for finger to be removed
+            while self.is_finger_pressed():
+                self.wait(1)
+            if self.complete_enroll():
+                return _id
+
+        return -1
+
+
+    def start_enroll(self, _id=None, tries=5):
+        '''
+            First stage of enrollment process
+            Parameter: The ID to be enrolled (auto-searches for a free ID if not specified)
+            Returns: The ID to be enrolled if successful, -1 if not
         '''
         if _id: # user specified an ID
             if self.is_enrolled(_id): # ID is already enrolled
@@ -238,9 +263,29 @@ class FingerprintScanner(object):
             if _id < 0: # database is full
                 return -1
 
+        self._send_command(CommandPacket('EnrollStart', parameter=_id))
+        response = self._receive_response()
+        if response.ack: # Enroll start success
+            if self._enroll(1, tries) and self._enroll(2, tries):
+                return _id
+        return -1
 
+    def complete_enroll(self, tries=5):
+        '''
+            Last stage of enrollment process
+            Returns: True if enrollment successfully finished, False if not
+        '''
+        return self._enroll(3, tries)
 
-        return _id
+    def _enroll(self, stage, tries=5):
+        '''
+            Returns: True if enrollment successfully finished, False if not
+        '''
+        if self._capture_finger(tries):
+            self._send_command(CommandPacket('Enroll' + str(stage)))
+            response = self._receive_response()
+            return response.ack
+        return False
 
 
     def is_finger_pressed(self):
@@ -250,34 +295,58 @@ class FingerprintScanner(object):
         self._send_command(CommandPacket('IsPressFinger'))
         response = self._receive_response()
         return response.parameter == 0
+
+    def verify_finger(self, _id, tries=5):
+        '''
+            Checks the currently pressed finger against a specific ID
+            Parameter: 0-199 (id number to be checked)
+            Returns: True if match, False if not
+        '''
+        if self._capture_finger(high_quality=False, tries=tries):
+            self._send_command(CommandPacket('Verify1_1', parameter=_id))
+            response = self._receive_response()
+            return response.ack
+        else:
+            return False
+
     
-    def identify_finger(self):
+    def identify_finger(self, tries=5):
         '''
             Checks the currently pressed finger against all enrolled fingerprints
             Returns:
                 0-199: Matched with this ID
-                -1   : Failed to find the fingerprint in the database
+                -1   : Failed to find a match
         '''
-        self._capture_finger(high_quality=False)
-        self._send_command(CommandPacket('Identify1_N'))
-        response = self._receive_response()
-        return response.parameter if response.ack else -1
+        if self._capture_finger(high_quality=False, tries=tries):
+            self._send_command(CommandPacket('Identify1_N'))
+            response = self._receive_response()
+            return response.parameter if response.ack else -1
+        else:
+            return -1
 
-    def _capture_finger(self, high_quality=True):
+    def _capture_finger(self, high_quality=True, tries=5):
         '''
             Captures the currently pressed finger onto the onboard ram
-            Parameter: True for high quality image (slower), False for low quality image (faster)
-                       Use high quality for enrollment, and low quality for verification/identification
+            Parameters: Set high quality = True for enrollment, and False for verification/identification
+                        tries is the number of times to scan for a valid finger before giving up
+
             Returns: True if successful, False if no finger pressed
         '''
-        self._send_command(CommandPacket('CaptureFinger', parameter = 1 if high_quality else 0))
-        response = self._receive_response()
-        return response.ack
+        self.backlight_on()
+
+        for i in xrange(tries):
+            self._send_command(CommandPacket('CaptureFinger', parameter = 1 if high_quality else 0))
+            response = self._receive_response()
+            if response.ack:
+                self.backlight_off()
+                return True
+            self.wait(1.5)
+        self.backlight_off()
+        return False
 
     def _send_command(self, command):
         if self.debug:
-            print
-            print 'Command:', command.name
+            print '\nCommand:', command.name
             print 'sent:', command.serialize_bytes(little_endian=self.little_endian)
         self._serial.write(command.pack_bytes())
 
@@ -294,19 +363,14 @@ class FingerprintScanner(object):
         self._serial.read()
 
 if __name__ == '__main__':
-    fps = FingerprintScanner(debug=False)
-    fps.backlight_on()
-    for i in range(5):
-        if fps.is_finger_pressed():
-            print 'Finger pressed!'
-            _id = fps.identify_finger()
-            if _id >= 0:
-                print 'Match with id %s' % _id
-            else:
-                print 'No match found'
-            break
-        print 'No finger pressed'
-        fps.wait(1)
-    fps.backlight_off()
+    fps = FingerprintScanner(debug=True)
+    
+    # enroll_id = fps.enroll_finger(tries=10)
+
+    identify_id = fps.identify_finger(tries=5)
+    if identify_id >= 0:
+        print 'Match with id %s' % identify_id
+    else:
+        print 'No match found'
     fps.close()
     print
