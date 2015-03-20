@@ -67,6 +67,9 @@ class CommandPacket(object):
     def serialize_bytes(self, little_endian=False):
         _bytes = self.pack_bytes(little_endian)
         return hexlify(_bytes)
+
+    def __str__(self):
+        return self.pack_bytes(little_endian=True)
         
 
 class ResponsePacket(object):
@@ -126,22 +129,53 @@ class ResponsePacket(object):
         return hexlify(_bytes)
 
 
+class DataPacket(object):
+
+    START_CODE_1 = 0x5A
+    START_CODE_2 = 0xA5
+    DEVICE_ID = 0x0001
+
+    def __init__(self, _bytes):
+        self._bytes = _bytes
+        self.data_length = len(_bytes) - 6
+        self._unpack_bytes()
+
+    def _unpack_bytes(self):
+        values = struct.unpack('<BBH%dsH' % self.data_length, self._bytes) # byte byte word var word
+        assert values[0] == self.START_CODE_1
+        assert values[1] == self.START_CODE_2
+        assert values[2] == self.DEVICE_ID
+        self.data = values[3]
+        assert len(self.data) == self.data_length
+        assert values[4] == byte_checksum(self._bytes[:-2])
+
+    def serialize_bytes(self, little_endian=False):
+        ''' Return hex representation of bytes '''
+        if little_endian:
+            _bytes = self._bytes
+        else:
+            values = struct.unpack('<BBH%dsH' % self.data_length, self._bytes) # byte byte word var word
+            _bytes = struct.pack('>BBH%dsH' % self.data_length, *values)
+        return hexlify(_bytes)
+
 
 class FingerprintScanner(object):
-
-    DEVICE = '/dev/ttyAMA0'
-    TIMEOUT = None
     
-    def __init__(self, baudrate=9600, debug=False, little_endian=False):
+    def __init__(self, debug=False, little_endian=False):
         self.debug = debug
         self.little_endian = little_endian
-        self._baudrate = baudrate
         try:
-            self._serial = serial.Serial(port=self.DEVICE, baudrate=self._baudrate, timeout=self.TIMEOUT)
-            self.open()
+            self._serial = serial.Serial(port='/dev/ttyAMA0', baudrate=9600, timeout=None)
+            if self.open(): # baud rate 9600 succeeded -> change to 115200
+                self.change_baudrate(115200)
+            else: # baud rate 9600 failed; maybe already set to 115200?
+                self._serial.setBaudrate(115200)
+                if self.open(): # baud rate 115200 succeeded
+                    self._serial.flush()
+                else: # baud rate 115200 failed
+                    raise serial.SerialException()
         except serial.SerialException, e:
-            print "Failed to connect to the fingerprint scanner!"
-            print str(e)
+            raise Exception("Failed to connect to the fingerprint scanner!")
 
     def wait(self, seconds):
         time.sleep(seconds)
@@ -151,8 +185,11 @@ class FingerprintScanner(object):
             Initializes communication with the scanner
         '''
         self._send_command(CommandPacket('Open'))
-        response = self._receive_response()
-        return response.ack
+        response = self._receive_response(timeout=1)
+        if response is None:
+            return False
+        else:
+            return response.ack
 
     def close(self):
         '''
@@ -161,6 +198,7 @@ class FingerprintScanner(object):
         '''
         self._send_command(CommandPacket('Close'))
         response = self._receive_response()
+        self._serial.close()
         return response.ack
 
     def set_backlight(self, on):
@@ -190,9 +228,8 @@ class FingerprintScanner(object):
             response = self._receive_response()
             if response.ack:
                 if self.debug:
-                    print 'Changed baud rate from %s to %s' % (self._baudrate, baudrate)
-                self._serial.close()
-                self.__init__(baudrate=baudrate, debug=self.debug, little_endian=self.little_endian)
+                    print 'Changed baud rate from %s to %s' % (self._serial.getBaudrate(), baudrate)
+                self._serial.setBaudrate(baudrate)
             return response.ack
         else:
             return True
@@ -246,7 +283,6 @@ class FingerprintScanner(object):
 
         return -1
 
-
     def start_enroll(self, _id=None, tries=5):
         '''
             First stage of enrollment process
@@ -287,7 +323,6 @@ class FingerprintScanner(object):
             return response.ack
         return False
 
-
     def is_finger_pressed(self):
         '''
             Returns: True if there is a finger on the scanner, False if not
@@ -295,6 +330,24 @@ class FingerprintScanner(object):
         self._send_command(CommandPacket('IsPressFinger'))
         response = self._receive_response()
         return response.parameter == 0
+
+    def delete_id(self, _id):
+        '''
+            Deletes the specified template ID from the database
+            Returns: True if successful, False if position invalid
+        '''
+        self._send_command(CommandPacket('DeleteID', parameter=_id))
+        response = self._receive_response()
+        return response.ack
+
+    def delete_all(self):
+        '''
+            Deletes all template IDs from the database
+            Returns: True if successful, False if db is empty
+        '''
+        self._send_command(CommandPacket('DeleteAll'))
+        response = self._receive_response()
+        return response.ack
 
     def verify_finger(self, _id, tries=5):
         '''
@@ -308,7 +361,6 @@ class FingerprintScanner(object):
             return response.ack
         else:
             return False
-
     
     def identify_finger(self, tries=5):
         '''
@@ -344,14 +396,40 @@ class FingerprintScanner(object):
         self.backlight_off()
         return False
 
+    def fetch_raw_image(self):
+        self.backlight_on()
+        self._send_command(CommandPacket('GetRawImage'))
+        response = self._receive_response()
+        if response.ack:
+            data = self._receive_data(19200)
+            self.backlight_off()
+            return data
+        self.backlight_off()
+        return None
+
+    def fetch_template(self, _id):
+        self._send_command(CommandPacket('GetTemplate', parameter=_id))
+        response = self._receive_response()
+        if response.ack:
+            data = self._receive_data(498)
+            return data
+        return None
+
     def _send_command(self, command):
         if self.debug:
             print '\nCommand:', command.name
             print 'sent:', command.serialize_bytes(little_endian=self.little_endian)
         self._serial.write(command.pack_bytes())
 
-    def _receive_response(self):
+    def _receive_response(self, timeout=None):
+
+        self._serial.setTimeout(timeout)
         _bytes = self._serial.read(size=12)
+
+        if len(_bytes) < 12:
+            print 'read:'
+            return None
+        
         response = ResponsePacket(_bytes)
         if self.debug:
             print 'read:', response.serialize_bytes(little_endian=self.little_endian)
@@ -359,18 +437,51 @@ class FingerprintScanner(object):
                 print 'ERROR:', response.error
         return response
 
-    def _receive_data(self, length):
-        self._serial.read()
+    def _receive_data(self, data_length, timeout=10):
+        # _bytes = bytearray()
+        # while len(_bytes) < length:
+        #     if self._serial.inWaiting() > 0:
+        #         read_bytes = self._serial.read()
+        #         if self.debug:
+        #             print 'read:', hexlify(read_bytes)
+        #         _bytes += read_bytes
+        #     else:
+        #         print len(_bytes)
+        packet_length = data_length + 6 # the +6 comes from the other non-data parts of the packet
+
+        self._serial.setTimeout(timeout)
+        _bytes = self._serial.read(size=packet_length)
+        assert self._serial.inWaiting() == 0 # that should be all
+
+        if len(_bytes) < packet_length:
+            return None
+
+        packet = DataPacket(_bytes)
+        if self.debug:
+            print 'data:', packet.serialize_bytes()
+            print 'dlen:', len(packet.data)
+        return packet.data
+
 
 if __name__ == '__main__':
     fps = FingerprintScanner(debug=True)
-    
+    # fps = FingerprintScanner(baudrate=9600, debug=True)
+    # fps.change_baudrate(115200)
+
     # enroll_id = fps.enroll_finger(tries=10)
 
-    identify_id = fps.identify_finger(tries=5)
-    if identify_id >= 0:
-        print 'Match with id %s' % identify_id
-    else:
-        print 'No match found'
+    # identify_id = fps.identify_finger(tries=5)
+    # if identify_id >= 0:
+    #     print 'Match with id %s' % identify_id
+    # else:
+    #     print 'No match found'
+    
+    # fps.fetch_template(_id=0)
+
+    # fps.fetch_raw_image()
+    
+    from test_raw import SaveImage
+    SaveImage('fingerprint1.raw', fps.fetch_raw_image())
+
     fps.close()
     print

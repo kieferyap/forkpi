@@ -124,6 +124,7 @@ def processImage(imgName,imgRaw):
     enh = ImageEnhance.Sharpness(img)
     img = enh.enhance(1.2)
     img.save(imgName + '.bmp','BMP')
+    print 'Saved image to', imgName + '.bmp'
 #    img = rotateImage(img, imgName  + '.rotate.bmp')
     img = normalizeImage(img,imgName + '.norm.bmp')
     img = segmentacion(img,imgName + '.seg.bmp')
