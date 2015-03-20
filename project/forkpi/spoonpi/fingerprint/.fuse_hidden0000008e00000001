@@ -52,24 +52,24 @@ class CommandPacket(object):
         else:
             raise ValueError("%s not in command list" % command_name)
 
-    def _pack_bytes(self, little_endian=True):
+    def pack_bytes(self, little_endian=True):
         if little_endian:
             byte_order = '<'
         else: # big endian
             byte_order = '>'
 
-        _bytes = struct.pack(byte_order + 'BBHiH', # byte byte word dword word
+        _bytes = struct.pack(byte_order + 'BBHIH', # byte byte word dword word
                 self.START_CODE_1, self.START_CODE_2, self.DEVICE_ID, self.parameter, self.command_code)
         checksum = byte_checksum(_bytes)
         _bytes += struct.pack(byte_order + 'H', checksum)
         return _bytes
 
     def serialize_bytes(self, little_endian=False):
-        _bytes = self._pack_bytes(little_endian)
+        _bytes = self.pack_bytes(little_endian)
         return hexlify(_bytes)
 
     def __str__(self):
-        return self._pack_bytes(little_endian=True)
+        return self.pack_bytes(little_endian=True)
         
 
 class ResponsePacket(object):
@@ -79,6 +79,7 @@ class ResponsePacket(object):
     DEVICE_ID = 0x0001
 
     ERRORS = {
+        0x0000: 'NO_ERROR'                  , # Default value. no error
         0x1001: 'NACK_TIMEOUT'              , # Obsolete, capture timeout
         0x1002: 'NACK_INVALID_BAUDRATE'     , # Obsolete, Invalid serial baud rate
         0x1003: 'NACK_INVALID_POS'          , # The specified ID is not between 0~199
@@ -104,7 +105,7 @@ class ResponsePacket(object):
         self._unpack_bytes()
 
     def _unpack_bytes(self):
-        values = struct.unpack('<BBHiHH', self._bytes) # byte byte word dword word word
+        values = struct.unpack('<BBHIHH', self._bytes) # byte byte word dword word word
         assert values[0] == self.START_CODE_1
         assert values[1] == self.START_CODE_2
         assert values[2] == self.DEVICE_ID
@@ -116,21 +117,15 @@ class ResponsePacket(object):
             self.parameter = values[3]
         else:
             self.error_code = values[3]
-            self.error = self.ERRORS.get(self.error_code, "DUPLICATE_ID_" + str(self.error_code))
-
-    def __str__(self):
-        return self._bytes
-
-    def __nonzero__(self):
-        return self.ack
+            self.error = self.ERRORS[self.error_code]
 
     def serialize_bytes(self, little_endian=False):
         ''' Return hex representation of bytes '''
         if little_endian:
             _bytes = self._bytes
         else:
-            values = struct.unpack('<BBHiHH', self._bytes) # byte byte word dword word word
-            _bytes = struct.pack('>BBHiHH', *values)
+            values = struct.unpack('<BBHIHH', self._bytes) # byte byte word dword word word
+            _bytes = struct.pack('>BBHIHH', *values)
         return hexlify(_bytes)
 
 
@@ -140,29 +135,10 @@ class DataPacket(object):
     START_CODE_2 = 0xA5
     DEVICE_ID = 0x0001
 
-    def __init__(self, _bytes=None, data=None):
-        assert not (_bytes and data)
-        if _bytes: # unpack data from bytes
-            self._bytes = _bytes
-            self.data_length = len(_bytes) - 6
-            self._unpack_bytes()
-        elif data: # pack data to bytes
-            self.data = bytes(data)
-            self.data_length = len(self.data)
-            self._pack_bytes()
-
-    def _pack_bytes(self, little_endian=True):
-        if little_endian:
-            byte_order = '<'
-        else: # big endian
-            byte_order = '>'
-
-        _bytes = struct.pack(byte_order + 'BBH%ds' % self.data_length, # byte byte word dword word
-                self.START_CODE_1, self.START_CODE_2, self.DEVICE_ID, self.data)
-        checksum = byte_checksum(_bytes)
-        _bytes += struct.pack(byte_order + 'H', checksum)
+    def __init__(self, _bytes):
         self._bytes = _bytes
-        return self._bytes
+        self.data_length = len(_bytes) - 6
+        self._unpack_bytes()
 
     def _unpack_bytes(self):
         values = struct.unpack('<BBH%dsH' % self.data_length, self._bytes) # byte byte word var word
@@ -172,14 +148,15 @@ class DataPacket(object):
         self.data = values[3]
         assert len(self.data) == self.data_length
         assert values[4] == byte_checksum(self._bytes[:-2])
-        return self.data
 
     def serialize_bytes(self, little_endian=False):
         ''' Return hex representation of bytes '''
-        return hexlify(self._pack_bytes(little_endian))
-
-    def __str__(self):
-        return self._pack_bytes(little_endian=True)
+        if little_endian:
+            _bytes = self._bytes
+        else:
+            values = struct.unpack('<BBH%dsH' % self.data_length, self._bytes) # byte byte word var word
+            _bytes = struct.pack('>BBH%dsH' % self.data_length, *values)
+        return hexlify(_bytes)
 
 
 class FingerprintScanner(object):
@@ -207,8 +184,8 @@ class FingerprintScanner(object):
         '''
             Initializes communication with the scanner
         '''
-        self._send_command('Open')
-        response = self._receive_response(timeout=2)
+        self._send_command(CommandPacket('Open'))
+        response = self._receive_response(timeout=1)
         if response is None:
             return False
         else:
@@ -219,7 +196,8 @@ class FingerprintScanner(object):
             Ends communication with the scanner
             Does not actually do anything (according to the datasheet)
         '''
-        response = self._run_command('Close')
+        self._send_command(CommandPacket('Close'))
+        response = self._receive_response()
         self._serial.close()
         return response.ack
 
@@ -229,7 +207,8 @@ class FingerprintScanner(object):
             LED must be on to see fingerprints
             Parameter: True turns on the backlight, False turns it off
         '''
-        response = self._run_command('CmosLed', parameter = 1 if on else 0)
+        self._send_command(CommandPacket('CmosLed', parameter = 1 if on else 0))
+        response = self._receive_response()
         return response.ack
 
     def backlight_on(self):
@@ -245,7 +224,9 @@ class FingerprintScanner(object):
             Returns: True if success, False if invalid baud
         '''
         if baudrate != self._serial.getBaudrate():
-            if self._run_command('ChangeBaudrate', parameter=baudrate):
+            self._send_command(CommandPacket('ChangeBaudrate', parameter=baudrate))
+            response = self._receive_response()
+            if response.ack:
                 if self.debug:
                     print 'Changed baud rate from %s to %s' % (self._serial.getBaudrate(), baudrate)
                 self._serial.setBaudrate(baudrate)
@@ -257,7 +238,8 @@ class FingerprintScanner(object):
         '''
             Returns: The total number of enrolled fingerprints
         '''
-        response = self._run_command('GetEnrollCount')
+        self._send_command(CommandPacket('GetEnrollCount'))
+        response = self._receive_response()
         return response.parameter
 
     def is_enrolled(self, _id):
@@ -265,12 +247,13 @@ class FingerprintScanner(object):
             Parameter: The ID to be checked
             Returns: True if the ID is enrolled, False if not
         '''
-        response = self._run_command('CheckEnrolled', parameter=_id)
+        self._send_command(CommandPacket('CheckEnrolled', parameter=_id))
+        response = self._receive_response()
         return response.ack
 
     def find_free_id(self):
         '''
-            Returns: The first free ID, -1 if db is full
+            Returns: The first free ID, -1 if full
         '''
         for _id in range(200):
             if not self.is_enrolled(_id):
@@ -279,7 +262,8 @@ class FingerprintScanner(object):
 
     def enroll_finger(self, _id=None, tries=5):
         '''
-            The entire two-stage enrollment process
+            Two-stage enrollment process
+            We merged Enroll1 and Enroll2 so you only have to remove and re-place your finger once
             Parameter: The ID to be enrolled (auto-searches for a free ID if not specified)
             Returns: The ID enrolled if successful, -1 if not
         '''
@@ -315,10 +299,11 @@ class FingerprintScanner(object):
             if _id < 0: # database is full
                 return -1
 
-        if self._run_command('EnrollStart', parameter=_id): # Enroll start success
-            if self._enroll(1, tries):
-                if self._enroll(2, tries):
-                    return _id
+        self._send_command(CommandPacket('EnrollStart', parameter=_id))
+        response = self._receive_response()
+        if response.ack: # Enroll start success
+            if self._enroll(1, tries) and self._enroll(2, tries):
+                return _id
         return -1
 
     def complete_enroll(self, tries=5):
@@ -333,7 +318,8 @@ class FingerprintScanner(object):
             Returns: True if enrollment successfully finished, False if not
         '''
         if self._capture_finger(tries):
-            response = self._run_command('Enroll' + str(stage))
+            self._send_command(CommandPacket('Enroll' + str(stage)))
+            response = self._receive_response()
             return response.ack
         return False
 
@@ -341,7 +327,8 @@ class FingerprintScanner(object):
         '''
             Returns: True if there is a finger on the scanner, False if not
         '''
-        response = self._run_command('IsPressFinger')
+        self._send_command(CommandPacket('IsPressFinger'))
+        response = self._receive_response()
         return response.parameter == 0
 
     def delete_id(self, _id):
@@ -349,7 +336,8 @@ class FingerprintScanner(object):
             Deletes the specified template ID from the database
             Returns: True if successful, False if position invalid
         '''
-        response = self._run_command('DeleteID', parameter=_id)
+        self._send_command(CommandPacket('DeleteID', parameter=_id))
+        response = self._receive_response()
         return response.ack
 
     def delete_all(self):
@@ -357,7 +345,8 @@ class FingerprintScanner(object):
             Deletes all template IDs from the database
             Returns: True if successful, False if db is empty
         '''
-        response = self._run_command('DeleteAll')
+        self._send_command(CommandPacket('DeleteAll'))
+        response = self._receive_response()
         return response.ack
 
     def verify_finger(self, _id, tries=5):
@@ -367,7 +356,8 @@ class FingerprintScanner(object):
             Returns: True if match, False if not
         '''
         if self._capture_finger(high_quality=False, tries=tries):
-            response = self._run_command('Verify1_1', parameter=_id)
+            self._send_command(CommandPacket('Verify1_1', parameter=_id))
+            response = self._receive_response()
             return response.ack
         else:
             return False
@@ -380,24 +370,11 @@ class FingerprintScanner(object):
                 -1   : Failed to find a match
         '''
         if self._capture_finger(high_quality=False, tries=tries):
-            response = self._run_command('Identify1_N')
+            self._send_command(CommandPacket('Identify1_N'))
+            response = self._receive_response()
             return response.parameter if response.ack else -1
         else:
             return -1
-
-    def verify_template(self, _id, template):
-        if self._run_command('VerifyTemplate1_1', parameter=_id):
-            self._send_data(data=template)
-            response = self._receive_response()
-            return response.ack
-        return False
-
-    def identify_template(self, template):
-        if self._run_command('IdentifyTemplate1_N'):
-            self._send_data(data=template)
-            response = self._receive_response()
-            return response.parameter
-        return -1
 
     def _capture_finger(self, high_quality=True, tries=5):
         '''
@@ -410,73 +387,42 @@ class FingerprintScanner(object):
         self.backlight_on()
 
         for i in xrange(tries):
-            if self._run_command('CaptureFinger', parameter = 1 if high_quality else 0):
+            self._send_command(CommandPacket('CaptureFinger', parameter = 1 if high_quality else 0))
+            response = self._receive_response()
+            if response.ack:
                 self.backlight_off()
                 return True
             self.wait(1.5)
         self.backlight_off()
         return False
 
-    def make_template(self, tries=5):
-        if self._capture_finger(high_quality=True, tries=tries):
-            if self._run_command('MakeTemplate'):
-                data = self._receive_data(498)
-                return data
-        return None
-
-    def make_image(self, tries=5):
-        if self._capture_finger(high_quality=True, tries=tries):
-            if self._run_command('GetImage'):
-                data = self._receive_data(52116)
-                return data
-        return None
-
-    def make_raw_image(self):
+    def fetch_raw_image(self):
         self.backlight_on()
-        if self._run_command('GetRawImage'):
+        self._send_command(CommandPacket('GetRawImage'))
+        response = self._receive_response()
+        if response.ack:
             data = self._receive_data(19200)
             self.backlight_off()
             return data
         self.backlight_off()
         return None
 
-    def download_template(self, _id):
-        '''
-            Downloads a template from the database
-            Parameter: 0-199 ID number
-            Returns: the template requested (498 bytes)
-        '''
-        if self._run_command('GetTemplate', parameter=_id):
+    def fetch_template(self, _id):
+        self._send_command(CommandPacket('GetTemplate', parameter=_id))
+        response = self._receive_response()
+        if response.ack:
             data = self._receive_data(498)
             return data
         return None
 
-    def upload_template(self, _id, template):
-        '''
-            Uploads a template to the database
-            Parameter: 0-199 ID number, template (498 bytes)
-            Returns: True if successful, False if not
-        '''
-        # the addition below is so that duplication check is not performed
-        if self._run_command('SetTemplate', parameter=0x00ff0000 + _id):
-            self._send_data(data=template)
-            response = self._receive_response()
-            return response.ack
-        return False
-
-    def _run_command(self, *args, **kwargs):
-        self._send_command(*args, **kwargs)
-        response = self._receive_response()
-        return response
-
-    def _send_command(self, *args, **kwargs):
-        command = CommandPacket(*args, **kwargs)
+    def _send_command(self, command):
         if self.debug:
             print '\nCommand:', command.name
             print 'sent:', command.serialize_bytes(little_endian=self.little_endian)
-        self._serial.write(bytes(command))
+        self._serial.write(command.pack_bytes())
 
     def _receive_response(self, timeout=None):
+
         self._serial.setTimeout(timeout)
         _bytes = self._serial.read(size=12)
 
@@ -491,14 +437,16 @@ class FingerprintScanner(object):
                 print 'ERROR:', response.error
         return response
 
-    def _send_data(self, data):
-        packet = DataPacket(data=data)
-        if self.debug:
-            print 'data:', packet.serialize_bytes(little_endian=self.little_endian)
-            print 'dlen:', len(packet.data)
-        self._serial.write(bytes(packet))
-
     def _receive_data(self, data_length, timeout=10):
+        # _bytes = bytearray()
+        # while len(_bytes) < length:
+        #     if self._serial.inWaiting() > 0:
+        #         read_bytes = self._serial.read()
+        #         if self.debug:
+        #             print 'read:', hexlify(read_bytes)
+        #         _bytes += read_bytes
+        #     else:
+        #         print len(_bytes)
         packet_length = data_length + 6 # the +6 comes from the other non-data parts of the packet
 
         self._serial.setTimeout(timeout)
@@ -508,15 +456,17 @@ class FingerprintScanner(object):
         if len(_bytes) < packet_length:
             return None
 
-        packet = DataPacket(_bytes=_bytes)
+        packet = DataPacket(_bytes)
         if self.debug:
-            print 'data:', packet.serialize_bytes(little_endian=self.little_endian)
+            print 'data:', packet.serialize_bytes()
             print 'dlen:', len(packet.data)
         return packet.data
 
 
 if __name__ == '__main__':
     fps = FingerprintScanner(debug=True)
+    # fps = FingerprintScanner(baudrate=9600, debug=True)
+    # fps.change_baudrate(115200)
 
     # enroll_id = fps.enroll_finger(tries=10)
 
@@ -524,21 +474,14 @@ if __name__ == '__main__':
     # if identify_id >= 0:
     #     print 'Match with id %s' % identify_id
     # else:
-    #    print 'No match found'
-
+    #     print 'No match found'
     
-    # template = fps.download_template(_id=0)
+    # fps.fetch_template(_id=0)
 
-    # template=fps.make_template(tries=10)
-    # fps.upload_template(_id=4, template=template)
-    # print fps.verify_template(_id=4, template=template)
-
-    print fps.verify_finger(_id=4, tries=10)
-
-    # fps.make_image()
+    # fps.fetch_raw_image()
     
-    # from test_raw import SaveImage
-    # SaveImage('fingerprint1.raw', fps.make_raw_image())
+    from test_raw import SaveImage
+    SaveImage('fingerprint1.raw', fps.fetch_raw_image())
 
     fps.close()
     print
