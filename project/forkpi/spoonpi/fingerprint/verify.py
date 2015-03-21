@@ -6,16 +6,16 @@ if __name__ == '__main__':
     fps.Open()
     fps.SetLED(True)
     
-    print 'Press finger to verify'
+    print('Press finger to verify')
     while not fps.IsPressFinger():
         FPS.delay(1)
 
     if fps.CaptureFinger(False):
-        print 'remove finger'
+        print('remove finger')
         id = fps.Identify1_N()
         if id < 200:
-            print 'Match with id', id
+            print('Match with id', id)
         else:
-            print 'No match found'
+            print('No match found')
     else:
-        print 'Failed to capture finger'
+        print('Failed to capture finger')

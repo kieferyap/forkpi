@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+from datetime import datetime
+from quick2wire.gpio import pins, In, Out
+from timeit import Timer
+
+
+def nothin():
+    pass
+
+def onepass_read():
+    x = inpin.value
+
+def onepass_toggle():
+    outpin.value = 1
+    outpin.value = 0
+
+iterations = 10000
+
+outpin = pins.pin(0, Out)
+inpin = pins.pin(1, In)
+
+with inpin, outpin:
+    overhead = Timer(nothin).timeit(iterations)
+    readresult = Timer(onepass_read).timeit(iterations)
+    toggleresult = Timer(onepass_toggle).timeit(iterations)
+
+    print("The time to do nothing %d times is %4.3fsec" % (iterations, overhead))
+    print("The time to read %d times is %4.3fsec" % (iterations, readresult))
+    print("The time to toggle %d times is %4.3fsec" % (iterations, toggleresult))

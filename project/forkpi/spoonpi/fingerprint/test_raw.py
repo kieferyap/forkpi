@@ -84,10 +84,10 @@ def bifurcaciones(image,size):
     return [1 if pixelesVecinos(image, (x1,y1) ) == bifurcacion else -1  for (x1,y1) in pixs]
 
 def contarBifurcaciones(bifurcaciones):
-    return sum(filter(lambda x: x==1, bifurcaciones))
+    return sum([x for x in bifurcaciones if x==1])
 
 def contarNoBifurcaciones(bifurcaciones):
-    return sum(map(lambda m: -1*m,filter(lambda x: not x==1, bifurcaciones)))
+    return sum([-1*m for m in [x for x in bifurcaciones if not x==1]])
 
 def matchBif(im1,im2):
     bif1 = (contarBifurcaciones(bifurcaciones(im1,im1.size)),
@@ -95,8 +95,8 @@ def matchBif(im1,im2):
     bif2 = (contarBifurcaciones(bifurcaciones(im2,im2.size)),
            contarNoBifurcaciones(bifurcaciones(im2,im2.size)))
     tolerance = 0.1
-    print bif1
-    print bif2
+    print(bif1)
+    print(bif2)
     return True if bif2[0]-bif1[0] <= bif2[0]*tolerance or bif2[1]-bif1[1] <= bif2[0]*tolerance else False
 
 def GetRawImg(fps):
@@ -105,7 +105,7 @@ def GetRawImg(fps):
     if fps.GetRawImage():
         response = fps._lastResponse.RawBytes[16:]
         # print fps.serializeToSend(response)
-        print u'Size %s' % len(response)
+        print('Size %s' % len(response))
         ret = bytes(response)
     FPS.delay(0.1)
     return ret
@@ -124,7 +124,7 @@ def processImage(imgName,imgRaw):
     enh = ImageEnhance.Sharpness(img)
     img = enh.enhance(1.2)
     img.save(imgName + '.bmp','BMP')
-    print 'Saved image to', imgName + '.bmp'
+    print('Saved image to', imgName + '.bmp')
 #    img = rotateImage(img, imgName  + '.rotate.bmp')
     img = normalizeImage(img,imgName + '.norm.bmp')
     img = segmentacion(img,imgName + '.seg.bmp')
@@ -169,11 +169,11 @@ if __name__ == '__main__':
     fps.UseSerialDebug = True
     fps.SetLED(True) # Turns ON the CMOS LED
     
-    print 'Put your finger in the scan'
+    print('Put your finger in the scan')
     counter = 0 # simple counter for wait 10 seconds
     while counter < 10:
         if fps.IsPressFinger():  #verify if the finger is in the scan
-            print 'Your finger is in the scan'
+            print('Your finger is in the scan')
             Enroll(fps, 1)
             break
         else:

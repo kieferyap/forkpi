@@ -1,27 +1,28 @@
 from keypad import Keypad
 from oled import OLED
-from nfc_reader import NFCReader
+from rfid.py532lib.mifare import Mifare
 from forkpi_db import ForkpiDB
+from binascii import hexlify
 
 import time
 from math import ceil
 
 class SpoonPi:
 	# LOCKOUT TABLE columns [rfid_uid, incorrect_streak, lockout]
-	COL_UID, COL_STREAK, COL_TIME_LEFT = range(3)
+	COL_UID, COL_STREAK, COL_TIME_LEFT = list(range(3))
 
 	def __init__(self):
 		self.lockout_table = list()
 
-		print 'Loading OLED...'
+		print('Loading OLED...')
 		self.led = OLED()
-		print 'Loading NFC Reader...'
-		self.nfc_reader = NFCReader()
-		print 'Loading keypad...'
+		print('Loading NFC Reader...')
+		self.nfc_reader = Mifare()
+		print('Loading keypad...')
 		self.keypad = Keypad()
-		print 'Loading the ForkPi database...'
+		print('Loading the ForkPi database...')
 		self.db = ForkpiDB()
-		print 'Loading options...'
+		print('Loading options...')
 		self.attempt_limit = self.load_option('attempt_limit')
 		self.lockout_time = self.load_option('lockout_time_minutes') * 60
 		self.keypad_timeout = self.load_option('keypad_timeout_seconds')
@@ -29,23 +30,23 @@ class SpoonPi:
 	def load_option(self, name):
 		value, default = self.db.fetch_option(name)
 		if value.isdigit():
-			print '  custom : {} = {}'.format(name, value)
+			print('  custom : {} = {}'.format(name, value))
 			return int(value)
 		else:
-			print '  default: {} = {}'.format(name, default)
+			print('  default: {} = {}'.format(name, default))
 			return int(default)
 
 	def allow_access(self, names, pin, rfid_uid):
 		pin = '*' * len(pin) # convert pin to asterisks so pin is not exposed in the logs
 		message = "Allowed PIN({}) UID({}) : {}".format(pin, rfid_uid, names)
-		print message
+		print(message)
 		self.db.log_allowed(names=names, pin=pin, rfid_uid=rfid_uid)
 		self.led.clear_display()
 		self.led.puts("Access\ngranted")
 
 	def deny_access(self, reason, pin, rfid_uid, led_message="Access\ndenied"):
 		message = "Denied  PIN({}) UID({}) : {}".format(pin, rfid_uid, reason)
-		print message
+		print(message)
 		self.db.log_denied(reason=reason, pin=pin, rfid_uid=rfid_uid)
 		self.led.clear_display()
 		self.led.puts(led_message)
@@ -53,7 +54,8 @@ class SpoonPi:
 	def rfid_authentication(self):
 		self.led.clear_display()
 		self.led.puts("Swipe RFID")
-		rfid_uid = self.nfc_reader.read_tag()
+		rfid_uid = self.nfc_reader.scan_field()
+		rfid_uid = hexlify(rfid_uid).decode()
 		return rfid_uid
 
 	def pin_authentication(self):

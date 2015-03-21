@@ -47,46 +47,46 @@ def LegacyEnroll(fps):
 
     if enrollid <200:
         #press finger to Enroll enrollid
-        print 'Press finger to Enroll %s' % str(enrollid)
+        print('Press finger to Enroll %s' % str(enrollid))
         fps.EnrollStart(enrollid)
         while not fps.IsPressFinger():
             FPS.delay(1)
         iret = 0
         if fps.CaptureFinger(True):
             #remove finger
-            print 'remove finger'
+            print('remove finger')
             fps.Enroll1()
             while not fps.IsPressFinger():
                 FPS.delay(1)
             #Press same finger again
-            print 'Press same finger again'
+            print('Press same finger again')
             while not fps.IsPressFinger():
                 FPS.delay(1)
             if fps.CaptureFinger(True):
                 #remove finger
-                print 'remove finger'
+                print('remove finger')
                 fps.Enroll2()
                 while not fps.IsPressFinger():
                     FPS.delay(1)
                 #Press same finger again
-                print 'press same finger yet again'
+                print('press same finger yet again')
                 while not fps.IsPressFinger():
                     FPS.delay(1)
                 if fps.CaptureFinger(True):
                     #remove finger
                     iret = fps.Enroll3()
                     if iret == 0:
-                        print 'Enrolling Successfull'
+                        print('Enrolling Successfull')
                     else:
-                        print 'Enrolling Failed with error code: %s' % str(iret)
+                        print('Enrolling Failed with error code: %s' % str(iret))
                 else:
-                    print 'Failed to capture third finger'
+                    print('Failed to capture third finger')
             else:
-                print 'Failed to capture second finger'
+                print('Failed to capture second finger')
         else:
-            print 'Failed to capture first finger'
+            print('Failed to capture first finger')
     else:
-        print 'Failed: enroll storage is full'
+        print('Failed: enroll storage is full')
 
 if __name__ == '__main__':
     fps = FPS.FPS_GT511C3(device_name='/dev/ttyAMA0',baud=9600,timeout=2) #settings for raspberry pi GPIO

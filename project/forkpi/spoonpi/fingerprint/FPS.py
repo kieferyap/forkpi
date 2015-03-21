@@ -98,7 +98,7 @@ class Command_Packet(Packet):
         kwargs.setdefault('UseSerialDebug', True)
         self.UseSerialDebug= kwargs['UseSerialDebug']
         if self.UseSerialDebug:
-            print 'Command: %s' % commandName
+            print('Command: %s' % commandName)
         self.cmd = self.commands[commandName]
         
     UseSerialDebug = True
@@ -182,7 +182,7 @@ class Response_Packet(Packet):
             self.RawBytes = _buffer
             self._lastBuffer = bytes(_buffer)
             if self.UseSerialDebug:
-                print 'read: %s' % self.serializeToSend(_buffer)
+                print('read: %s' % self.serializeToSend(_buffer))
             if _buffer.__len__()>=12:
                 self.ACK = True if _buffer[8] == 0x30 else False
                 self.ParameterBytes[0] = _buffer[4]
@@ -208,9 +208,9 @@ class Response_Packet(Packet):
         '''
         e  = 'INVALID'
         if high == 0x01:
-            if low in self.errors.values():
-                errorIndex = self.errors.values().index(low)
-                e = self.errors.keys()[errorIndex]
+            if low in list(self.errors.values()):
+                errorIndex = list(self.errors.values()).index(low)
+                e = list(self.errors.keys())[errorIndex]
         return e
     
     
@@ -228,7 +228,7 @@ class SerialCommander:
         Serializes the args to hex to send to serial port
     '''
     def __serialize_args_hex__(self,*arg,**kwargs):
-        return bytes(bytearray([v for v in kwargs.values()]))
+        return bytes(bytearray([v for v in list(kwargs.values())]))
     
     def serializeToSend(self,bytearr):
         return ' '.join(binascii.hexlify(ch) for ch in bytes(bytearr))
@@ -251,8 +251,8 @@ def connect(device_name=None,baud=None,timeout=None):
         _ser = serial.Serial(device_name,baudrate=baud,timeout=timeout)
         if not _ser.isOpen():
             _ser.open()
-    except Exception,e:
-        print '[Connect] No es posible conectar al dispositivo %s' % (str(e))
+    except Exception as e:
+        print('[Connect] No es posible conectar al dispositivo %s' % (str(e)))
         pass
     return _ser
 
@@ -283,7 +283,7 @@ class FPS_GT511C3(SerialCommander):
             delay(0.1)
             self.Open()
         elif self.UseSerialDebug:
-            print '[FPS_GT511C3] No es posible conectar con el dispositivo %s' % self._device_name
+            print('[FPS_GT511C3] No es posible conectar con el dispositivo %s' % self._device_name)
             
      
     def Open(self):
@@ -347,7 +347,7 @@ class FPS_GT511C3(SerialCommander):
              NOTE: Untested (don't have a logic level changer and a voltage divider is too slow)
         '''
         retval = False
-        if baud <> self._serial.getBaudrate():
+        if baud != self._serial.getBaudrate():
             cp = Command_Packet('ChangeBaudrate',UseSerialDebug=self.UseSerialDebug)
             cp.ParameterFromInt(baud)
             packetbytes = cp.GetPacketBytes()
@@ -358,7 +358,7 @@ class FPS_GT511C3(SerialCommander):
             retval = rp.ACK
             if retval:
                 if self.UseSerialDebug:
-                    print 'Changing port baudrate'
+                    print('Changing port baudrate')
                 self._serial.close()
                 BAUD = baud
                 self._serial = connect(self._device_name,self._baud,self._timeout)
@@ -720,12 +720,12 @@ class FPS_GT511C3(SerialCommander):
         if not self._serial is None:
             self._serial.write(bytes(cmd))
             if self.UseSerialDebug:
-                print 'sent:', self.serializeToSend(cmd)
+                print('sent:', self.serializeToSend(cmd))
                 # print bytes(cmd)
                 # print repr(bytes(cmd))[1:-1]
         else:
             if self.UseSerialDebug:
-                print '[SendCommand] No es posible escribir en %s' % self._device_name
+                print('[SendCommand] No es posible escribir en %s' % self._device_name)
     
     def GetResponse(self, response_size=12):
         '''
@@ -735,7 +735,7 @@ class FPS_GT511C3(SerialCommander):
         # delay(interval)
         if self._serial is None:
             rp = Response_Packet()
-            print '[GetResponse] No es posible leer desde: %s' % self._device_name
+            print('[GetResponse] No es posible leer desde: %s' % self._device_name)
         else:
             r = bytearray(self._serial.read(response_size))
             # r = bytearray(self._serial.read(max(12, self._serial.inWaiting())))
@@ -754,5 +754,5 @@ class FPS_GT511C3(SerialCommander):
                 # r2 = bytearray(self._serial.read(max(12, self._serial.inWaiting())))
                 rp2 = Response_Packet(r2,self.UseSerialDebug)
         self._lastResponse = rp
-        print 'Response length:', len(rp.RawBytes)
+        print('Response length:', len(rp.RawBytes))
         return rp

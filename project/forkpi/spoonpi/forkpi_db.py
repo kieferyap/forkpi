@@ -1,5 +1,4 @@
 import psycopg2
-from aes import AES
 import hashlib
 
 class ForkpiDB(object):
@@ -7,23 +6,6 @@ class ForkpiDB(object):
     def __init__(self):
         self.conn = psycopg2.connect(database="forkpi", user="pi", password="raspberry", host="forkpi.local", port="5432")
         self.conn.autocommit = True
-
-    '''
-    def encrypt(self, plaintext, name):
-        cipher = AES(name)
-        return cipher.encrypt(ciphertext)
-
-    def decrypt(self, ciphertext, name):
-        cipher = AES(name)
-        return cipher.decrypt(ciphertext)
-
-    def find_pins_for(self, rfid_uid):
-        c = self.conn.cursor()
-        c.execute("SELECT name, pin FROM records_keypair WHERE rfid_uid = '%s' AND is_active=TRUE" % rfid_uid)
-        result = c.fetchall()
-        result = map(lambda x: x[1], result)
-        return result
-    '''
 
     def hash_keypair(self, pin, rfid_uid):
         return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
@@ -40,7 +22,7 @@ class ForkpiDB(object):
         c.execute("SELECT name FROM records_keypair WHERE hashpass = '%s' AND is_active=TRUE" % hashpass)
         result = c.fetchall()
         is_authorized = (len(result) > 0)
-        names = ', '.join(map(lambda x: x[0], result))
+        names = ', '.join([x[0] for x in result])
         return is_authorized, names
 
     def log_allowed(self, names, pin='', rfid_uid=''):

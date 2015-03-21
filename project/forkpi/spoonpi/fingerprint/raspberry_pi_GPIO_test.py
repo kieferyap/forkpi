@@ -34,11 +34,11 @@ if __name__ == '__main__':
     fps.UseSerialDebug = True
     fps.SetLED(True) # Turns ON the CMOS LED
     FPS.delay(1) # wait 1 second
-    print 'Put your finger in the scan'
+    print('Put your finger in the scan')
     counter = 0 # simple counter for wait 10 seconds
     while counter < 10:
         if fps.IsPressFinger():  #verify if the finger is in the scan
-            print 'Your finger is in the scan'
+            print('Your finger is in the scan')
             
             break
         else:

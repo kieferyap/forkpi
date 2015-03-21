@@ -42,6 +42,6 @@ class Keypad:
                                 pass
                             return key
                     GPIO.output(col, 1)
-        except Exception, err:
-            print traceback.format_exc()
+        except Exception as err:
+            print(traceback.format_exc())
             GPIO.cleanup()

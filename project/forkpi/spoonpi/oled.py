@@ -7,7 +7,7 @@ class OLED:
     line_height = 16
     line_size = 2
     
-    def __init__(self, reset_pin=8, dc_pin=9, n_lines=2):
+    def __init__(self, reset_pin=6, dc_pin=11, n_lines=2):
         self.led = gaugette.ssd1306.SSD1306(reset_pin=reset_pin, dc_pin=dc_pin)
         self.led.begin()
         self.n_lines = n_lines
