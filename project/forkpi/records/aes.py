@@ -11,16 +11,16 @@ from Crypto import Random
 
 class AES:
     def __init__( self, key ):
-        self.key = hashlib.md5(key).hexdigest()
+        self.key = hashlib.md5(key.encode()).hexdigest()
 
     def encrypt( self, raw ):
         raw = pad(raw)
         iv = Random.new().read( Cipher.AES.block_size )
         cipher = Cipher.AES.new( self.key, Cipher.AES.MODE_CBC, iv )
-        return base64.b64encode( iv + cipher.encrypt( raw ) ) 
+        return base64.b64encode( iv + cipher.encrypt( raw.encode() ) ) 
 
     def decrypt( self, enc ):
-        enc = base64.b64decode(enc)
+        enc = base64.b64decode(enc.encode())
         iv = enc[:16]
         cipher = Cipher.AES.new(self.key, Cipher.AES.MODE_CBC, iv )
-        return unpad(cipher.decrypt( enc[16:] ))
+        return unpad(cipher.decrypt( enc[16:] )).decode()

@@ -9,7 +9,7 @@ def random_key():
 def write_to_path(path, text):
     with open(path, 'w') as f:
         f.write(text)
-        os.chmod(path, 0600)
+        os.chmod(path, 600)
 
 def regenerate_secret_key(path):
     new_key = random_key()

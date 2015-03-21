@@ -37,9 +37,9 @@ def redirect_to_name(name):
 	return django_redirect(reverse(name))
 
 
-from subviews.keypairs import keypairs_page, scan_rfid, new_keypair, delete_keypair, edit_keypair_name, edit_keypair_pin, edit_keypair_uid, keypair_toggle_active, print_pdf
-from subviews.session import login_page, logging_in, logout, must_be_logged_in
-from subviews.signup import signup_page, add_user
-from subviews.logs import logs_page
-from subviews.options import options_page, edit_option_value, regenerate_secret_key
+from .subviews.keypairs import keypairs_page, scan_rfid, new_keypair, delete_keypair, edit_keypair_name, edit_keypair_pin, edit_keypair_uid, keypair_toggle_active, print_pdf
+from .subviews.session import login_page, logging_in, logout, must_be_logged_in
+from .subviews.signup import signup_page, add_user
+from .subviews.logs import logs_page
+from .subviews.options import options_page, edit_option_value, regenerate_secret_key
 

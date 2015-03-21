@@ -1,8 +1,7 @@
 from keypad import Keypad
 from oled import OLED
-from rfid.py532lib.mifare import Mifare
+from nfc_reader import NFCReader
 from forkpi_db import ForkpiDB
-from binascii import hexlify
 
 import time
 from math import ceil
@@ -17,7 +16,7 @@ class SpoonPi:
 		print('Loading OLED...')
 		self.led = OLED()
 		print('Loading NFC Reader...')
-		self.nfc_reader = Mifare()
+		self.nfc_reader = NFCReader()
 		print('Loading keypad...')
 		self.keypad = Keypad()
 		print('Loading the ForkPi database...')
@@ -54,8 +53,7 @@ class SpoonPi:
 	def rfid_authentication(self):
 		self.led.clear_display()
 		self.led.puts("Swipe RFID")
-		rfid_uid = self.nfc_reader.scan_field()
-		rfid_uid = hexlify(rfid_uid).decode()
+		rfid_uid = self.nfc_reader.read_tag()
 		return rfid_uid
 
 	def pin_authentication(self):
