@@ -24,7 +24,11 @@
 					<tbody>
 						{% if logs|length > 0 %}
 							{% for log in logs %}
-							<tr>
+							<tr class="
+								{% if log.action == 'Denied' %}
+									redded
+								{% endif %}
+							">
 								<td>{{ log.id }}</td>
 								<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
 								<td>{{ log.action }}</td>

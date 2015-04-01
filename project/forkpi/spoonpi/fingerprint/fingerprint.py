@@ -414,9 +414,10 @@ class FingerprintScanner(object):
         self.backlight_on()
 
         for i in range(tries):
-            if self._run_command('CaptureFinger', parameter = 1 if high_quality else 0):
-                self.backlight_off()
-                return True
+            if self.is_finger_pressed():
+                if self._run_command('CaptureFinger', parameter = 1 if high_quality else 0):
+                    self.backlight_off()
+                    return True
             self.wait(1.5)
         self.backlight_off()
         return False
@@ -524,17 +525,17 @@ if __name__ == '__main__':
 
     # enroll_id = fps.enroll_finger(tries=10)
 
-    # identify_id = fps.identify_finger(tries=5)
-    # if identify_id >= 0:
-    #     print 'Match with id %s' % identify_id
-    # else:
-    #    print 'No match found'
+    identify_id = fps.identify_finger(tries=50)
+    if identify_id >= 0:
+        print('Match with id %s' % identify_id)
+    else:
+       print('No match found')
 
     
-    for i in range(5):
-        template = fps.download_template(_id=i)
+    # for i in range(5):
+    #     template = fps.download_template(_id=i)
 
-    # template=fps.make_template(tries=10)
+    # template = fps.make_template(tries=10)
     # fps.upload_template(_id=4, template=template)
     # print fps.verify_template(_id=4, template=template)
 

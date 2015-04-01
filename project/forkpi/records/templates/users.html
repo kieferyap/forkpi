@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content%}
+	{% csrf_token %}
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">
+			<div class="row col-md-12">
+				<div class="panel panel-primary">
+					<div class="panel-heading">
+						<h3 class="panel-title">Users</b></h3>
+						<div class="pull-right">
+						</div>
+					</div>
+					<table id="keypairs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
+						<thead>
+							<tr>
+								<th class="col-md-1" data-placeholder="S..."># </th>
+								<th class="col-md-3" data-placeholder="Search...">Username </th>
+								<th class="col-md-3" data-placeholder="Search...">E-Mail Address</th>
+								<th class="col-md-1" data-placeholder="S...">Login</th>
+								<th class="col-md-1" data-placeholder="S...">Join</th>
+								<th class="col-md-3" data-placeholder="Search...">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% if users|length > 0 %}
+								{% for user in users %}
+								<tr id="user-{{ user.id }}" class="
+									{% if not user.is_active %}
+										greyed
+									{% endif %}
+									{% if not user.is_superuser %}
+										redded
+									{% endif %}
+								">
+									<td>{{ user.id }}</td>
+
+									<!-- Username -->
+									<td>																
+										{{ user.username }}
+										<span
+											id="star-{{ user.id }}"
+											class="glyphicon glyphicon-star small-text"
+											style="
+											{% if not user.is_staff %}
+												display: none;
+											{% endif %}
+											"
+										></span>
+										{% if not user.is_superuser %}
+											<span id="unapproved-{{ user.id }}" class="small-text glyphicon glyphicon-exclamation-sign"></span>
+										{% endif %}				
+									</td>
+
+									<!-- Name -->
+									<td>
+										{{ user.email }}<br/>
+										{{ user.firstname }} {{ user.lastname }}
+									</td>
+
+									<!-- Dates -->
+									<td class="x-small-text">
+										{{ user.last_login | date:"Y-m-d H:i:s"}}
+									</td>
+									<td class="x-small-text">
+										{{ user.date_joined | date:"Y-m-d H:i:s"}}
+									</td>
+
+									<!-- Actions -->
+									<td>
+										{% if user.is_superuser %}
+											{% if user.is_staff %}
+												<button class="btn btn-warning demote-btn-user" id="{{ user.id }}">Demote to Regular</button>
+											{% else %}
+												<button class="btn btn-success promote-btn-user" id="{{ user.id }}">Promote to Admin</button>
+											{% endif %}
+											{% if user.is_active %}
+												<button class="btn btn-warning deactivate-btn-user" id="{{ user.id }}">Deactivate</button>
+											{% else %}
+												<button class="btn btn-success activate-btn-user" id="{{ user.id }}">Activate</button>
+											{% endif %}
+											<button class="btn btn-danger delete-btn-user" id="{{ user.id }}">Delete</button>
+										{% else %}
+											<button class="btn btn-success approve-btn-user" id="{{ user.id }}">Approve</button>
+											<button class="btn btn-danger deny-btn-user" id="{{ user.id }}">Deny</button>
+										{% endif %}
+									</td>
+								</tr>
+								{% endfor %}
+							{% else %}
+								<tr>
+									<td colspan="6" style="text-align:center">No users found.</td>
+								</tr>
+							{% endif %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+{% endblock %}

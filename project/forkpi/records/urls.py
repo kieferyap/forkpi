@@ -29,4 +29,10 @@ urlpatterns = patterns('',
     url(r'^options/$', options_page, name='options'),
     url(r'^options/edit/value$', edit_option_value, name='edit option value'),
     url(r'^options/regenerate$', regenerate_secret_key, name='regenerate secret key'),
+
+    url(r'^users$', all_users, name='users'),
+    url(r'^users/toggleactiveuser$', user_toggle_active, name='user toggle active'),
+    url(r'^users/togglestaff$', user_toggle_staff, name='user toggle staff'),
+    url(r'^users/delete$', delete_user, name='delete user'),
+    url(r'^users/approveuser$', approve_user, name='approve user'),
 )

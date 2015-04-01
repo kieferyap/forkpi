@@ -1,1 +1,1 @@
-sudo python manage.py runserver forkpi.local:80
+sudo python3 manage.py runserver forkpi.local:80

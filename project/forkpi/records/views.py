@@ -1,6 +1,7 @@
 from django.shortcuts import render as django_render
 from django.shortcuts import redirect as django_redirect
 from django.core.urlresolvers import reverse
+from records.models import User
 
 def index_page(request):
 	if request.user.is_authenticated():
@@ -19,7 +20,14 @@ def get_user_actions(request):
 		userActions = list()
 		userActions.append({'name':'Keypairs', 'url':reverse('keypairs')})
 		userActions.append({'name':'Logs',     'url':reverse('logs')})
-		userActions.append({'name':'Options',  'url':reverse('options')})
+
+		if request.user.is_staff:
+			unapproved_count = User.objects.filter(is_superuser = False).count()
+			unapproved_count = ' ('+str(unapproved_count)+')' if unapproved_count > 0 else ''
+
+			userActions.append({'name':'Users'+unapproved_count,   'url':reverse('users')})
+			userActions.append({'name':'Options',  'url':reverse('options')})
+
 		userActions.append({'name':'Logout',   'url':reverse('logout')})
 		return userActions
 	else:
@@ -41,5 +49,6 @@ from .subviews.keypairs import keypairs_page, scan_rfid, new_keypair, delete_key
 from .subviews.session import login_page, logging_in, logout, must_be_logged_in
 from .subviews.signup import signup_page, add_user
 from .subviews.logs import logs_page
+from .subviews.users import all_users, user_toggle_active, user_toggle_staff, delete_user, approve_user
 from .subviews.options import options_page, edit_option_value, regenerate_secret_key
 

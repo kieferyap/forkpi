@@ -8,6 +8,7 @@ class NFCReader():
 
 	def __init__(self):
 		self.mifare = Mifare()
+		self.mifare.SAMconfigure()
 
 	def read_tag(self):
 		rfid_uid = self.mifare.scan_field()

@@ -21,3 +21,4 @@ class Option(Model):
 	name = TextField(unique=True)
 	value = TextField(default='')
 	default = TextField()
+	flavor_text = TextField(default='')

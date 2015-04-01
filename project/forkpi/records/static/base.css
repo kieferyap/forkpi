@@ -101,3 +101,19 @@ table {
 .greyed{
 	color: #CCCCCC;
 }
+.redded{
+	/*background-color: rgba(38, 166, 91, 0.2);*/
+	font-weight: 500;
+	color: #C0392B;
+	/*border: 2px solid #26A65B;*/
+}
+.x-small-text{
+	font-size: x-small;
+}
+.small-text{
+	font-size: small;
+}
+
+.invisible{
+	display: none;
+}

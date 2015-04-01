@@ -16,12 +16,16 @@ def logging_in(request):
 
 	user = auth.authenticate(username=username, password=password)
 	if user is not None:
-		if user.is_superuser:
+		if user.is_superuser and user.is_active:
 			auth.login(request, user)
 			messages.add_message(request, messages.SUCCESS, 'Awesome! Your login was successful.')
 			return redirect_to_name('keypairs')
-		else:
+		elif not user.is_superuser:
 			messages.add_message(request, messages.ERROR, 'Sorry, your account is still awaiting admin approval.')
+			return redirect_to_name('login')
+		else:
+			messages.add_message(request, messages.ERROR, 'Sorry, your account has been marked as inactive. '
+				'Please contact the admin to activate your account.')
 			return redirect_to_name('login')
 	else:
 		messages.add_message(request, messages.ERROR, 'I don\'t seem to recognize your username-password combination...')

@@ -11,8 +11,11 @@ from records.subviews import keypairs
 
 @login_required
 def options_page(request):
-	options = Option.objects.all()
-	return render(request, 'options.html', {'options': options})
+	if request.user.is_staff:
+		options = Option.objects.all()
+		return render(request, 'options.html', {'options': options})
+	else:
+		return redirect_to_name('index')
 
 @login_required
 def edit_option_value(request):

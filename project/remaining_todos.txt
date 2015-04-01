@@ -1,12 +1,41 @@
-
 [.] Change sign-up process
 	Admins can approve new users, edit db and view logs
 	Regular users can edit db and view logs
+
+
+Schema changes:
+	Keypair:
+		add field bytea fingerprint_template
+		separate hashes for pin and rfid_uid
+	Add table keypair_doors with fields
+		keypair_id
+		door_id
+	Add table doors with fields
+		id
+		name
+		serial
+	Logs:
+		add field Boolean fingerprint_used
+
+fingerprint matching process:
+	forkpi stores template in keypair upon enrollment
+	spoonpi: SELECT name, fingerprint_template FROM records_keypair WHERE door_serial=myserial
+	spoonpi: upload templates to scanner db in batches of 200
+		if match is found
+			allow name
+
+# Why we cannot match fingers in forkpi:
+	Multiple SpoonPis might cause simultaneous uploading to the forkpi scanner
+	Someone might use SpoonPi to verify while someone is enrolling in ForkPi
+
 BUG: Scan RFID close window while polling -> next poll causes crash
 Only forkpi has write keypair permission
 BUG: Can save keypair while waiting for rfid tag
 show error message if forkpi is not running
 restore all defaults for options
+Usability Test
+Fingerprint scanner and rfid polling at the same time
+Test if Pis can communicate over local network wirelessly using a router with no internet connection
 
 [x] write paper
 	[x] Cost

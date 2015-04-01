@@ -15,7 +15,7 @@
 						<tr>
 							<th class="col-md-4" data-placeholder="Search...">Name</th>
 							<th class="col-md-4" data-placeholder="Search...">Value</th>
-							<th class="col-md-2" data-placeholder="Search...">Default</th>
+							<th class="col-md-4" data-placeholder="Search...">Default Value</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -24,7 +24,11 @@
 							{% for option in options %}
 							<tr>
 								<td>
-									{{ option.name }}
+									{% if option.flavor_text|length > 0 %}
+										{{ option.flavor_text }}
+									{% else %}
+										{{ option.name }}
+									{% endif %}
 								</td>
 								<td ajaxUrl={% url 'edit option value' %} ajaxId="{{ option.id }}" ajaxField="name">
 									<span class="editable-text">
