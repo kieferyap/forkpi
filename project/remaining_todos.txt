@@ -1,41 +1,37 @@
-[.] Change sign-up process
-	Admins can approve new users, edit db and view logs
-	Regular users can edit db and view logs
-
 
 Schema changes:
 	Keypair:
-		add field bytea fingerprint_template
-		separate hashes for pin and rfid_uid
+		[x] add field bytea fingerprint_template
+		[x] separate hashes for pin and rfid_uid
 	Add table keypair_doors with fields
-		keypair_id
-		door_id
+		[x] keypair_id
+		[x] door_id
 	Add table doors with fields
-		id
-		name
-		serial
+		[x] id
+		[x] name
+		[x] serial
 	Logs:
-		add field Boolean fingerprint_used
-
-fingerprint matching process:
-	forkpi stores template in keypair upon enrollment
-	spoonpi: SELECT name, fingerprint_template FROM records_keypair WHERE door_serial=myserial
-	spoonpi: upload templates to scanner db in batches of 200
-		if match is found
-			allow name
+		[x] add field Boolean fingerprint_used
+[.] Test if Pis can communicate over local network wirelessly using a router with no internet connection
+	They cannot. D:
+[x] Fingerprint scanner and rfid polling at the same time (Spoonpi)
 
 # Why we cannot match fingers in forkpi:
 	Multiple SpoonPis might cause simultaneous uploading to the forkpi scanner
 	Someone might use SpoonPi to verify while someone is enrolling in ForkPi
 
-BUG: Scan RFID close window while polling -> next poll causes crash
-Only forkpi has write keypair permission
-BUG: Can save keypair while waiting for rfid tag
-show error message if forkpi is not running
-restore all defaults for options
-Usability Test
-Fingerprint scanner and rfid polling at the same time
-Test if Pis can communicate over local network wirelessly using a router with no internet connection
+// Fingerprint stuff
+Register fingerprint via forkpi (April Week 01)
+Change the saving-to-db function (April Week 02)
+Change the auth function (April Week 02)
+
+// Others
+Mass-delete disabled keypairs
+Change key used to encrypt keypairs to AES key transferred using RSA
+Scan RFID close window while polling -> next poll causes crash
+
+// 199 lol
+Usability Test (April Week 03)
 
 [x] write paper
 	[x] Cost
@@ -57,15 +53,47 @@ Test if Pis can communicate over local network wirelessly using a router with no
 [x] check valid pin for editing
 [x] PIN remove from pdf
 [x] Deactivate/disable keypairs
-[x] Filter logs by date, allowed/denied, uid, pin
-[x] Access ForkPi over the local network using its host name
-[x] Change lock-out time / attempt limit
-[.] Change key used to encrypt keypairs to AES key transferred using RSA - issue avoided since acceptable security already achieved?
-[x] BUG: Lockout timers are only updated after a transaction -> denied the first time you swipe after the timer expires
 [.] Option for 6 digit PIN - onchange disable all existing keypairs with 4-digit PIN
-	Or: Make PINs not necessarily uniform length; can be 4-10 digits
-		Might require the use of an 'Enter' button for security reasons
-[x] '#' enter, '*' backspace
-[x] read secret key from file
-[x] regenerate secret key
-[.] Mass-delete disabled keypairs - no mass disabling of keypairs so no need
+	[x] Or: Remove limits on max length; min length is 4
+
+(Aren't these done?)
+[x] Filter logs by date, allowed/denied, uid
+[x] Change lock-out time / attempt limit
+[x] Access ForkPi over the local network using its host name
+
+[x] Beautification
+	[x] Buttons must have a sort of margin around it.
+	[x] Options: more presentable names
+	[x] Color coding: red = denied
+	[x] Date in Users
+	[x] Visual cue for Admin in the Users
+	[x] Notification if there are new users awaiting approval
+
+[x] Signup Process
+	[x] Check what sort of user and append the menu according to such.
+	[x] Prevent access to certain views (users.py and options.py), if non-staff
+	[.] Upon signup, is_superuser must be false (already done)
+	[x] If user is inactive, do not allow login
+	[%] if not superuser:
+		Approve/Deny OR
+		(
+			if not staff
+				[x] Promote to Admin
+			else
+				[x] Demote to Regular
+			if active
+				[x] Deactivate
+			else
+				[x] Activate
+			[x] Delete
+		)
+	Raw text:
+		Change sign-up process
+		Admins can approve new users, edit db and view logs, in other words: (is_staff)
+			- Users
+			- Options
+			- Logs
+			- Keypairs
+		Regular users can edit db and view logs, in other words: (is_superuser)
+			- Logs
+			- Keypairs
