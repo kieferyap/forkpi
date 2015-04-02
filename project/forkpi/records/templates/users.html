@@ -14,11 +14,11 @@
 					<table id="keypairs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
 						<thead>
 							<tr>
-								<th class="col-md-1" data-placeholder="S..."># </th>
-								<th class="col-md-3" data-placeholder="Search...">Username </th>
+								<!--th class="col-md-1" data-placeholder="S..."># </th-->
+								<th class="col-md-2" data-placeholder="Search...">Username </th>
 								<th class="col-md-3" data-placeholder="Search...">E-Mail Address</th>
-								<th class="col-md-1" data-placeholder="S...">Login</th>
-								<th class="col-md-1" data-placeholder="S...">Join</th>
+								<th class="col-md-2" data-placeholder="S...">Last Login</th>
+								<th class="col-md-2" data-placeholder="S...">Join Date</th>
 								<th class="col-md-3" data-placeholder="Search...">Actions</th>
 							</tr>
 						</thead>
@@ -33,11 +33,10 @@
 										redded
 									{% endif %}
 								">
-									<td>{{ user.id }}</td>
+									<!--td>{{ user.id }}</td-->
 
 									<!-- Username -->
 									<td>																
-										{{ user.username }}
 										<span
 											id="star-{{ user.id }}"
 											class="glyphicon glyphicon-star small-text"
@@ -48,21 +47,23 @@
 											"
 										></span>
 										{% if not user.is_superuser %}
+											<span class="invisible">0</span>
 											<span id="unapproved-{{ user.id }}" class="small-text glyphicon glyphicon-exclamation-sign"></span>
 										{% endif %}				
+										{{ user.username }}
 									</td>
 
 									<!-- Name -->
-									<td>
+									<td class="small-text">
 										{{ user.email }}<br/>
 										{{ user.firstname }} {{ user.lastname }}
 									</td>
 
 									<!-- Dates -->
-									<td class="x-small-text">
+									<td class="small-text">
 										{{ user.last_login | date:"Y-m-d H:i:s"}}
 									</td>
-									<td class="x-small-text">
+									<td class="small-text">
 										{{ user.date_joined | date:"Y-m-d H:i:s"}}
 									</td>
 
@@ -89,7 +90,7 @@
 								{% endfor %}
 							{% else %}
 								<tr>
-									<td colspan="6" style="text-align:center">No users found.</td>
+									<td colspan="5" style="text-align:center">No users found.</td>
 								</tr>
 							{% endif %}
 						</tbody>
