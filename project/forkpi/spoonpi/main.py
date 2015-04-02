@@ -7,6 +7,7 @@ import time
 from math import ceil
 
 from rfid_thread import *
+from fingerprint_thread import *
 
 class SpoonPi:
 	# LOCKOUT TABLE columns [rfid_uid, incorrect_streak, lockout]
@@ -94,21 +95,35 @@ class SpoonPi:
 				row[SpoonPi.COL_STREAK] = 0
 
 	def run(self):
+		"""
+		Flow:
+			Ask for RFID or Fingerprint
+			If the RFID or Fingerprint is authorized, access granted.
+			Else, ask for PIN, then check for auth.
+			Notice that there's no three-factor auth (all-three).
+			Because fuck that shit.
+		"""
 		
 		# Start the RFID Thread
 		rfid_thread = RfidThread()
 		rfid_thread.start()
 
 		# Start the Fingerprint Thread
-		# fingerprint_thread = FingerprintThread()
-		# fingerprint_thread.start()
+		fingerprint_thread = FingerprintThread()
+		fingerprint_thread.start()
 
+		# Some initializations
 		is_ask_for_pin = False
+		finger_id = 0
+		rfid_uid = 0
 
 		while True:
 
 			# If the RFID thread goes: "An RFID card has been swiped!"
 			if rfid_thread.is_found:
+
+				# Ask the fingerprint thread to stop polling
+				fingerprint_thread.is_not_polling = True
 
 				# Grab the UID and do single-factor RFID authorization check:
 				rfid_uid = rfid_thread.rfid_uid
@@ -121,13 +136,30 @@ class SpoonPi:
 					is_ask_for_pin = True
 
 			# If the Fingerprint thread goes: "A new fingerprint has been found!"
+			if fingerprint_thread.is_found:
 
+				# Ask the RFID thread to stop polling
+				rfid_thread.is_not_polling = True
+
+				# Grab the ID of the fingerprint template
+				finger_id = fingerprint_thread.finger_id
+
+				# TODO: Check if there is single-factor auth for said fingerprint
+				if False:
+					pass
+				# Else, ask for PIN.
+				else:
+					# Temporary rfid for the currently working PIN + RFID authentication
+					rfid_uid = "1234abcd"
+					is_ask_for_pin = True
 
 			# If somebody's asking for the PIN
 			if is_ask_for_pin:
 
 				# Grab the pin and do an authorization check
 				pin, timed_out = self.pin_authentication()
+
+				# TODO: Incorporate fingerprint in the authorization
 				is_authorized, names = self.db.authorize(pin=pin, rfid_uid=rfid_uid)
 
 				# If authorized, Allow entry. Else: Access denied.
@@ -137,7 +169,10 @@ class SpoonPi:
 					self.deny_access(reason="wrong pin", pin=pin, rfid_uid=rfid_uid)
 					is_authenticated = False
 			
-				# Poll for the next RFID
+				# Poll for the next RFID and Fingerprint
+				fingerprint_thread.is_not_polling = False
+				fingerprint_thread.is_found = False
+				rfid_thread.is_not_polling = False
 				rfid_thread.is_found = False
 				is_ask_for_pin = False
 

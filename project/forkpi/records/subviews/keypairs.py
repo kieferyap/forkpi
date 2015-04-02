@@ -77,7 +77,7 @@ def new_keypair(request):
 
 	hashpass = hash_keypair(pin, rfid_uid)
 
-	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hashpass=hashpass)
+	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hash_pin_rfid=hashpass)
 	messages.add_message(request, messages.SUCCESS, 'Pair addition successful.')
 	return redirect_to_name('keypairs')
 

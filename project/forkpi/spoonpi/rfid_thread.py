@@ -8,11 +8,12 @@ class RfidThread(threading.Thread):
 		print('Loading NFC Reader...')
 		self.rfid_uid = ''					# The UID of the newly swiped RFID
 		self.is_found = False				# Has a new RFID been swiped?
+		self.is_not_polling = False				# A flag which sets polling
 		self.nfc_reader = NFCReader()		# The NFC Reader
 
 	def run(self):
 		while True:
-			while not self.is_found:
+			while not (self.is_found or self.is_not_polling):
 				self.rfid_uid = self.nfc_reader.read_tag()
 				print("[RFIDThread]: Found a new UID:", self.rfid_uid)
 				self.is_found = True
