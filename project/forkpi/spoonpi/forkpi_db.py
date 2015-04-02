@@ -19,7 +19,7 @@ class ForkpiDB(object):
         '''
         c = self.conn.cursor()
         hashpass = self.hash_keypair(pin, rfid_uid)
-        c.execute("SELECT name FROM records_keypair WHERE hashpass = '%s' AND is_active=TRUE" % hashpass)
+        c.execute("SELECT name FROM records_keypair WHERE hash_pin_rfid = '%s' AND is_active=TRUE" % hashpass)
         result = c.fetchall()
         is_authorized = (len(result) > 0)
         names = ', '.join([x[0] for x in result])
@@ -33,8 +33,8 @@ class ForkpiDB(object):
 
     def log(self, action, details='', pin='', rfid_uid=''):
         c = self.conn.cursor()
-        c.execute("INSERT INTO records_log(created_on, action, details, pin, rfid_uid) \
-                     VALUES (now(), '%s', '%s', '%s', '%s')" % (action, details, pin, rfid_uid))
+        c.execute("INSERT INTO records_log(created_on, action, details, pin, rfid_uid, is_fingerprint_used) \
+                     VALUES (now(), '%s', '%s', '%s', '%s', false)" % (action, details, pin, rfid_uid))
 
     def fetch_option(self, name):
         c = self.conn.cursor()

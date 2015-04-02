@@ -6,8 +6,6 @@ from forkpi_db import ForkpiDB
 import time
 from math import ceil
 
-from rfid_thread import *
-
 class SpoonPi:
 	# LOCKOUT TABLE columns [rfid_uid, incorrect_streak, lockout]
 	COL_UID, COL_STREAK, COL_TIME_LEFT = list(range(3))
@@ -17,8 +15,8 @@ class SpoonPi:
 
 		print('Loading OLED...')
 		self.led = OLED()
-		# print('Loading NFC Reader...')
-		# self.nfc_reader = NFCReader()
+		print('Loading NFC Reader...')
+		self.nfc_reader = NFCReader()
 		print('Loading keypad...')
 		self.keypad = Keypad()
 		print('Loading the ForkPi database...')
@@ -51,6 +49,12 @@ class SpoonPi:
 		self.db.log_denied(reason=reason, pin=pin, rfid_uid=rfid_uid)
 		self.led.clear_display()
 		self.led.puts(led_message)
+
+	def rfid_authentication(self):
+		self.led.clear_display()
+		self.led.puts("Swipe RFID")
+		rfid_uid = self.nfc_reader.read_tag()
+		return rfid_uid
 
 	def pin_authentication(self):
 		'''
@@ -94,57 +98,52 @@ class SpoonPi:
 				row[SpoonPi.COL_STREAK] = 0
 
 	def run(self):
-		
-		# Start the RFID Thread
-		rfid_thread = RfidThread()
-		rfid_thread.start()
-
-		# Start the Fingerprint Thread
-		# fingerprint_thread = FingerprintThread()
-		# fingerprint_thread.start()
-
-		is_ask_for_pin = False
-
 		while True:
-
-			# If the RFID thread goes: "An RFID card has been swiped!"
-			if rfid_thread.is_found:
-
-				# Grab the UID and do single-factor RFID authorization check:
-				rfid_uid = rfid_thread.rfid_uid
-				is_authorized, names = self.db.authorize(pin='', rfid_uid=rfid_uid)
-
-				# If authorized, allow entry. else: Set the ask_for_pin flag = True
-				if is_authorized:
-					self.allow_access(names=names, pin='', rfid_uid=rfid_uid)
-				else:
-					is_ask_for_pin = True
-
-			# If the Fingerprint thread goes: "A new fingerprint has been found!"
-
-
-			# If somebody's asking for the PIN
-			if is_ask_for_pin:
-
-				# Grab the pin and do an authorization check
-				pin, timed_out = self.pin_authentication()
-				is_authorized, names = self.db.authorize(pin=pin, rfid_uid=rfid_uid)
-
-				# If authorized, Allow entry. Else: Access denied.
-				if is_authorized:
-					self.allow_access(names=names, pin=pin, rfid_uid=rfid_uid)
-				else:
-					self.deny_access(reason="wrong pin", pin=pin, rfid_uid=rfid_uid)
-					is_authenticated = False
+			time_started = time.time()
 			
-				# Poll for the next RFID
-				rfid_thread.is_found = False
-				is_ask_for_pin = False
+			rfid_uid = self.rfid_authentication()
 
-				# LED: "Swipe RFID or Finger"
-				self.led.clear_display()
-				self.led.puts("Swipe RFID\nor Finger")
+			time_elapsed = int(time.time() - time_started)
+			self.update_lockout_timers(time_elapsed)
 
+			time_started = time.time()
+			
+			is_authorized, names = self.db.authorize(pin='', rfid_uid=rfid_uid)
+			if is_authorized:
+				self.allow_access(names=names, pin='', rfid_uid=rfid_uid)
+			else:
+				lockout_row = self.find_lockout_row(rfid_uid)
+
+				if lockout_row[SpoonPi.COL_TIME_LEFT] > 0:
+					self.deny_access(reason="locked out", pin='', rfid_uid=rfid_uid,
+						led_message="Locked out\nfor %sm" % int(ceil(lockout_row[SpoonPi.COL_TIME_LEFT] / 60.0)))
+				else:
+					pin, timed_out = self.pin_authentication()
+
+					is_authenticated = True
+					if timed_out:
+						self.deny_access(reason="timeout", pin=pin, rfid_uid=rfid_uid, led_message="Timeout")
+						is_authenticated = False
+					else:
+						is_authorized, names = self.db.authorize(pin=pin, rfid_uid=rfid_uid)
+						if is_authorized:
+							self.allow_access(names=names, pin=pin, rfid_uid=rfid_uid)
+						else:
+							self.deny_access(reason="wrong pin", pin=pin, rfid_uid=rfid_uid)
+							is_authenticated = False
+
+					if is_authenticated:
+						lockout_row[SpoonPi.COL_STREAK] = 0
+						lockout_row[SpoonPi.COL_TIME_LEFT] = 0
+					else:
+						lockout_row[SpoonPi.COL_STREAK] += 1
+						if lockout_row[SpoonPi.COL_STREAK] >= self.attempt_limit:
+							lockout_row[SpoonPi.COL_TIME_LEFT] = self.lockout_time
+
+			time.sleep(2)
+			time_elapsed = int(time.time() - time_started)
+			self.update_lockout_timers(time_elapsed)
+			# print self.lockout_table
 
 if __name__ == '__main__':
 	SpoonPi().run()
