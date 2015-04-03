@@ -26,6 +26,9 @@ def decrypt(value, key=None):
 def hash_keypair(pin, rfid_uid):
 	return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
 
+def hash_string(value):
+	return hashlib.sha1((value).encode()).hexdigest()
+
 @login_required
 def keypairs_page(request):
 	keypairs = Keypair.objects.all()
@@ -75,9 +78,10 @@ def new_keypair(request):
 	if is_error:
 		return redirect_to_name('keypairs')
 
-	hashpass = hash_keypair(pin, rfid_uid)
+	hashpin = hash_string(pin)
+	hashrfid = hash_string(rfid_uid)
 
-	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hash_pin_rfid=hashpass)
+	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hash_pin=hashpin, hash_rfid=hashrfid)
 	messages.add_message(request, messages.SUCCESS, 'Pair addition successful.')
 	return redirect_to_name('keypairs')
 

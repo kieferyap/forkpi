@@ -2,13 +2,18 @@ from django.db.models import *
 from django.contrib.auth.models import User
 from datetime import datetime
 # from encryption import EncryptedCharField, EncryptedTextField
+# P, R, F: PR, PF, FR, R, F, PFR
 
 class Keypair(Model):
 	name = TextField(default='')
 	pin = TextField(default='', null=True, blank=True)
 	rfid_uid = TextField(default='', null=True, blank=True)
 	fingerprint_template = TextField(default='', null=True, blank=True)
-	hash_pin = TextField(default='')
+	hash_pin_rfid = TextField(default='')
+	hash_pin_finger = TextField(default='')
+	hash_finger_rfid = TextField(default='')
+	hash_all = TextField(default='')
+	hash_finger = TextField(default='')
 	hash_rfid = TextField(default='')
 	is_active = BooleanField(default=True)
 

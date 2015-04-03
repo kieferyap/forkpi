@@ -25,6 +25,9 @@ Register fingerprint via forkpi (April Week 01)
 Change the saving-to-db function (April Week 02)
 Change the auth function (April Week 02)
 
+// Doors
+Add a module which is for door administration (April Week 02)
+
 // Others
 Mass-delete disabled keypairs
 Change key used to encrypt keypairs to AES key transferred using RSA

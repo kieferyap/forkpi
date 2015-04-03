@@ -100,7 +100,7 @@ class SpoonPi:
 			Ask for RFID or Fingerprint
 			If the RFID or Fingerprint is authorized, access granted.
 			Else, ask for PIN, then check for auth.
-			Notice that there's no three-factor auth (all-three).
+			Notice that there's no three-factor auth.
 			Because fuck that shit.
 		"""
 		
@@ -114,8 +114,13 @@ class SpoonPi:
 
 		# Some initializations
 		is_ask_for_pin = False
+		is_resetting = False
 		finger_id = 0
 		rfid_uid = 0
+
+		# LED initializations
+		self.led.clear_display()
+		self.led.puts("Swipe RFID\nor Finger")
 
 		while True:
 
@@ -132,6 +137,7 @@ class SpoonPi:
 				# If authorized, allow entry. else: Set the ask_for_pin flag = True
 				if is_authorized:
 					self.allow_access(names=names, pin='', rfid_uid=rfid_uid)
+					is_resetting = True
 				else:
 					is_ask_for_pin = True
 
@@ -146,7 +152,7 @@ class SpoonPi:
 
 				# TODO: Check if there is single-factor auth for said fingerprint
 				if False:
-					pass
+					is_resetting = True
 				# Else, ask for PIN.
 				else:
 					# Temporary rfid for the currently working PIN + RFID authentication
@@ -169,6 +175,11 @@ class SpoonPi:
 					self.deny_access(reason="wrong pin", pin=pin, rfid_uid=rfid_uid)
 					is_authenticated = False
 			
+				# Set reset flag to true
+				is_resetting = True
+
+			if is_resetting:
+
 				# Poll for the next RFID and Fingerprint
 				fingerprint_thread.is_not_polling = False
 				fingerprint_thread.is_found = False
@@ -179,6 +190,9 @@ class SpoonPi:
 				# LED: "Swipe RFID or Finger"
 				self.led.clear_display()
 				self.led.puts("Swipe RFID\nor Finger")
+
+				# Set flag to false
+				is_resetting = False
 
 
 if __name__ == '__main__':

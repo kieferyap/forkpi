@@ -6,7 +6,7 @@ class FingerprintThread(threading.Thread):
 	def __init__(self):
 		super(FingerprintThread, self).__init__()
 		print('Loading Fingerprint Reader...')
-		self.fps = FingerprintScanner(debug=True)	# The Fingerprint scanner
+		self.fps = FingerprintScanner(debug=False)	# The Fingerprint scanner
 		self.finger_id = 0							# The ID of the newly swiped finger
 		self.is_not_polling = False					# A flag which sets polling
 		self.is_found = False						# Has a new finger been swiped?

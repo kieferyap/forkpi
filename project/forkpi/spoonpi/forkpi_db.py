@@ -10,6 +10,9 @@ class ForkpiDB(object):
     def hash_keypair(self, pin, rfid_uid):
         return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
 
+    def hash_string(self, value):
+        return hashlib.sha1((value).encode()).hexdigest()
+
     def authorize(self, pin, rfid_uid):
         '''
         Returns (is_authorized, names)
@@ -18,8 +21,9 @@ class ForkpiDB(object):
             This is an empty string if is_authorized is False
         '''
         c = self.conn.cursor()
-        hashpass = self.hash_keypair(pin, rfid_uid)
-        c.execute("SELECT name FROM records_keypair WHERE hash_pin_rfid = '%s' AND is_active=TRUE" % hashpass)
+        pin = self.hash_string(pin)
+        rfid_uid = self.hash_string(rfid_uid)
+        c.execute("SELECT name FROM records_keypair WHERE hash_pin = '%s' AND hash_rfid = '%s' AND is_active=TRUE" % (pin, rfid_uid))
         result = c.fetchall()
         is_authorized = (len(result) > 0)
         names = ', '.join([x[0] for x in result])
