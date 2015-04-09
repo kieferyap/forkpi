@@ -24,6 +24,13 @@
 					</div>
 					<input type="button" class="btn btn-success scan-new-rfid" name="scan-new-rfid" value="Scan RFID">
 				</div>
+				<div class="form-group">
+					<label for="fingerprint_template" class="col-md-2 control-label">Fingerprint</label>
+					<div class="col-md-8">
+						<input type="text" class="form-control" id="inputFinger" name="fingerprint_template" placeholder="0123456789abcdef012345...">
+					</div>
+					<input type="button" class="btn btn-success scan-new-fingerprint" name="scan-new-fingerprint" value="Scan Finger">
+				</div>
 				{% csrf_token %}
 				<button class="btn btn-primary col-md-2 col-md-offset-10 signup-button" type="submit">Add to Keypairs</button>
 			</form>
@@ -33,7 +40,7 @@
 <br/>
 <br/>
 <div class="row">
-	<div class="col-md-10 col-md-offset-1">
+	<div class="col-md-12">
 		<div class="row col-md-12">
 			<div class="panel panel-primary">
 				<div class="panel-heading">
@@ -48,6 +55,7 @@
 							<th class="col-md-3" data-placeholder="Search...">Name </th>
 							<th class="col-md-2" data-placeholder="Search...">PIN </th>
 							<th class="col-md-3" data-placeholder="Search...">RFID UID </th>
+							<th class="col-md-3" data-placeholder="Search...">Fingerprint</th>
 							<th class="col-md-3" data-placeholder="Search...">Actions</th>
 						</tr>
 					</thead>
@@ -80,9 +88,24 @@
 								</td>
 
 								<!-- UID -->
-								<td ajaxUrl="{% url 'edit keypair uid' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="rfid">
+								<td ajaxUrl="{% url 'edit keypair rfid' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="edit-rfid">
 									<span class="editable-text">
-									{{ keypair.rfid_uid }}
+									{% if keypair.rfid_uid %}
+										{{ keypair.rfid_uid }}
+									{% else %}
+										- - -
+									{% endif %}
+									</span>
+								</td>
+
+								<!-- Fingerprint -->
+								<td ajaxUrl="{% url 'edit keypair fingerprint' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="edit-fingerprint">
+									<span class="editable-text">
+									{% if keypair.fingerprint_template %}
+										{{ keypair.fingerprint_template }}
+									{% else %}
+										- - -
+									{% endif %}
 									</span>
 								</td>
 								

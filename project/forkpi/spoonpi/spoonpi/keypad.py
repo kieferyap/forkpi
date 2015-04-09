@@ -22,7 +22,7 @@ class Keypad:
             GPIO.output(col, 1)
 
         for row in Keypad.ROWS:
-            GPIO.setup(row, GPIO.IN, pull_up_down = GPIO.PUD_UP)
+            GPIO.setup(row, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
         try:
             time_started = time.mktime(time.gmtime())

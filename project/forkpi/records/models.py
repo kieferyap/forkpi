@@ -1,7 +1,7 @@
 from django.db.models import *
 from django.contrib.auth.models import User
+
 from datetime import datetime
-# from encryption import EncryptedCharField, EncryptedTextField
 
 class Keypair(Model):
 	name = TextField(default='')
@@ -11,6 +11,8 @@ class Keypair(Model):
 	hash_pin = TextField(default='')
 	hash_rfid = TextField(default='')
 	is_active = BooleanField(default=True)
+	doors = ManyToManyField('Door')
+
 
 class Log(Model):
 	created_on = DateTimeField(auto_now_add=True, default=datetime.now)
@@ -18,7 +20,7 @@ class Log(Model):
 	details = TextField(default='', null=True, blank=True)
 	pin = TextField(default='', null=True, blank=True)
 	rfid_uid = TextField(default='', null=True, blank=True)
-	is_fingerprint_used = BooleanField(default=False)
+	used_fingerprint = BooleanField(default=False)
 
 class Option(Model):
 	name = TextField(unique=True)
@@ -30,6 +32,6 @@ class Door(Model):
 	name = TextField(default='', unique=True)
 	serial = TextField(unique=True)
 
-class Keypair_Door(Model):
-	keypair_id = ForeignKey('Keypair')
-	door_id = ForeignKey('Door')
+# class Keypair_Door(Model):
+# 	keypair = ForeignKey('Keypair')
+# 	door = ForeignKey('Door')

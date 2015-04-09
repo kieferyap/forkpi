@@ -73,12 +73,15 @@ table {
 	max-width: 100%;
 	padding: 2px;
 	border-radius: 3px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 .editable-text:hover{
 	border: 1px solid #ADADAD;
 }
 
-.editable-done, .scan-edit-rfid{
+.editable-done, .scan-edit-rfid, .scan-edit-fingerprint{
 	display: inline-block;	
 	padding-right: 4px;
 	padding-left: 4px;
@@ -87,13 +90,15 @@ table {
 	cursor: pointer;
 }
 
-.completed-check, .scan-edit-rfid{
+.completed-check, .scan-edit-rfid, .scan-edit-fingerprint{
 	position: relative;
 	top: 3px;
 	font-size: 20px;
 	color: #60C739;
 	padding-left: 3px;
 }
+
+
 
 .control-label{
 	padding-top: 0px !important;

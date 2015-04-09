@@ -29,7 +29,7 @@ def add_user(request):
 		return redirect_to_name('signup')
 
 	## Insert user into database
-	User.objects.create_user(username = username, password = password, email = email)
+	User.objects.create_user(username=username, password=password, email=email)
 
 	messages.add_message(request, messages.SUCCESS, 'Your sign up was successful and is now awaiting admin approval.')
 	return redirect_to_name('login')

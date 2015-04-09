@@ -1,7 +1,5 @@
-import FPS
 from PIL import Image, ImageEnhance
 import numpy as np
-# FPS.BAUD = 115200
 
 def desplazarImagen(image,image2,delta):
     "Roll an image sideways"
@@ -99,24 +97,13 @@ def matchBif(im1,im2):
     print(bif2)
     return True if bif2[0]-bif1[0] <= bif2[0]*tolerance or bif2[1]-bif1[1] <= bif2[0]*tolerance else False
 
-def GetRawImg(fps):
-    ret = bytes()
-    fps.SetLED(True)
-    if fps.GetRawImage():
-        response = fps._lastResponse.RawBytes[16:]
-        # print fps.serializeToSend(response)
-        print('Size %s' % len(response))
-        ret = bytes(response)
-    FPS.delay(0.1)
-    return ret
-
 def SavedImg(imgName):    
     img = Image.open(imgName + '.binar.bmp')
     return img
 
 def processImage(imgName,imgRaw):
-    # img = Image.fromstring(mode='L',size=(160,120),data= imgRaw)
-    img = Image.fromstring(mode='L',size=(160, len(imgRaw)/160),data= imgRaw)
+    img = Image.fromstring(mode='L',size=(160,120),data= imgRaw)
+    # img = Image.fromstring(mode='L',size=(160, len(imgRaw)/160),data= imgRaw)
     enh = ImageEnhance.Brightness(img)
     img = enh.enhance(1.2)
     enh = ImageEnhance.Contrast(img)
@@ -134,52 +121,3 @@ def processImage(imgName,imgRaw):
 
 def SaveImage(imgName,imgRaw):
     img = processImage(imgName,imgRaw)
-
-def Enroll(fps,id):
-    imgRaw = GetRawImg(fps)# + GetRawImg(fps) + GetRawImg(fps) + GetRawImg(fps) + GetRawImg(fps) + GetRawImg(fps)
-    if imgRaw.__len__()>0:
-        # FPS.delay(3)
-        SaveImage('fingerprint'+str(id)+'.raw', imgRaw)
-    """
-        imgRaw2 = GetRawImg(fps)
-        if imgRaw2.__len__()>0:
-            FPS.delay(3)
-            SaveImage('fingerprint2.raw', imgRaw2)
-            imgRaw3 = GetRawImg(fps)
-            if imgRaw3.__len__()>0:
-                FPS.delay(3)
-                SaveImage('fingerprint3.raw', imgRaw3)
-    """
-
-def Verify(fps,id):
-    imgRaw = GetRawImg(fps)
-    if imgRaw.__len__()>0:
-        FPS.delay(3)
-        img = processImage('fingerprint_verify_'+id+'.raw',imgRaw)
-        savedImg1 = SavedImg('fingerprint'+str(id)+'.raw')
-        return 'Verified is: %s' % (str(matchBif(img, savedImg1)))
-    else:
-        return 'Not Verified'
-
-
-
-if __name__ == '__main__':
-    fps =  FPS.FPS_GT511C3(device_name='/dev/ttyAMA0',baud=9600,timeout=2)
-    #fps.ChangeBaudRate(9600)
-    fps.UseSerialDebug = True
-    fps.SetLED(True) # Turns ON the CMOS LED
-    
-    print('Put your finger in the scan')
-    counter = 0 # simple counter for wait 10 seconds
-    while counter < 10:
-        if fps.IsPressFinger():  #verify if the finger is in the scan
-            print('Your finger is in the scan')
-            Enroll(fps, 1)
-            break
-        else:
-            FPS.delay(1) #wait 1 second
-            counter = counter + 1
-    
-    fps.SetLED(False) # Turns OFF the CMOS LED
-    fps.Close() # Closes serial connection
-    pass

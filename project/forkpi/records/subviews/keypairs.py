@@ -4,13 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 
 import hashlib
+import binascii
 
 from records.views import render, redirect_to_name
 from records.models import Keypair
-from spoonpi.nfc_reader import NFCReader
 from records.aes import AES
 
-is_polling = False
+from spoonpi.spoonpi.nfc_reader import NFCReader
+from spoonpi.spoonpi.fingerprint import FingerprintScanner
 
 
 def encrypt(value, key=None):
@@ -22,9 +23,6 @@ def decrypt(value, key=None):
 	if not key:
 		key = settings.SECRET_KEY
 	return AES(key).decrypt(value)
-
-def hash_keypair(pin, rfid_uid):
-	return hashlib.sha1((pin + rfid_uid).encode()).hexdigest()
 
 def hash_string(value):
 	return hashlib.sha1((value).encode()).hexdigest()
@@ -49,16 +47,18 @@ def reencrypt_keypairs(old_key, new_key):
 
 @login_required
 def scan_rfid(request):
-	global is_polling
-	if not is_polling:
-		is_polling = True
-		uid = NFCReader().read_tag()
-		is_polling = False
-		return HttpResponse(uid)
-	else:
-		response = HttpResponse("Please try again at a later time. Sorry for the inconvenience.")
-		response.status_code = 400
-		return response
+	uid = NFCReader().read_tag()
+	return HttpResponse(uid)
+	# TODO prevent multiple pollings from happening
+	# response = HttpResponse("Please try again at a later time. Sorry for the inconvenience.")
+	# response.status_code = 400
+	# return response
+
+@login_required
+def scan_fingerprint(request):
+	template = FingerprintScanner(debug=False).make_template()
+	template = binascii.hexlify(template)
+	return HttpResponse(template)
 
 def is_valid_pin(pin):
 	return len(pin)==0 or pin.isdigit()
@@ -68,6 +68,7 @@ def new_keypair(request):
 	name = request.POST['name']
 	pin = request.POST['pin']
 	rfid_uid = request.POST['rfid_uid']
+	fingerprint_template = request.POST['fingerprint_template']
 
 	is_error = False
 
@@ -81,7 +82,7 @@ def new_keypair(request):
 	hashpin = hash_string(pin)
 	hashrfid = hash_string(rfid_uid)
 
-	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hash_pin=hashpin, hash_rfid=hashrfid)
+	Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid), hash_pin=hashpin, hash_rfid=hashrfid, fingerprint_template=fingerprint_template)
 	messages.add_message(request, messages.SUCCESS, 'Pair addition successful.')
 	return redirect_to_name('keypairs')
 
@@ -98,7 +99,7 @@ def edit_keypair_pin(request):
 	if is_valid_pin(pin):
 		keypair = Keypair.objects.get(id = request.POST['kid'])
 		keypair.pin = encrypt(pin)
-		keypair.hashpass = hash_keypair(pin, decrypt(keypair.rfid_uid))
+		keypair.hash_pin = hash_string(pin)
 		keypair.save()
 		return HttpResponse("Successful.")
 	else:
@@ -108,11 +109,19 @@ def edit_keypair_pin(request):
 		return response
 
 @login_required
-def edit_keypair_uid(request):
+def edit_keypair_rfid(request):
 	rfid_uid = request.POST['value']
 	keypair = Keypair.objects.get(id = request.POST['kid'])
 	keypair.rfid_uid = encrypt(rfid_uid)
-	keypair.hashpass = hash_keypair(decrypt(keypair.pin), rfid_uid)
+	keypair.hash_rfid = hash_string(rfid_uid)
+	keypair.save()
+	return HttpResponse("Successful.")
+
+@login_required
+def edit_keypair_fingerprint(request):
+	fingerprint_template = request.POST['value']
+	keypair = Keypair.objects.get(id = request.POST['kid'])
+	keypair.fingerprint_template = fingerprint_template
 	keypair.save()
 	return HttpResponse("Successful.")
 

@@ -1,3 +1,4 @@
+// For table sorting and filtering
 $(document).ready(function() {
 	$(".tablesorter").tablesorter({
 		widgets: ["filter"],
@@ -12,7 +13,10 @@ $(document).ready(function() {
 			filter_saveFilters: true,
 		}
 	});
+});
 
+// For editing text
+$(document).ready(function() {
 	var editableTextTrigger = false;
 	var readyToClick = 1;
 	var curListId = 0;
@@ -33,8 +37,10 @@ $(document).ready(function() {
 		
 		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
 		
-		if($(this).parent().attr('type') == 'rfid'){
+		if ($(this).parent().attr('type') == 'edit-rfid'){
 			doneButton = '<div class="scan-edit-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
+		} else if($(this).parent().attr('type') == 'edit-fingerprint'){
+			doneButton = '<div class="scan-edit-fingerprint"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
 		}
 
 		$(this).parent().html(current+doneButton);
@@ -50,7 +56,7 @@ $(document).ready(function() {
 		var ajaxId = $(this).parent().attr('ajaxId');
 		var ajaxField = $(this).parent().attr('ajaxField');
 		var ajaxValue = $(this).parent().children('input').val().replace('/', '&sol;').trim();
-		var token = document.getElementsByName('csrfmiddlewaretoken')[0].value;
+		var token = getToken();
 
 		$('.editing-text').off('click');
 			
@@ -81,27 +87,53 @@ $(document).ready(function() {
 			}
 		});		
 	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
-		ajaxUrl = '/keypairs/scanrfid';
-		var isEditing = $(this).parent().attr('type') == 'rfid';
-
-		var x = $(this);
+		ajaxUrl = '/keypairs/scan/rfid';
+		var isEditing = $(this).parent().attr('type') == 'edit-rfid';
 
 		if(isEditing)
 			textSelector = '.editing-text';
 		else
 			textSelector = '#inputUid';
-	
-		x.hide(256);	
+		
+		var scan_button = $(this);
+		scan_button.hide(256);	
 		$(textSelector).val('Waiting for RFID data...');
 
 		$.ajax({
 			type: 'POST',
 			url: ajaxUrl,
 			data: {
-				'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
+				'csrfmiddlewaretoken': getToken()
 			},
 			success: function(msg){
-				x.show(256);
+				scan_button.show(256);
+				$(textSelector).val(msg);
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+			}
+		});
+	}).on('click', '.scan-new-fingerprint, .scan-edit-fingerprint', function(e){
+		ajaxUrl = '/keypairs/scan/fingerprint';
+		var isEditing = $(this).parent().attr('type') == 'edit-fingerprint';
+
+		if(isEditing)
+			textSelector = '.editing-text';
+		else
+			textSelector = '#inputFinger';
+	
+		var scan_button = $(this);
+		scan_button.hide(256);	
+		$(textSelector).val('Waiting for finger...');
+
+		$.ajax({
+			type: 'POST',
+			url: ajaxUrl,
+			data: {
+				'csrfmiddlewaretoken': getToken()
+			},
+			success: function(msg){
+				scan_button.show(256);
 				$(textSelector).val(msg);
 			},
 			error: function(msg){
@@ -175,124 +207,53 @@ $(document).ready(function() {
 	});
 });
 
-
-// For users
 function toggleActiveUser(uid){
 	ajaxUrl = '/users/toggleactiveuser';
-
-	$.ajax({
-		type: 'POST',
-		url: ajaxUrl,
-		data: {
-			'uid': uid,
-			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		},
-		success: function(msg){
-		},
-		error: function(msg){
-			alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
-			location.reload();
-		}
-	});
+	postToUrl(ajaxUrl, {'uid':uid});
 }
-
 
 function toggleStaff(uid){
 	ajaxUrl = '/users/togglestaff';
-
-	$.ajax({
-		type: 'POST',
-		url: ajaxUrl,
-		data: {
-			'uid': uid,
-			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		},
-		success: function(msg){
-		},
-		error: function(msg){
-			alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
-			location.reload();
-		}
-	});
+	postToUrl(ajaxUrl, {'uid':uid});
 }
 
 function approveUser(uid){
 	ajaxUrl = '/users/approveuser';
-
-	$.ajax({
-		type: 'POST',
-		url: ajaxUrl,
-		data: {
-			'uid': uid,
-			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		},
-		success: function(msg){
-		},
-		error: function(msg){
-			alert('Whoops, looks like something went wrong... Sorry \'bout that, let me refresh for you...');
-			location.reload();
-		}
-	});
+	postToUrl(ajaxUrl, {'uid':uid});
 }
 
 function deleteUser(uid){
 	$('#user-'+uid).hide(256);
 	ajaxUrl = '/users/delete';
-
-	$.ajax({
-		type: 'POST',
-		url: ajaxUrl,
-		data: {
-			'uid': uid,
-			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		},
-		success: function(msg){
-		},
-		error: function(msg){
-			alert('Whoops, looks like something went wrong... Sorry \'bout that, let me refresh for you...');
-			location.reload();
-		}
-	});
+	postToUrl(ajaxUrl, {'uid':uid});
 }
 
 
-
-// For keypairs
 function toggleActiveKeypair(kid){
 	ajaxUrl = '/keypairs/toggleactive';
+	postToUrl(ajaxUrl, {'kid':kid});
+}
 
+function deleteKeypair(kid) {
+	$('#kp-'+kid).hide(256);
+	ajaxUrl = '/keypairs/delete';
+	postToUrl(ajaxUrl, {'kid':kid});
+}
+
+function getToken() {
+	return document.getElementsByName('csrfmiddlewaretoken')[0].value;
+}
+
+function postToUrl(url, data) {
+	data['csrfmiddlewaretoken'] = getToken();
 	$.ajax({
 		type: 'POST',
 		url: ajaxUrl,
-		data: {
-			'kid': kid,
-			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		},
+		data: data,
 		success: function(msg){
 		},
 		error: function(msg){
 			alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
-			location.reload();
-		}
-	});
-}
-
-function deleteKeypair(kid){
-	$('#kp-'+kid).hide(256);
-
-	ajaxUrl = '/keypairs/delete';
-
-	$.ajax({
-		type: 'POST',
-		url: ajaxUrl,
-		data: {
-			'kid': kid,
-			'csrfmiddlewaretoken': document.getElementsByName('csrfmiddlewaretoken')[0].value
-		},
-		success: function(msg){
-		},
-		error: function(msg){
-			alert('Whoops, looks like something went wrong... Sorry \'bout that, let me refresh for you...');
 			location.reload();
 		}
 	});

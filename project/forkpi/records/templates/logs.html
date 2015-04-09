@@ -2,7 +2,7 @@
 
 {% block content%}
 <div class="row">
-	<div class="col-md-10 col-md-offset-1">
+	<div class="col-md-12">
 		<div class="row col-md-12">
 			<div class="panel panel-primary">
 				<div class="panel-heading">
@@ -19,6 +19,7 @@
 							<th class="col-md-4" data-placeholder="Search...">Details</th>
 							<th class="col-md-2" data-placeholder="Search...">PIN</th>
 							<th class="col-md-2" data-placeholder="Search...">RFID UID</th>
+							<th class="col-md-2" data-placeholder="Search...">Fingerprint</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -35,6 +36,13 @@
 								<td>{{ log.details }}</td>
 								<td>{{ log.pin }}</td>
 								<td>{{ log.rfid_uid }}</td>
+								<td>
+								{% if log.used_fingerprint %}
+									Yes
+								{% else %}
+									No
+								{% endif %}
+								</td>
 							</tr>
 							{% endfor %}
 						{% else %}

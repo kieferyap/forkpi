@@ -281,7 +281,7 @@ class FingerprintScanner(object):
                 return _id
         return -1
 
-    def enroll_finger(self, _id=None, tries=5):
+    def enroll_finger(self, _id=None, blocking=True):
         '''
             The entire two-stage enrollment process
             Parameter: The ID to be enrolled (auto-searches for a free ID if not specified)
@@ -303,7 +303,7 @@ class FingerprintScanner(object):
 
         return -1
 
-    def start_enroll(self, _id=None, tries=5):
+    def start_enroll(self, _id=None, blocking=True):
         '''
             First stage of enrollment process
             Parameter: The ID to be enrolled (auto-searches for a free ID if not specified)
@@ -320,23 +320,23 @@ class FingerprintScanner(object):
                 return -1
 
         if self._run_command('EnrollStart', parameter=_id): # Enroll start success
-            if self._enroll(1, tries):
-                if self._enroll(2, tries):
+            if self._enroll(1, blocking):
+                if self._enroll(2, blocking):
                     return _id
         return -1
 
-    def complete_enroll(self, tries=5):
+    def complete_enroll(self, blocking=True):
         '''
             Last stage of enrollment process
             Returns: True if enrollment successfully finished, False if not
         '''
-        return self._enroll(3, tries)
+        return self._enroll(3, blocking)
 
-    def _enroll(self, stage, tries=5):
+    def _enroll(self, stage, blocking=True):
         '''
             Returns: True if enrollment successfully finished, False if not
         '''
-        if self._capture_finger(tries):
+        if self._capture_finger(blocking):
             response = self._run_command('Enroll' + str(stage))
             return response.ack
         return False
@@ -348,7 +348,7 @@ class FingerprintScanner(object):
         response = self._run_command('IsPressFinger')
         return response.parameter == 0
 
-    def delete_id(self, _id):
+    def delete_template(self, _id):
         '''
             Deletes the specified template ID from the database
             Returns: True if successful, False if position invalid
@@ -364,26 +364,26 @@ class FingerprintScanner(object):
         response = self._run_command('DeleteAll')
         return response.ack
 
-    def verify_finger(self, _id, tries=5):
+    def verify_finger(self, _id, blocking=True):
         '''
             Checks the currently pressed finger against a specific ID
             Parameter: 0-199 (id number to be checked)
             Returns: True if match, False if not
         '''
-        if self._capture_finger(high_quality=False, tries=tries):
+        if self._capture_finger(high_quality=False, blocking=blocking):
             response = self._run_command('Verify1_1', parameter=_id)
             return response.ack
         else:
             return False
     
-    def identify_finger(self, tries=5):
+    def identify_finger(self, blocking=True):
         '''
             Checks the currently pressed finger against all enrolled fingerprints
             Returns:
                 0-199: Matched with this ID
                 -1   : Failed to find a match
         '''
-        if self._capture_finger(high_quality=False, tries=tries):
+        if self._capture_finger(high_quality=False, blocking=blocking):
             response = self._run_command('Identify1_N')
             return response.parameter if response.ack else -1
         else:
@@ -400,37 +400,38 @@ class FingerprintScanner(object):
         if self._run_command('IdentifyTemplate1_N'):
             self._send_data(data=template)
             response = self._receive_response()
-            return response.parameter
+            if response.ack:
+                return response.parameter
         return -1
 
-    def _capture_finger(self, high_quality=True, tries=5):
+    def _capture_finger(self, high_quality=True, blocking=True):
         '''
             Captures the currently pressed finger onto the onboard ram
             Parameters: Set high quality = True for enrollment, and False for verification/identification
-                        tries is the number of times to scan for a valid finger before giving up
+                        If blocking = True, will loop forever until a finger is captured
 
             Returns: True if successful, False if no finger pressed
         '''
         self.backlight_on()
+        while True:
+            if self._run_command('CaptureFinger', parameter = 1 if high_quality else 0):
+                self.backlight_off()
+                return True
+            elif not blocking: # give up
+                self.backlight_off()
+                return False
+            else: # blocking -> try again
+                self.wait(1.5)
 
-        for i in range(tries):
-            if self.is_finger_pressed():
-                if self._run_command('CaptureFinger', parameter = 1 if high_quality else 0):
-                    self.backlight_off()
-                    return True
-            self.wait(1.5)
-        self.backlight_off()
-        return False
-
-    def make_template(self, tries=5):
-        if self._capture_finger(high_quality=True, tries=tries):
+    def make_template(self, blocking=True):
+        if self._capture_finger(high_quality=True, blocking=blocking):
             if self._run_command('MakeTemplate'):
                 data = self._receive_data(498)
                 return data
         return None
 
-    def make_image(self, tries=5):
-        if self._capture_finger(high_quality=True, tries=tries):
+    def make_image(self, blocking=True):
+        if self._capture_finger(high_quality=True, blocking=blocking):
             if self._run_command('GetImage'):
                 data = self._receive_data(52116)
                 return data
@@ -462,7 +463,7 @@ class FingerprintScanner(object):
             Parameter: 0-199 ID number, template (498 bytes)
             Returns: True if successful, False if not
         '''
-        # the addition below is so that duplication check is not performed
+        # the addition of 0x00ff0000 below is so that duplication check is not performed
         if self._run_command('SetTemplate', parameter=0x00ff0000 + _id):
             self._send_data(data=template)
             response = self._receive_response()
@@ -486,7 +487,8 @@ class FingerprintScanner(object):
         _bytes = self._serial.read(size=12)
 
         if len(_bytes) < 12:
-            print('read:')
+            if self.debug:
+                print('read:')
             return None
         
         response = ResponsePacket(_bytes)
@@ -522,29 +524,37 @@ class FingerprintScanner(object):
 
 if __name__ == '__main__':
     fps = FingerprintScanner(debug=True)
+    # fps.backlight_on()
+    # for i in range(10):
+    #     print(fps.is_finger_pressed())
+    #     time.sleep(1)
+    # fps.backlight_off()
 
-    # enroll_id = fps.enroll_finger(tries=10)
+    # Enrollment
+    # enroll_id = fps.enroll_finger(blocking=True)
 
-    identify_id = fps.identify_finger(tries=10)
-    if identify_id >= 0:
-        print('Match with id %s' % identify_id)
-    else:
-       print('No match found')
+    # Identification
+    # identify_id = fps.identify_finger(blocking=True)
+    # if identify_id >= 0:
+    #     print('Match with id %s' % identify_id)
+    # else:
+    #    print('No match found')
 
-    
     # for i in range(5):
     #     template = fps.download_template(_id=i)
 
-    # template = fps.make_template(tries=10)
-    # fps.upload_template(_id=4, template=template)
+    fps.delete_all()
+    template = fps.make_template(blocking=True)
+    fps.upload_template(_id=0, template=template)
     # print fps.verify_template(_id=4, template=template)
 
-    # print fps.verify_finger(_id=4, tries=10)
+    # print fps.verify_finger(_id=4, blocking=True)
 
     # fps.make_image()
     
     # from test_raw import SaveImage
     # SaveImage('fingerprint1.raw', fps.make_raw_image())
+    # print(fps.make_raw_image())
 
     fps.close()
     print()
