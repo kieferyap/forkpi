@@ -45,13 +45,14 @@ class ForkpiDB(object):
         names = [x[0] for x in result]
         return is_authorized, names
 
-    def log_allowed(self, names, pin='', rfid_uid='', used_fingerprint=False):
-        self.log("Allowed", details=names, pin=pin, rfid_uid=rfid_uid, used_fingerprint=used_fingerprint)
+    def log_allowed(self, names, **kwargs):
+        self.log("Allowed", details=names, **kwargs)
 
-    def log_denied(self, reason, pin='', rfid_uid='', used_fingerprint=False):
-        self.log("Denied", details=reason, pin=pin, rfid_uid=rfid_uid, used_fingerprint=used_fingerprint)
+    def log_denied(self, reason, **kwargs):
+        self.log("Denied", details=reason, **kwargs)
 
-    def log(self, action, details='', pin='', rfid_uid='', used_fingerprint=False):
+    def log(self, action, details='', pin='', rfid_uid='', fingerprint_matches=[]):
+        used_fingerprint = len(fingerprint_matches) > 0
         c = self.conn.cursor()
         c.execute("INSERT INTO records_log(created_on, action, details, pin, rfid_uid, used_fingerprint) \
                      VALUES (now(), '%s', '%s', '%s', '%s', %s)" % (action, details, pin, rfid_uid, used_fingerprint))

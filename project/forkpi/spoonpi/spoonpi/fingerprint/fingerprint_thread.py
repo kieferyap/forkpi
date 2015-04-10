@@ -7,13 +7,17 @@ class FingerprintThread(threading.Thread):
 
     def __init__(self, ForkpiDB):
         super(FingerprintThread, self).__init__()
-        print('Loading Fingerprint Reader...')
         self.fps = FingerprintScanner(debug=False)
-
         self.db = ForkpiDB()
+        self.reset()
+
+    def reset(self):
+        self.is_polling = False
+        self.is_found = False # True if a fingeprint match has been found
         self.matches = [] # Keypair IDs whose fingerprint field matches the current finger
+
+    def start_polling(self):
         self.is_polling = True
-        self.is_found = False # True if a match was found
 
     def run(self):
         while True:

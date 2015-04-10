@@ -5,12 +5,16 @@ class RfidThread(threading.Thread):
 
     def __init__(self):
         super(RfidThread, self).__init__()
-        print('Loading RFID Reader...')
         self.rfid_reader = RfidReader()       # The RFID Reader
-        
+        self.reset()
+
+    def reset(self):
+        self.is_polling = False
+        self.is_found = False # True if an RFID has been swiped
         self.rfid_uid = '' # The UID of the newly swiped RFID
-        self.is_found = False               # Has a new RFID been swiped?
-        self.is_polling = True         # A flag which sets polling
+
+    def start_polling(self):
+        self.is_polling = True
 
     def run(self):
         while True:
