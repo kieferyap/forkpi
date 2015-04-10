@@ -73,12 +73,15 @@ table {
 	max-width: 100%;
 	padding: 2px;
 	border-radius: 3px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 .editable-text:hover{
 	border: 1px solid #ADADAD;
+}
+
+.editable-text, .editing-text {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .editable-done, .scan-edit-rfid, .scan-edit-fingerprint{

@@ -9,8 +9,10 @@ class Keypad:
                ['7', '8', '9' ],
                ['*', '0', '#' ] ]
 
+    # GPIO pin numbers
     ROWS = [7, 11, 13, 15]
     COLS = [12, 16, 18]
+    
     TIMEOUT = -1
 
     def __init__(self):

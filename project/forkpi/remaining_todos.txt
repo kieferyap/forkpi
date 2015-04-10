@@ -1,3 +1,4 @@
+Add door name to logs
 Fetch only keypairs that are mapped to this door
 Authentication Mechanisms:
 	[x] single factor fingerprint
@@ -98,3 +99,4 @@ BUG: Can demote self -> if I am the only admin, will result in no admins able to
 	
 [x] Register fingerprint via forkpi (April Week 01)
 [x] Change the saving-to-db function (April Week 02)
+[x] Handle case of 'Unable to get serial number'

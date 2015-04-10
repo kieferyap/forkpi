@@ -10,8 +10,8 @@ from records.views import render, redirect_to_name
 from records.models import Keypair
 from records.aes import AES
 
-from spoonpi.spoonpi.nfc_reader import NFCReader
-from spoonpi.spoonpi.fingerprint import FingerprintScanner
+from spoonpi.spoonpi.rfid.rfid_reader import RfidReader
+from spoonpi.spoonpi.fingerprint.fingerprint_scanner import FingerprintScanner
 
 
 def encrypt(value, key=None):
@@ -47,7 +47,7 @@ def reencrypt_keypairs(old_key, new_key):
 
 @login_required
 def scan_rfid(request):
-	uid = NFCReader().read_tag()
+	uid = RfidReader().read_tag()
 	return HttpResponse(uid)
 	# TODO prevent multiple pollings from happening
 	# response = HttpResponse("Please try again at a later time. Sorry for the inconvenience.")

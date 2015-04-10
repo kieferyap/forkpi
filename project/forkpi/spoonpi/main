@@ -1,7 +1,8 @@
 #!/bin/bash
 sudo python3 spoonpi/main.py
 # Turn off the fingerprint backlight
-sudo python3 -c "from spoonpi.fingerprint import FingerprintScanner
+sudo python3 -c "
+from spoonpi.fingerprint.fingerprint_scanner import FingerprintScanner
 fps = FingerprintScanner(debug=False)
 fps.backlight_off()
 fps.close()"

@@ -1,13 +1,12 @@
-from keypad import Keypad
-from oled import OLED
-from nfc_reader import NFCReader
 from forkpi_db import ForkpiDB
+
+from fingerprint.fingerprint_thread import FingerprintThread
+from oled import OLED
+from rfid.rfid_thread import RfidThread
+from keypad import Keypad
 
 import time
 from math import ceil
-
-from rfid_thread import *
-from fingerprint_thread import *
 
 class SpoonPi:
     # LOCKOUT TABLE columns [rfid_uid, incorrect_streak, lockout]
@@ -16,23 +15,20 @@ class SpoonPi:
     def __init__(self):
         print('Loading the ForkPi database...')
         self.db = ForkpiDB()
-        
-        self.lockout_table = list()
-
         print('Loading OLED...')
         self.led = OLED()
-        # print('Loading NFC Reader...')
-        # self.nfc_reader = NFCReader()
         print('Loading keypad...')
         self.keypad = Keypad()
         print('Loading options...')
         self.attempt_limit = self.load_option('attempt_limit')
         self.lockout_time = self.load_option('lockout_time_minutes') * 60
         self.keypad_timeout = self.load_option('keypad_timeout_seconds')
+        
+        self.lockout_table = list()
 
     def load_option(self, name):
         value, default = self.db.fetch_option(name)
-        if value.isdigit():
+        if value.isdigit() and value != default:
             print('  custom : {} = {}'.format(name, value))
             return int(value)
         else:
@@ -98,6 +94,43 @@ class SpoonPi:
             if was_locked_out and row[SpoonPi.COL_TIME_LEFT] == 0:
                 row[SpoonPi.COL_STREAK] = 0
 
+    def next_transaction(self):
+        rfid_uid = None
+        fingerprint_matches = None
+        pin = None
+
+        self.led.clear_display()
+        self.led.puts("Present RFID\nor Finger")
+
+        while True:
+            if rfid_thread.is_found:
+                rfid_uid = rfid_thread.rfid_uid
+                if single_factor_authentication(rfid_uid=rfid_uid):
+                    # if single factor succeeded, next transaction
+                    next_transaction()
+                elif fingerprint_matches is not None:
+                    # next transaction whether it succeeded or not
+                    two_factor_authentication(rfid_uid=rfid_uid, fingerprint_matches=fingerprint_matches)
+                else:
+                    fingerprint_thread.stop_polling()
+                    pin = pin_authentication()
+                    two_factor_authentication(rfid_uid=rfid_uid, pin=pin)
+
+            if fingerprint_thread.is_found:
+                fingerprint_matches = fingerprint_thread.matches
+                if single_factor_authentication(fingerprint_matches=fingerprint_matches):
+                    # if single factor succeeded, next transaction
+                    next_transaction()
+                elif rfid_uid is not None:
+                    # next transaction whether it succeeded or not
+                    two_factor_authentication(rfid_uid=rfid_uid, fingerprint_matches=fingerprint_matches)
+                else:
+                    rfid_thread.stop_polling()
+                    pin = pin_authentication()
+                    two_factor_authentication(fingerprint_matches=fingerprint_matches, pin=pin)
+
+
+
     def run(self):
         """
         Flow:
@@ -113,7 +146,7 @@ class SpoonPi:
         rfid_thread.start()
 
         # Start the Fingerprint Thread
-        fingerprint_thread = FingerprintThread()
+        fingerprint_thread = FingerprintThread(lambda: ForkpiDB())
         fingerprint_thread.start()
 
         # Some initializations
@@ -149,11 +182,10 @@ class SpoonPi:
                 # Ask the RFID thread to stop polling
                 rfid_thread.is_polling = False
                 # Fetch the IDs of the keypairs whose prints match the found print
-                fingerprint_matches = fingerprint_thread.keypair_matches
+                fingerprint_matches = fingerprint_thread.matches
                 # Do single-factor fingerprint authentication check
                 is_authorized, names = self.db.authorize(pin='', fingerprint_matches=fingerprint_matches)
 
-                # TODO: Check if there is single-factor auth for said fingerprint
                 if is_authorized:
                     self.allow_access(names=names, pin='', used_fingerprint=True)
                     is_resetting = True
@@ -181,6 +213,8 @@ class SpoonPi:
                 is_resetting = True
 
             if is_resetting:
+                time.sleep(1.5)
+                
                 # Poll for the next RFID and Fingerprint
                 fingerprint_thread.is_polling = True
                 fingerprint_thread.is_found = False

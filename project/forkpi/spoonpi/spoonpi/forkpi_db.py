@@ -8,8 +8,6 @@ class ForkpiDB(object):
         self.conn = psycopg2.connect(database="forkpi", user="pi", password="raspberry", host="forkpi.local", port="5432")
         self.conn.autocommit = True
         self.door_id = self.fetch_door_id()
-        if not self.door_id:
-            raise Exception('Register this door with ForkPi first!')
 
     def hash_string(self, value):
         return hashlib.sha1((value).encode()).hexdigest()
@@ -65,13 +63,17 @@ class ForkpiDB(object):
         return result[0], result[1]
 
     def fetch_door_id(self):
+        serial_num = get_serial()
+        if serial_num is None:
+            raise Exception("Unable to get serial number!")
+
         c = self.conn.cursor()
-        c.execute("SELECT id FROM records_door WHERE serial = '%s'" % get_serial())
+        c.execute("SELECT id FROM records_door WHERE serial = '%s'" % serial_num)
         result = c.fetchone()
         if result:
             return result[0]
         else:
-            return None
+            raise Exception('Register this door with ForkPi first!')
 
     def fetch_templates(self):
         c = self.conn.cursor()

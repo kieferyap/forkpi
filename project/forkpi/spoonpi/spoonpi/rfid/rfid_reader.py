@@ -1,10 +1,11 @@
 try:
-    from rfid.py532lib.mifare import Mifare
+    from py532lib.mifare import Mifare
 except ImportError:
-    from .rfid.py532lib.mifare import Mifare
+    from .py532lib.mifare import Mifare
+
 from binascii import hexlify
 
-class NFCReader():
+class RfidReader():
 
     def __init__(self):
         self.mifare = Mifare()
