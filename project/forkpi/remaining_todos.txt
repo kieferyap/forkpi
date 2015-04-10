@@ -1,3 +1,4 @@
+Separate Forkpi and Spoonpi users in database
 Keypair - last_edited_by field
 Add door name to logs
 Fetch only keypairs that are mapped to this door

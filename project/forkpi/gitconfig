@@ -1,0 +1,7 @@
+git config user.name "Matthew Co"
+git config user.email "matthewdeeco@gmail.com"
+git submodule foreach --recursive 'git config user.name "Matthew Co" && git config user.email "matthewdeeco@gmail.com"'
+
+git config user.name "Kiefer Yap"
+git config user.email "kiefer.yap@gmail.com"
+git submodule foreach --recursive 'git config user.name "Kiefer Yap" && git config user.email "kiefer.yap@gmail.com"'
