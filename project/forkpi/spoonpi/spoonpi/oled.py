@@ -45,3 +45,7 @@ class OLED:
     def clear_display(self):
         self.lines = [""]
         self.led.clear_display()
+
+    def clear_then_puts(self, text):
+        self.clear_display()
+        self.puts(text)

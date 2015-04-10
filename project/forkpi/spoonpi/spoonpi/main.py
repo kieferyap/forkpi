@@ -3,7 +3,7 @@ from forkpi_db import ForkpiDB
 from fingerprint.fingerprint_thread import FingerprintThread
 from oled import OLED
 from rfid.rfid_thread import RfidThread
-from keypad import Keypad
+from keypad.keypad_thread import KeypadThread
 
 import time
 from math import ceil
@@ -28,14 +28,17 @@ class SpoonPi:
         print('Loading RFID Reader...')
         self.rfid_thread = RfidThread()
         print('Loading Keypad...')
-        self.keypad = Keypad()
+        self.keypad_thread = KeypadThread()
+
         # maps RFID UIDs to incorrect streak and remaining lockout time
         self.lockout_table = list()
-        # ends a pending transaction after a timer if the current factors are not enough to be authenticated
-        self.transaction_timer = None
+        # ends a pending transaction after a timer if the current self.factors are not enough to be authenticated
+        self.new_timer = lambda: Timer(3, self.deny_then_end_transaction, kwargs={'reason':'insufficient credentials'})
+        self.transaction_timer = self.new_timer()
         # start polling for cards and fingers
         self.rfid_thread.start()
         self.fingerprint_thread.start()
+        self.keypad_thread.start()
 
     def load_option(self, name):
         value, default = self.db.fetch_option(name)
@@ -52,40 +55,17 @@ class SpoonPi:
             # convert pin to asterisks so pin is not exposed in the logs
             kwargs['pin'] = '*' * len(kwargs['pin'])
         names = ', '.join(names)
-        print("Allowed %s" % names)
+        print("> Allowed %s" % names)
         self.db.log_allowed(names=names, **kwargs)
-        self.led.clear_display()
-        self.led.puts("Access\ngranted")
+        self.led.clear_then_puts("Access\n granted")
+        time.sleep(2)
 
-    def deny_access(self, reason, led_message="Access\ndenied", *args, **kwargs):
+    def deny_access(self, reason, led_message="Access\n denied", *args, **kwargs):
         assert len(args) == 0
-        print(led_message.replace('\n', ' '))
+        print("> %s" % led_message.replace('\n ', ' '), kwargs)
         self.db.log_denied(reason=reason, **kwargs)
-        self.led.clear_display()
-        self.led.puts(led_message)
-
-    def pin_authentication(self):
-        '''
-        Returns (pin, timeout) where
-          pin = the pin entered (string)
-          timeout = whether the keypad timed out (boolean)
-        '''
-        pin = ''
-        self.led.clear_display()
-        self.led.puts("Enter PIN:\n")
-
-        while True:
-            key = self.keypad.getch(timeout=self.keypad_timeout)
-            if key == Keypad.TIMEOUT:
-                return pin, True
-            elif key.isdigit():
-                pin += str(key)
-                self.led.puts('*')
-            elif key == '*': # backspace
-                pin = pin[:-1]
-                self.led.puts('\b')
-            elif key == '#': # enter
-                return pin, False
+        self.led.clear_then_puts(led_message)
+        time.sleep(0.5)
 
     def find_lockout_row(self, rfid_uid):
         lockout_row = None
@@ -109,7 +89,7 @@ class SpoonPi:
         assert len(args) == 0
         assert len(kwargs.keys()) == 1
 
-        is_authorized, names = self.db.authorize(pin='', **kwargs)
+        is_authorized, names = self.db.authenticate(pin='', **kwargs)
         if is_authorized:
             self.allow_access(names=names, pin='', **kwargs)
         return is_authorized
@@ -118,188 +98,120 @@ class SpoonPi:
         assert len(args) == 0
         assert len(kwargs.keys()) == 2
 
-        is_authorized, names = self.db.authorize(**kwargs)
+        is_authorized, names = self.db.authenticate(**kwargs)
         if is_authorized:
             self.allow_access(names=names, **kwargs)
         else:
-            self.deny_access(names=names, **kwargs)
+            self.deny_access(reason='', **kwargs)
         return is_authorized
 
+    def pin_authentication(self):
+        '''
+        Returns (pin, timeout) where
+          pin = the pin entered (string)
+          timeout = whether the keypad timed out (boolean)
+        '''
+        pin = ''
+        self.led.clear_then_puts("Enter PIN:\n")
+        # First key that triggered this pin authentication
+        key = self.keypad_thread.get_key()
+
+        while True:
+            if key is None: # timed out!
+                return pin, True
+            elif key.isdigit():
+                pin += str(key)
+                self.led.puts('*')
+            elif key == '*': # backspace
+                pin = pin[:-1]
+                self.led.puts('\b')
+            elif key == '#': # enter
+                return pin, False
+            key = self.keypad_thread.getch(timeout=self.keypad_timeout)
+
     def start_transaction_timer(self):
-        self.transaction_timer = Timer(3, self.end_transaction)
+        self.transaction_timer = self.new_timer()
         self.transaction_timer.start()
 
     def stop_transaction_timer(self):
         self.transaction_timer.cancel()
 
+    def deny_then_end_transaction(self, reason):
+        self.deny_access(reason=reason, **self.factors)
+        self.end_transaction()
+
     def end_transaction(self):
         self.is_transacting = False
+        self.stop_transaction_timer()
 
     def new_transaction(self):
         self.is_transacting = True
 
-        factors = dict()
+        self.factors = dict()
 
-        self.led.clear_display()
-        self.led.puts("Swipe RFID\nor Finger")
-
-        self.rfid_thread.reset()
-        self.fingerprint_thread.reset()
+        self.led.clear_then_puts("Swipe, scan,\nor push key")
 
         self.rfid_thread.start_polling()
         self.fingerprint_thread.start_polling()
+        self.keypad_thread.start_polling()
 
         while self.is_transacting:
 
-            if self.rfid_thread.is_found:
-                self.led.clear_display()
-                self.led.puts("RFID\nswiped!")
+            if self.rfid_thread.tag_swiped:
+                self.stop_transaction_timer()
 
-                factors['rfid_uid'] = self.rfid_thread.rfid_uid
-                # we don't want to detect the same card again, and we want rfid to stop polling for new cards
-                self.rfid_thread.reset()
-                if len(factors) == 1:
-                    if self.single_factor_authentication(**factors):
-                        # if single factor succeeded, end transaction
-                        self.end_transaction()
-                    else:
-                        # single factor failed; wait 3s for another factor
-                        # if another factor is not entered by then, deny and proceed to next transaction
-                        self.start_transaction_timer()
-                else: # len(factors) == 2
-                    self.stop_transaction_timer()
-                    self.two_factor_authentication(**factors)
+                self.rfid_thread.stop_polling()
+                self.factors['rfid_uid'] = self.rfid_thread.get_rfid_uid()
+
+                if self.single_factor_authentication(rfid_uid=self.factors['rfid_uid']):
+                    # single factor succeeded; end transaction
+                    self.end_transaction()
+                elif len(self.factors) == 1:
+                    # single factor failed; wait for another factor
+                    self.led.clear_then_puts("RFID tag\n swiped!")
+                    self.start_transaction_timer()
+                else: # len(self.factors) == 2
+                    self.two_factor_authentication(**self.factors)
                     self.end_transaction()
 
-            elif self.fingerprint_thread.is_found:
-                self.led.clear_display()
-                self.led.puts("Finger\nscanned!")
+            elif self.fingerprint_thread.finger_scanned:
+                self.stop_transaction_timer()
 
-                factors['fingerprint_matches'] = self.fingerprint_thread.matches
-                # we don't want to detect the same finger again, and we want to stop polling for new fingers
-                self.fingerprint_thread.reset()
-                if len(factors) == 1:
-                    if self.single_factor_authentication(**factors):
-                        # if single factor succeeded, end transaction
-                        self.end_transaction()
-                    else:
-                        # single factor failed; wait 3s for another factor
-                        # if another factor is not entered by then, deny and proceed to next transaction
-                        self.start_transaction_timer()
-                else: # len(factors) == 2
-                    self.stop_transaction_timer()
-                    self.two_factor_authentication(**factors)
+                self.fingerprint_thread.stop_polling()
+                self.factors['fingerprint_matches'] = self.fingerprint_thread.get_matches()
+
+                if self.single_factor_authentication(fingerprint_matches=self.factors['fingerprint_matches']):
+                    # single factor succeeded; end transaction
+                    self.end_transaction()
+                elif len(self.factors) == 1:
+                    # single factor failed; wait for another factor
+                    self.led.clear_then_puts("Finger\n scanned!")
+                    self.start_transaction_timer()
+                else: # len(self.factors) == 2
+                    self.two_factor_authentication(**self.factors)
                     self.end_transaction()
 
-                # else:
-                #     self.rfid_thread.stop_polling()
-                #     pin, timeout = self.pin_authentication()
-                #     if not timeout:
-                #         self.two_factor_authentication(fingerprint_matches=fingerprint_matches, pin=pin)
-        time.sleep(1.5)
+            elif self.keypad_thread.key_pressed:
+                self.stop_transaction_timer()
 
+                self.keypad_thread.stop_polling()
+                self.factors['pin'], timed_out = self.pin_authentication()
 
-    def run(self):
-        """
-        Flow:
-            Ask for RFID or Fingerprint
-            If the RFID or Fingerprint is authorized, access granted.
-            Else, ask for PIN, then check for auth.
-            Notice that there's no three-factor auth.
-            Because fuck that shit.
-        """
-        # Start polling for fingerprints and rfids
-        self.fingerprint_thread.start()
-        self.rfid_thread.start()
-
-        self.next_transaction()
-
-
-
-
-
-        # Some initializations
-        is_ask_for_pin = False
-        is_resetting = False
-        finger_id = 0
-        rfid_uid = 0
-
-        # LED initializations
-        self.led.clear_display()
-        self.led.puts("Swipe RFID\nor Finger")
-
-        while True:
-
-            # If the RFID thread goes: "An RFID card has been swiped!"
-            if rfid_thread.is_found:
-                # Ask the fingerprint thread to stop polling
-                fingerprint_thread.is_polling = False
-                # Fetch the UID
-                rfid_uid = rfid_thread.rfid_uid
-                # Do single-factor RFID authentication check:
-                is_authorized, names = self.db.authorize(pin='', rfid_uid=rfid_uid)
-
-                # If authorized, allow entry. else: Set the ask_for_pin flag = True
-                if is_authorized:
-                    self.allow_access(names=names, pin='', rfid_uid=rfid_uid)
-                    is_resetting = True
-                else:
-                    is_ask_for_pin = True
-
-            # If the Fingerprint thread goes: "A new fingerprint has been found!"
-            if fingerprint_thread.is_found:
-                # Ask the RFID thread to stop polling
-                rfid_thread.is_polling = False
-                # Fetch the IDs of the keypairs whose prints match the found print
-                fingerprint_matches = fingerprint_thread.matches
-                # Do single-factor fingerprint authentication check
-                is_authorized, names = self.db.authorize(pin='', fingerprint_matches=fingerprint_matches)
-
-                if is_authorized:
-                    self.allow_access(names=names, pin='', used_fingerprint=True)
-                    is_resetting = True
-                # Else, ask for PIN.
-                else:
-                    is_ask_for_pin = True
-
-            # If somebody's asking for the PIN
-            if is_ask_for_pin:
-
-                # Grab the pin and do an authorization check
-                pin, timed_out = self.pin_authentication()
-
-                # TODO: Incorporate fingerprint in the authorization
-                is_authorized, names = self.db.authorize(pin=pin, rfid_uid=rfid_uid)
-
-                # If authorized, Allow entry. Else: Access denied.
-                if is_authorized:
-                    self.allow_access(names=names, pin=pin, rfid_uid=rfid_uid)
-                else:
-                    self.deny_access(reason="wrong pin", pin=pin, rfid_uid=rfid_uid)
-                    is_authenticated = False
-            
-                # Set reset flag to true
-                is_resetting = True
-
-            if is_resetting:
-                time.sleep(1.5)
-                
-                # Poll for the next RFID and Fingerprint
-                fingerprint_thread.is_polling = True
-                fingerprint_thread.is_found = False
-                rfid_thread.is_polling = True
-                rfid_thread.is_found = False
-                is_ask_for_pin = False
-
-                # LED: "Swipe RFID or Finger"
-                self.led.clear_display()
-                self.led.puts("Swipe RFID\nor Finger")
-
-                # Set flag to false
-                is_resetting = False
-
+                if timed_out:
+                    self.deny_then_end_transaction(reason='keypad timeout')
+                # pin was entered correctly
+                elif len(self.factors) == 1:
+                    # wait for another factor
+                    self.led.clear_then_puts("PIN\n entered!")
+                    self.start_transaction_timer()
+                else: # len(self.factors) == 2
+                    self.stop_transaction_timer()
+                    self.two_factor_authentication(**self.factors)
+                    self.end_transaction()
 
 if __name__ == '__main__':
     spoonpi = SpoonPi()
     while True:
+        print('-------------New Transaction-------------')
         spoonpi.new_transaction()
+        print('-------------End Transaction-------------')

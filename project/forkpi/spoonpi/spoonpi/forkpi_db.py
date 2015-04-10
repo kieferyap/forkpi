@@ -12,7 +12,7 @@ class ForkpiDB(object):
     def hash_string(self, value):
         return hashlib.sha1((value).encode()).hexdigest()
 
-    def authorize(self, *args, **kwargs):
+    def authenticate(self, *args, **kwargs):
         '''
         Returns (is_authorized, names)
           is_authorized is True if there is an entry in the database

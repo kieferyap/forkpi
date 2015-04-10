@@ -12,13 +12,12 @@ class Keypad:
     # GPIO pin numbers
     ROWS = [7, 11, 13, 15]
     COLS = [12, 16, 18]
-    
-    TIMEOUT = -1
 
     def __init__(self):
         GPIO.setmode(GPIO.BOARD)
+        GPIO.setwarnings(False)
 
-    def getch(self, timeout=10):
+    def getch(self, timeout=None):
         for col in Keypad.COLS:
             GPIO.setup(col, GPIO.OUT)
             GPIO.output(col, 1)
@@ -30,8 +29,9 @@ class Keypad:
             time_started = time.mktime(time.gmtime())
             while(True):
                 current_time = time.mktime(time.gmtime()) 
-                if current_time > time_started + timeout:
-                    return Keypad.TIMEOUT
+                if timeout is not None:
+                    if current_time > time_started + timeout:
+                        return None
 
                 for j, col in enumerate(Keypad.COLS):
                     GPIO.output(col, 0)

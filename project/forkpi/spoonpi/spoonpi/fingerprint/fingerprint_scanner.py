@@ -191,26 +191,38 @@ class FingerprintScanner(object):
         self.little_endian = little_endian
         try:
             self._serial = serial.Serial(port='/dev/ttyAMA0', baudrate=9600, timeout=None)
-            if self.open(): # baud rate 9600 succeeded -> change to 115200
-                self.change_baudrate(115200)
-            else: # baud rate 9600 failed; maybe already set to 115200?
-                self._serial.setBaudrate(115200)
-                if self.open(): # baud rate 115200 succeeded
-                    self._serial.flush()
-                else: # baud rate 115200 failed
+            self.open(timeout=0.1)
+                
+            self._serial.setBaudrate(115200)
+            if self.open(): # baud rate 115200 succeeded
+                self._serial.flush()
+            else: # baud rate 115200 failed -> maybe still set to 9600?
+                self._serial.setBaudrate(9600)
+                if self.open(): # baud rate 9600 succeeded -> change to 115200
+                        self.change_baudrate(115200)
+                else: # baud rate 9600 failed; maybe already set to 115200?
                     raise serial.SerialException()
+
+            # if self.open(): # baud rate 9600 succeeded -> change to 115200
+            #     self.change_baudrate(115200)
+            # else: # baud rate 9600 failed; maybe already set to 115200?
+            #     self._serial.setBaudrate(115200)
+            #     if self.open(): # baud rate 115200 succeeded
+            #         self._serial.flush()
+            #     else: # baud rate 115200 failed
+            #         raise serial.SerialException()
         except serial.SerialException as e:
             raise Exception("Failed to connect to the fingerprint scanner!")
 
     def wait(self, seconds):
         time.sleep(seconds)
 
-    def open(self):
+    def open(self, timeout=2):
         '''
             Initializes communication with the scanner
         '''
         self._send_command('Open')
-        response = self._receive_response(timeout=2)
+        response = self._receive_response(timeout=timeout)
         if response is None:
             return False
         else:
