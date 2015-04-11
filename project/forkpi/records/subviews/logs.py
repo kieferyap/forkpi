@@ -10,6 +10,7 @@ def logs_page(request):
 	cursor = connection.cursor()
 	
 	logs = Log.objects.all()
+	print([log.door.name for log in logs])
 	return render(request, 'logs.html', {'logs': logs})
 
 @login_required

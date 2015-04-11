@@ -27,6 +27,11 @@ urlpatterns = patterns('',
     url(r'^keypairs/scan/fingerprint$', scan_fingerprint, name='scan fingerprint'),
     url(r'^keypairs/printpdf$', print_pdf, name='print pdf'),
 
+    url(r'^keypairs/link_door$', link_door_to_keypair, name='link door to keypair'),
+    url(r'^keypairs/unlink_door$', unlink_door_from_keypair, name='unlink door from keypair'),
+
+    url(r'^doors/search', search_doors, name='search doors'),
+    
     url(r'^logs/$', logs_page, name='logs'),
     url(r'^logs/delete$', delete_logs_older_than, name='delete logs'),
 
@@ -35,8 +40,8 @@ urlpatterns = patterns('',
     url(r'^options/regenerate$', regenerate_secret_key, name='regenerate secret key'),
 
     url(r'^users$', all_users, name='users'),
-    url(r'^users/toggleactiveuser$', user_toggle_active, name='user toggle active'),
+    url(r'^users/toggleactive$', user_toggle_active, name='user toggle active'),
     url(r'^users/togglestaff$', user_toggle_staff, name='user toggle staff'),
     url(r'^users/delete$', delete_user, name='delete user'),
-    url(r'^users/approveuser$', approve_user, name='approve user'),
+    url(r'^users/approve$', approve_user, name='approve user'),
 )

@@ -7,7 +7,7 @@ import hashlib
 import binascii
 
 from records.views import render, redirect_to_name
-from records.models import Keypair
+from records.models import Keypair, Door
 from records.aes import AES
 
 from spoonpi.spoonpi.rfid.rfid_reader import RfidReader
@@ -33,6 +33,10 @@ def keypairs_page(request):
 	for keypair in keypairs:
 		keypair.pin = decrypt(keypair.pin)
 		keypair.rfid_uid = decrypt(keypair.rfid_uid)
+		doors = []
+		for door in keypair.doors.all():
+			doors.append({'id':door.id, 'name':door.name})
+		keypair.doors_json = doors
 	return render(request, 'keypairs.html',  {'keypairs': keypairs})
 
 def reencrypt_keypairs(old_key, new_key):
@@ -168,3 +172,19 @@ def print_pdf(request):
 	elements.append(t)
 	doc.build(elements)
 	return response
+
+@login_required
+def link_door_to_keypair(request):
+	keypair = Keypair.objects.get(id = request.POST['kid'])
+	door = Door.objects.get(id = request.POST['did'])
+	keypair.doors.add(door)
+	keypair.save()
+	return HttpResponse("Successful.")
+
+@login_required
+def unlink_door_from_keypair(request):
+	keypair = Keypair.objects.get(id = request.POST['kid'])
+	door = Door.objects.get(id = request.POST['did'])
+	keypair.doors.remove(door)
+	keypair.save()
+	return HttpResponse("Successful.")

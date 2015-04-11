@@ -9,42 +9,45 @@
 <div class="tab-content">
 	<div class="tab-pane active" id="view-logs">
 		<table id="logs-table" class="table table-hover tablesorter tablesaw"
-			data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[1,1]]">
+			data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,1]]">
 			<thead>
 				<tr>
-					<th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="2">
+					<!-- <th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="2">
 						#
-					</th>
-					<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
+					</th> -->
+					<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="persist">
 						Date
 					</th>
-					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="1">
+					<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
+						Door
+					</th>
+					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="1">
 						Action
 					</th>
-					<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="3">
+					<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="3">
 						Details
 					</th>
-					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
 						PIN
 					</th>
-					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
 						RFID UID
 					</th>
-					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
 						Fingerprint
 					</th>
 				</tr>
 			</thead>
 			<tbody>
-				{% if logs|length > 0 %}
-					{% for log in logs %}
+				{% for log in logs %}
 					<tr class="
 						{% if log.action == 'Denied' %}
 							redded
 						{% endif %}
 					">
-						<td>{{ log.id }}</td>
+						<!-- <td>{{ log.id }}</td> -->
 						<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
+						<td>{{ log.door.name }}
 						<td>{{ log.action }}</td>
 						<td>{{ log.details }}</td>
 						<td>{{ log.pin }}</td>
@@ -57,12 +60,7 @@
 						{% endif %}
 						</td>
 					</tr>
-					{% endfor %}
-				{% else %}
-					<tr>
-						<td colspan="7" style="text-align:center">No logs found.</td>
-					</tr>
-				{% endif %}
+				{% endfor %}
 			</tbody>
 		</table>
 	</div>

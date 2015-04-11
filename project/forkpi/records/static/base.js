@@ -9,7 +9,7 @@ $(document).ready(function() {
 			filter_columnFilters: true,
 			filter_ignoreCase: true,
 			filter_searchDelay: 300,
-			filter_startsWith: true,
+			filter_startsWith: false,
 			filter_saveFilters: true,
 		}
 	});
@@ -18,8 +18,6 @@ $(document).ready(function() {
 // For editing text
 $(document).ready(function() {
 	var editableTextTrigger = false;
-	var readyToClick = 1;
-	var curListId = 0;
 
 	$(document.body).on('click', '.editable-text', function(){
 		if(editableTextTrigger){ // some other text is already being edited; close that first
@@ -28,64 +26,105 @@ $(document).ready(function() {
 		}
 
 		var current = $(this).html();
-		
+		var parent = $(this).parent();
+		var type = parent.attr('type');
 		if(current.trim() == '- - -'){
 			current = '';
 		}
 		
-		current = '<input type="text" class="editing-text col-md-8" value="'+current.trim()+'"/>';
+		if (type == 'edit-keypair-doors') {
+			current = '<input type="text" class="editing-text col-md-8" value=""/>';
+		} else {
+			current = '<input type="text" class="editing-text col-md-8" value="'+current.trim()+'"/>';
+		}
 		
 		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
 		
-		if ($(this).parent().attr('type') == 'edit-rfid'){
+		if (parent.attr('type') == 'edit-rfid') {
 			doneButton = '<div class="scan-edit-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
-		} else if($(this).parent().attr('type') == 'edit-fingerprint'){
+		} else if (type == 'edit-fingerprint') {
 			doneButton = '<div class="scan-edit-fingerprint"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
 		}
 
-		$(this).parent().html(current+doneButton);
-		
+		parent.html(current + doneButton);
 		editableTextTrigger = true;
+
+		if (type == 'edit-keypair-doors') {
+			var kid = parent.attr('ajaxId');
+			var doors = eval(parent.attr('ajaxData'));
+
+			$('.editing-text').tokenInput('/doors/search/', {
+				theme: 'facebook',
+				hintText: null,
+				prePopulate: doors,
+				preventDuplicates : true,
+				onAdd: linkDoorToKeypair(kid),
+				onDelete: unlinkDoorFromKeypair(kid),
+			});
+			var searchBox = parent.find('ul');
+			searchBox.addClass('col-md-10');
+			searchBox.click();
+		} else {
+			var textBox = parent.find('input');
+			textBox.focus();
+			textBox.select();
+		}
 		
 		$('.editing-text').on('click', function(e){
 			e.stopPropagation();
 		});
 		
 	}).on('click', '.editable-done', function(){
-		var ajaxUrl = $(this).parent().attr('ajaxUrl');
-		var ajaxId = $(this).parent().attr('ajaxId');
-		var ajaxField = $(this).parent().attr('ajaxField');
-		var ajaxValue = $(this).parent().children('input').val().replace('/', '&sol;').trim();
-		var token = getToken();
-
-		$('.editing-text').off('click');
-			
-		editableTextTrigger = false;
-		readyToClick = 1;
-
-		var newValue = '<span class="editable-text">- - -</span>';
 		
-		if($(this).parent().children('input').val().trim() != ''){
-			newValue = '<span class="editable-text">'+$(this).parent().children('input').val().trim()+'</span>';
-		}
-		$(this).parent().html(newValue);	
+		var parent = $(this).parent();
+		var type = parent.attr('type');
+		var ajaxId = parent.attr('ajaxId');
 
-		$.ajax({
-			type: 'POST',
-			url: ajaxUrl,
-			data: {
-				'kid': ajaxId,
-				'field': ajaxField,
-				'value': ajaxValue,
-				'csrfmiddlewaretoken': token
-			},
-			success: function(msg){
-			},
-			error: function(msg){
-				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
-				location.reload();
+		var newValue = '<span class="editable-text">';
+
+		if (type == 'edit-keypair-doors') {
+			doors_json_new = $('.editing-text').tokenInput('get');
+			parent.attr('ajaxData', JSON.stringify(doors_json_new));
+			var len = doors_json_new.length;
+			if (len == 0) {
+				newValue += '- - -';
+			} else {
+				for (var i = 0; i < len; i++) {
+					newValue += '<li class="token-input-token-facebook">' + doors_json_new[i].name + '</li>'
+				}
 			}
-		});		
+		} else {
+			var ajaxUrl = parent.attr('ajaxUrl');
+			var ajaxValue = parent.children('input').val().trim();
+			
+			if(ajaxValue == '') {
+				newValue += '- - -';
+			} else {
+				newValue += ajaxValue;
+			}
+
+			$.ajax({
+				type: 'POST',
+				url: ajaxUrl,
+				data: {
+					'kid': ajaxId,
+					'value': ajaxValue,
+					'csrfmiddlewaretoken': getToken()
+				},
+				success: function(msg){
+				},
+				error: function(msg){
+					alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+					location.reload();
+				}
+			});	
+		}
+
+		newValue += '</span>';	
+		parent.html(newValue);
+		editableTextTrigger = false;
+		$('.editing-text').off('click');
+
 	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
 		ajaxUrl = '/keypairs/scan/rfid';
 		var isEditing = $(this).parent().attr('type') == 'edit-rfid';
@@ -193,12 +232,13 @@ $(document).ready(function() {
 	});
 	// Approve
 	$(document.body).on('click', '.approve-btn-user', function(){
-		approveUser($(this).attr('id'));
-		$(this).parent().parent().removeClass('redded');
-		var promoteButton = '<button class="btn btn-success promote-btn-user" id="'+$(this).attr('id')+'">Promote to Admin</button> ';
-		var deactivateButton = '<button class="btn btn-warning deactivate-btn-user" id="'+$(this).attr('id')+'">Deactivate</button> ';
-		var deleteButton = '<button class="btn btn-danger delete-btn-user" id="'+$(this).attr('id')+'">Delete</button>';
-		$(this).parent().html(promoteButton + deactivateButton + deleteButton);
+		approveUser(uid);
+		var uid = $(this).attr('id');
+		$(this).parent().parent().parent().parent().removeClass('redded');
+		var promoteButton = '<button class="btn btn-success promote-btn-user" id="'+uid+'">Promote</button> ';
+		var deactivateButton = '<button class="btn btn-warning deactivate-btn-user" id="'+uid+'">Deactivate</button> ';
+		var deleteButton = '<button class="btn btn-danger delete-btn-user" id="'+uid+'">Delete</button>';
+		$(this).parent().parent().html(wrapButton(promoteButton) + wrapButton(deactivateButton) + wrapButton(deleteButton));
 		$('#unapproved-'+$(this).attr('id')).hide();
 	});
 	// Delete
@@ -207,8 +247,27 @@ $(document).ready(function() {
 	});
 });
 
+
+function wrapButton(buttonHtml) {
+	return '<div class="btn-group btn-group-justified" role="group">' + buttonHtml + '</div>';
+}
+				
+var linkDoorToKeypair = function(kid) {
+	return function(door) {
+		ajaxUrl = '/keypairs/link_door';
+		postToUrl(ajaxUrl, {kid:kid, did:door.id})
+	}
+}
+
+var unlinkDoorFromKeypair = function(kid) {
+	return function(door) {
+		ajaxUrl = '/keypairs/unlink_door';
+		postToUrl(ajaxUrl, {kid:kid, did:door.id})
+	}
+}
+
 function toggleActiveUser(uid){
-	ajaxUrl = '/users/toggleactiveuser';
+	ajaxUrl = '/users/toggleactive';
 	postToUrl(ajaxUrl, {'uid':uid});
 }
 
@@ -218,7 +277,7 @@ function toggleStaff(uid){
 }
 
 function approveUser(uid){
-	ajaxUrl = '/users/approveuser';
+	ajaxUrl = '/users/approve';
 	postToUrl(ajaxUrl, {'uid':uid});
 }
 

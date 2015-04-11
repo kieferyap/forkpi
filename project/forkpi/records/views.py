@@ -45,7 +45,11 @@ def redirect_to_name(name):
 	return django_redirect(reverse(name))
 
 
-from .subviews.keypairs import keypairs_page, scan_rfid, scan_fingerprint, new_keypair, delete_keypair, edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, keypair_toggle_active, print_pdf
+from .subviews.keypairs import keypairs_page, scan_rfid, scan_fingerprint, \
+	new_keypair, delete_keypair, \
+	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, \
+	keypair_toggle_active, print_pdf, link_door_to_keypair, unlink_door_from_keypair
+from .subviews.doors import search_doors
 from .subviews.session import login_page, logging_in, logout, must_be_logged_in
 from .subviews.signup import signup_page, add_user
 from .subviews.logs import logs_page, delete_logs_older_than

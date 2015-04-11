@@ -16,6 +16,7 @@ class Keypair(Model):
 
 class Log(Model):
 	created_on = DateTimeField(auto_now_add=True, default=datetime.now)
+	door = ForeignKey('Door')
 	action = TextField(default='')
 	details = TextField(default='', null=True, blank=True)
 	pin = TextField(default='', null=True, blank=True)

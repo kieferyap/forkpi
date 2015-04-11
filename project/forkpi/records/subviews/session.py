@@ -24,8 +24,8 @@ def logging_in(request):
 			messages.add_message(request, messages.ERROR, 'Sorry, your account is still awaiting admin approval.')
 			return redirect_to_name('login')
 		else:
-			messages.add_message(request, messages.ERROR, 'Sorry, your account has been marked as inactive. '
-				'Please contact the admin to activate your account.')
+			messages.add_message(request, messages.ERROR, 'Your account has been marked as inactive. '
+				'Please contact the admin to activate it.')
 			return redirect_to_name('login')
 	else:
 		messages.add_message(request, messages.ERROR, 'I don\'t seem to recognize your username-password combination...')

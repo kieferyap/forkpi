@@ -34,12 +34,12 @@ class ForkpiDB(object):
         if 'fingerprint_matches' in keywords:
             keypair_ids = kwargs['fingerprint_matches']
             # (id=1 OR id=2 OR ...) if fingerprint matched with those ids
-            conditions.append('(%s)' % ' OR '.join(map(lambda x: 'id='+str(x), keypair_ids)))
+            conditions.append('(%s)' % ' OR '.join(map(lambda x: 'K.id='+str(x), keypair_ids)))
         
         conditions = ' AND '.join(conditions)
 
         c = self.conn.cursor()
-        c.execute("SELECT name FROM records_keypair WHERE %s" % (conditions))
+        c.execute("SELECT name FROM records_keypair K JOIN records_keypair_doors KD ON (K.id=KD.keypair_id) WHERE KD.door_id=%s AND %s" % (self.door_id, conditions))
         result = c.fetchall()
         is_authorized = (len(result) > 0)
         names = [x[0] for x in result]
@@ -54,8 +54,8 @@ class ForkpiDB(object):
     def log(self, action, details='', pin='', rfid_uid='', fingerprint_matches=[]):
         used_fingerprint = len(fingerprint_matches) > 0
         c = self.conn.cursor()
-        c.execute("INSERT INTO records_log(created_on, action, details, pin, rfid_uid, used_fingerprint) \
-                     VALUES (now(), '%s', '%s', '%s', '%s', %s)" % (action, details, pin, rfid_uid, used_fingerprint))
+        c.execute("INSERT INTO records_log(created_on, door_id, action, details, pin, rfid_uid, used_fingerprint) \
+                     VALUES (now(), %s, '%s', '%s', '%s', '%s', %s)" % (self.door_id, action, details, pin, rfid_uid, used_fingerprint))
 
     def fetch_option(self, name):
         c = self.conn.cursor()
@@ -78,6 +78,6 @@ class ForkpiDB(object):
 
     def fetch_templates(self):
         c = self.conn.cursor()
-        c.execute("SELECT id, fingerprint_template FROM records_keypair WHERE fingerprint_template != ''");
+        c.execute("SELECT K.id, fingerprint_template FROM records_keypair K JOIN records_keypair_doors KD ON (K.id=KD.keypair_id) WHERE KD.door_id=%s AND fingerprint_template != ''" % self.door_id);
         result = c.fetchall()
         return result

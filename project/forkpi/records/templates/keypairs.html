@@ -7,9 +7,10 @@
     <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
 </ul>
 
+<br/>
+
 <div class="tab-content">
 	<div class="tab-pane" id="new-keypair">
-		<br/>
 		<br/>
 		<div class="col-md-10 col-md-offset-1">
 			<form class="form-horizontal" accept-charset="UTF-8" action="{% url 'add keypair' %}" method="post">
@@ -55,102 +56,114 @@
 	<div class="tab-pane active" id="edit-keypairs">
 		<div class="col-md-12">
 			<table id="keypairs-table" class="table table-hover tablesorter tablesaw"
-					data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,0]]">
-					<thead>
-						<tr>
-							<th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="1">
-								#
-							</th>
-							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="persist">
-								Name
-							</th>
-							<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="2">
-								PIN
-							</th>
-							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="3">
-								RFID UID
-							</th>
-							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
-								Fingerprint
-							</th>
-							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="5">
-								Actions
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% if keypairs|length > 0 %}
-							{% for keypair in keypairs %}
-							<tr id="kp-{{ keypair.id }}" class="
-								{% if not keypair.is_active %}
-									greyed
-								{% endif %}
-							">
-								<td>{{ keypair.id }}</td>
-
-								<!-- Name -->
-								<td ajaxUrl="{% url 'edit keypair name' %}" ajaxId="{{ keypair.id }}" ajaxField="name">
-									<span class="editable-text">
-									{{ keypair.name }}
-									</span>
-								</td>
-
-								<!-- PIN -->
-								<td ajaxUrl="{% url 'edit keypair pin' %}" ajaxId="{{ keypair.id }}" ajaxField="pin">
-									<span class="editable-text">
-									{% if keypair.pin %}
-										{{ keypair.pin }}
-									{% else %}
-										- - -
-									{% endif %}
-									</span>
-								</td>
-
-								<!-- UID -->
-								<td ajaxUrl="{% url 'edit keypair rfid' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="edit-rfid">
-									<span class="editable-text">
-									{% if keypair.rfid_uid %}
-										{{ keypair.rfid_uid }}
-									{% else %}
-										- - -
-									{% endif %}
-									</span>
-								</td>
-
-								<!-- Fingerprint -->
-								<td ajaxUrl="{% url 'edit keypair fingerprint' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="edit-fingerprint">
-									<span class="editable-text">
-									{% if keypair.fingerprint_template %}
-										{{ keypair.fingerprint_template }}
-									{% else %}
-										- - -
-									{% endif %}
-									</span>
-								</td>
-								
-								<!-- Actions -->
-								<td id="action-{{ keypair.id }}" ajaxUrl="deletekeypair">
-									<div class="btn-group btn-group-justified" role="group">
-										<div class="btn-group" role="group">
-											{% if keypair.is_active %}
-												<button class="btn expand btn-warning task-cancelbox deactivate-btn" id="{{ keypair.id }}">Deactivate</button>
-											{% else %}
-												<button class="btn expand btn-success task-cancelbox activate-btn" id="{{ keypair.id }}">Activate</button>
-											{% endif %}
-										</div>
-										<div class="btn-group" role="group">
-											<button class="btn btn-danger task-cancelbox delete-btn" id="{{ keypair.id }}">Delete</button>
-										</div>
-									</div>
-								</td>
-							</tr>
-							{% endfor %}
-						{% else %}
-							<tr>
-								<td colspan="6" style="text-align:center">No keypairs found.</td>
-							</tr>
+					data-tablesaw-minimap data-tablesaw-mode="togglecolumn" data-sortList="[[0,0]]">
+				<thead>
+					<tr>
+						<!-- <th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="-1">
+							#
+						</th> -->
+						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="persist">
+							Name
+						</th>
+						<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="2">
+							Doors
+						</th>
+						<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="3">
+							PIN
+						</th>
+						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
+							RFID UID
+						</th>
+						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="5">
+							Fingerprint
+						</th>
+						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="7">
+							Actions
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for keypair in keypairs %}
+					<tr id="kp-{{ keypair.id }}" class="
+						{% if not keypair.is_active %}
+							greyed
 						{% endif %}
-					</tbody>
+					">
+						<!-- <td>{{ keypair.id }}</td> -->
+
+						<!-- Name -->
+						<td ajaxUrl="{% url 'edit keypair name' %}" ajaxId="{{ keypair.id }}" ajaxField="name">
+							<span class="editable-text">
+							{{ keypair.name }}
+							</span>
+						</td>
+
+						<!-- Doors -->
+						<td ajaxId="{{ keypair.id }}" type="edit-keypair-doors" ajaxData="{{ keypair.doors_json }}">
+							<span class="editable-text">
+								{% if keypair.doors_json %}
+									{% for door in keypair.doors_json %}
+									<li class="token-input-token-facebook">
+										{{ door.name }}
+									</li>
+									{% endfor %}
+								{% else %}
+									- - -
+								{% endif %}
+							</span>
+						</td>
+
+						<!-- PIN -->
+						<td ajaxUrl="{% url 'edit keypair pin' %}" ajaxId="{{ keypair.id }}" ajaxField="pin">
+							<span class="editable-text">
+							{% if keypair.pin %}
+								{{ keypair.pin }}
+							{% else %}
+								- - -
+							{% endif %}
+							</span>
+						</td>
+
+						<!-- UID -->
+						<td ajaxUrl="{% url 'edit keypair rfid' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="edit-rfid">
+							<span class="editable-text">
+							{% if keypair.rfid_uid %}
+								{{ keypair.rfid_uid }}
+							{% else %}
+								- - -
+							{% endif %}
+							</span>
+						</td>
+
+						<!-- Fingerprint -->
+						<td ajaxUrl="{% url 'edit keypair fingerprint' %}" ajaxId="{{ keypair.id }}" ajaxField="fingerprint" type="edit-fingerprint">
+							<span class="editable-text">
+								{% if keypair.fingerprint_template %}
+									{{ keypair.fingerprint_template }}
+								{% else %}
+									- - -
+								{% endif %}
+							</span>
+						</td>
+						
+						<!-- Actions -->
+						<td id="action-{{ keypair.id }}" ajaxUrl="deletekeypair">
+							<div class="btn-group btn-group-justified" role="group">
+								<div class="btn-group" role="group">
+									{% if keypair.is_active %}
+										<button class="btn expand btn-warning task-cancelbox deactivate-btn" id="{{ keypair.id }}">Deactivate</button>
+									{% else %}
+										<button class="btn expand btn-success task-cancelbox activate-btn" id="{{ keypair.id }}">Activate</button>
+									{% endif %}
+								</div>
+								<div class="btn-group" role="group">
+									<button class="btn btn-danger task-cancelbox delete-btn" id="{{ keypair.id }}">Delete</button>
+								</div>
+							</div>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
 			</table>
 		</div>
 		<button class="btn btn-primary col-md-2 col-md-offset-5"

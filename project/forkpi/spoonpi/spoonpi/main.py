@@ -21,13 +21,13 @@ class SpoonPi:
         self.lockout_time = self.load_option('lockout_time_minutes') * 60
         self.keypad_timeout = self.load_option('keypad_timeout_seconds')
 
-        print('Loading Fingerprint Scanner...')
+        print('Loading (F)ingerprint Scanner...')
         self.fingerprint_thread = FingerprintThread(lambda: ForkpiDB())
-        print('Loading OLED...')
+        print('Loading (O)LED...')
         self.led = OLED()
-        print('Loading RFID Reader...')
+        print('Loading (R)FID Reader...')
         self.rfid_thread = RfidThread()
-        print('Loading Keypad...')
+        print('Loading (K)eypad...')
         self.keypad_thread = KeypadThread()
 
         # maps RFID UIDs to incorrect streak and remaining lockout time

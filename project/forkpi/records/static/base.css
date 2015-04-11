@@ -129,6 +129,10 @@ th:last-child, td:last-child {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+.editing-text {
+	padding:0px;
+	text-align: center;
+}
 
 .editable-done, .scan-edit-rfid, .scan-edit-fingerprint{
 	display: inline-block;	
@@ -172,4 +176,8 @@ th:last-child, td:last-child {
 
 #regenerate-key-btn {
 	padding: 0.7em;
+}
+
+.bootstrap-tagsinput {
+	width: 100%;
 }

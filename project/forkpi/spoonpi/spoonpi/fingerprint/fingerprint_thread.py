@@ -43,12 +43,17 @@ class FingerprintThread(threading.Thread):
         # fetch templates for this door from the forkpi db
         for _id, template in self.db.fetch_templates():
             # verify all templates against id=0
-            template = binascii.unhexlify(bytes(template, 'utf-8'))
-            if self.fps.verify_template(_id=0, template=template):
-                self._print('Match with id %s' % _id)
-                # if template matches, add to list of keypair ids
-                matches.append(_id)
-                match_found = True
+            if len(template) == 996:
+                try:
+                    template = binascii.unhexlify(bytes(template, 'utf-8'))
+                except Exception:
+                    pass
+                else:
+                    if self.fps.verify_template(_id=0, template=template):
+                        self._print('Match with id %s' % _id)
+                        # if template matches, add to list of keypair ids
+                        matches.append(_id)
+                        match_found = True
         
         if not match_found:
             self._print('No match found.')
