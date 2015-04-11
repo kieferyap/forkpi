@@ -1,3 +1,68 @@
+body {
+	font: 18px/1.5em Helvetica, Arial, sans-serif;
+	background-color: #EEE;
+}
+
+a {
+	color: #069;
+}
+
+a:hover {
+	color: #28b;
+}
+
+button {
+	font-size: 18px;
+	padding: 1px 7px;
+}
+
+input {
+	font-size: 18px;
+}
+
+table {
+    table-layout: fixed;
+    word-wrap: break-word;
+    border-collapse: collapse;
+}
+thead tr:first-child th {
+	border: 1px solid #84817e;
+	background-color: #CDD8F2;
+}
+.tablesorter-filter-row td {
+	border: 1px solid #a4a19e;
+	background-color: #EAEFF3;
+}
+tbody tr td {
+	border: 1px solid #e4e1de;
+	background-color: #fafafa;
+}
+
+/* Outer table border
+thead tr:first-child {
+	border-top: 1px solid #428BCA;
+}
+tbody tr:last-child {
+	border-bottom: 1px solid #428BCA;
+}
+th:first-child, td:first-child {
+	border-left: 1px solid #428BCA;
+}
+th:last-child, td:last-child {
+	border-right: 1px solid #428BCA;
+}*/
+
+.nav-pills {
+	background-color: #f8f8f8;
+}
+.nav-pills > li > a:hover {
+	background-color: white;
+}
+
+.expand {
+	width: 100%;
+}
+
 .signup-textbox{
 	margin-top: 10px;
 	padding: 5px;
@@ -13,18 +78,6 @@
 	padding: 10px;
 	resize: none;
 }
-
-table {
-    table-layout: fixed;
-    word-wrap: break-word;
-}
-
-#logs-table td {
-    border: 1px solid #62ABEA;
-    border-right: none;
-    border-bottom: none;
-}
-
 .list-btn{
 	padding: 5px;
 	padding-left: 8px;
@@ -32,20 +85,13 @@ table {
 	margin-right: 3px;
 }
 
-
-#task-datepicker{
-	padding: 10px;
-	padding-top: 5px;
-	padding-bottom: 5px;
-}
-
-.usertype-admin{
+.usertype-admin {
 	cursor: default;
 	border-bottom: 1px dotted black;
 	padding: 2px;
 }
 
-.usertype-user{
+.usertype-user {
 	cursor: default;
 	border-bottom: 1px dotted black;
 	padding: 2px;
@@ -101,8 +147,6 @@ table {
 	padding-left: 3px;
 }
 
-
-
 .control-label{
 	padding-top: 0px !important;
 }
@@ -124,4 +168,8 @@ table {
 
 .invisible{
 	display: none;
+}
+
+#regenerate-key-btn {
+	padding: 0.7em;
 }

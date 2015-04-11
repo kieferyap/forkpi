@@ -28,6 +28,7 @@ urlpatterns = patterns('',
     url(r'^keypairs/printpdf$', print_pdf, name='print pdf'),
 
     url(r'^logs/$', logs_page, name='logs'),
+    url(r'^logs/delete$', delete_logs_older_than, name='delete logs'),
 
     url(r'^options/$', options_page, name='options'),
     url(r'^options/edit/value$', edit_option_value, name='edit option value'),

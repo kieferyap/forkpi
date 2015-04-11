@@ -11,7 +11,7 @@ def index_page(request):
 
 def get_login_text(request):
 	if request.user.is_authenticated():
-		return "Welcome back, " + request.user.username
+		return "Logged in as " + request.user.username
 	else:
 		return "You are not logged in."
 
@@ -48,7 +48,7 @@ def redirect_to_name(name):
 from .subviews.keypairs import keypairs_page, scan_rfid, scan_fingerprint, new_keypair, delete_keypair, edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, keypair_toggle_active, print_pdf
 from .subviews.session import login_page, logging_in, logout, must_be_logged_in
 from .subviews.signup import signup_page, add_user
-from .subviews.logs import logs_page
+from .subviews.logs import logs_page, delete_logs_older_than
 from .subviews.users import all_users, user_toggle_active, user_toggle_staff, delete_user, approve_user
 from .subviews.options import options_page, edit_option_value, regenerate_secret_key
 

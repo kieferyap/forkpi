@@ -1,9 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content%}
-<div class="row">
-	<div class="col-md-10 col-md-offset-1">
-		<div class="row col-md-12">
+
+<ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
+    <li><a href="#new-keypair" data-toggle="tab">New Keypair</a></li>
+    <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
+</ul>
+
+<div class="tab-content">
+	<div class="tab-pane" id="new-keypair">
+		<br/>
+		<br/>
+		<div class="col-md-10 col-md-offset-1">
 			<form class="form-horizontal" accept-charset="UTF-8" action="{% url 'add keypair' %}" method="post">
 				<div class="form-group">
 					<label for="name" class="col-md-2 control-label">Name</label>
@@ -22,41 +30,52 @@
 					<div class="col-md-8">
 						<input type="text" class="form-control" id="inputUid" name="rfid_uid" placeholder="abcdef12">
 					</div>
-					<input type="button" class="btn btn-success scan-new-rfid" name="scan-new-rfid" value="Scan RFID">
+					<div class="col-md-2">
+						<input type="button" class="btn expand btn-success scan-new-rfid" name="scan-new-rfid" value="Scan RFID">
+					</div>
 				</div>
 				<div class="form-group">
 					<label for="fingerprint_template" class="col-md-2 control-label">Fingerprint</label>
 					<div class="col-md-8">
 						<input type="text" class="form-control" id="inputFinger" name="fingerprint_template" placeholder="0123456789abcdef012345...">
 					</div>
-					<input type="button" class="btn btn-success scan-new-fingerprint" name="scan-new-fingerprint" value="Scan Finger">
+					<div class="col-md-2">
+						<input type="button" class="btn expand btn-success scan-new-fingerprint" name="scan-new-fingerprint" value="Scan Finger">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-md-10 col-md-offset-2">
+						<button class="btn expand btn-primary signup-button" type="submit">Add to Keypairs</button>
+					</div>
 				</div>
 				{% csrf_token %}
-				<button class="btn btn-primary col-md-2 col-md-offset-10 signup-button" type="submit">Add to Keypairs</button>
 			</form>
 		</div>
 	</div>
-</div>
-<br/>
-<br/>
-<div class="row">
-	<div class="col-md-12">
-		<div class="row col-md-12">
-			<div class="panel panel-primary">
-				<div class="panel-heading">
-					<h3 class="panel-title">Existing Keypairs</b></h3>
-					<div class="pull-right">
-					</div>
-				</div>
-				<table id="keypairs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
+	<div class="tab-pane active" id="edit-keypairs">
+		<div class="col-md-12">
+			<table id="keypairs-table" class="table table-hover tablesorter tablesaw"
+					data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,0]]">
 					<thead>
 						<tr>
-							<th class="col-md-1" data-placeholder="S..."># </th>
-							<th class="col-md-3" data-placeholder="Search...">Name </th>
-							<th class="col-md-2" data-placeholder="Search...">PIN </th>
-							<th class="col-md-3" data-placeholder="Search...">RFID UID </th>
-							<th class="col-md-3" data-placeholder="Search...">Fingerprint</th>
-							<th class="col-md-3" data-placeholder="Search...">Actions</th>
+							<th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="1">
+								#
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="persist">
+								Name
+							</th>
+							<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="2">
+								PIN
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="3">
+								RFID UID
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
+								Fingerprint
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="5">
+								Actions
+							</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -111,29 +130,32 @@
 								
 								<!-- Actions -->
 								<td id="action-{{ keypair.id }}" ajaxUrl="deletekeypair">
-									{% if keypair.is_active %}
-										<button class="btn btn-warning task-cancelbox deactivate-btn" id="{{ keypair.id }}">Deactivate</button>
-									{% else %}
-										<button class="btn btn-success task-cancelbox activate-btn" id="{{ keypair.id }}">Activate</button>
-									{% endif %}
-									<button class="btn btn-danger task-cancelbox delete-btn" id="{{ keypair.id }}">Delete</button>
+									<div class="btn-group btn-group-justified" role="group">
+										<div class="btn-group" role="group">
+											{% if keypair.is_active %}
+												<button class="btn expand btn-warning task-cancelbox deactivate-btn" id="{{ keypair.id }}">Deactivate</button>
+											{% else %}
+												<button class="btn expand btn-success task-cancelbox activate-btn" id="{{ keypair.id }}">Activate</button>
+											{% endif %}
+										</div>
+										<div class="btn-group" role="group">
+											<button class="btn btn-danger task-cancelbox delete-btn" id="{{ keypair.id }}">Delete</button>
+										</div>
+									</div>
 								</td>
 							</tr>
 							{% endfor %}
 						{% else %}
 							<tr>
-								<td colspan="5" style="text-align:center">No keypairs found.</td>
+								<td colspan="6" style="text-align:center">No keypairs found.</td>
 							</tr>
 						{% endif %}
 					</tbody>
-				</table>
-			</div>
+			</table>
 		</div>
+		<button class="btn btn-primary col-md-2 col-md-offset-5"
+		        onclick="window.location='{% url 'print pdf' %}'">Download as PDF</button>
 	</div>
 </div>
 
-<div class="row">
-	<button class="btn btn-primary col-md-2 col-md-offset-5"
-	        onclick="window.location='{% url 'print pdf' %}'">Download as PDF</button>
-</div>
 {% endblock %}

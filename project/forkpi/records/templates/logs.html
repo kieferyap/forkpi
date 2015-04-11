@@ -1,59 +1,88 @@
 {% extends 'base.html' %}
 
 {% block content%}
-<div class="row">
-	<div class="col-md-12">
-		<div class="row col-md-12">
-			<div class="panel panel-primary">
-				<div class="panel-heading">
-					<h3 class="panel-title">Logs</b></h3>
-					<div class="pull-right">
-					</div>
-				</div>
-				<table id="logs-table" class="table table-hover tablesorter" data-sortList="[[1,1]]">
-					<thead>
-						<tr>
-							<th class="col-md-1" data-placeholder="S...">#</th>
-							<th class="col-md-4" data-placeholder="Search...">Date</th>
-							<th class="col-md-2" data-placeholder="Search...">Action</th>
-							<th class="col-md-4" data-placeholder="Search...">Details</th>
-							<th class="col-md-2" data-placeholder="Search...">PIN</th>
-							<th class="col-md-2" data-placeholder="Search...">RFID UID</th>
-							<th class="col-md-2" data-placeholder="Search...">Fingerprint</th>
-						</tr>
-					</thead>
-					<tbody>
-						{% if logs|length > 0 %}
-							{% for log in logs %}
-							<tr class="
-								{% if log.action == 'Denied' %}
-									redded
-								{% endif %}
-							">
-								<td>{{ log.id }}</td>
-								<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
-								<td>{{ log.action }}</td>
-								<td>{{ log.details }}</td>
-								<td>{{ log.pin }}</td>
-								<td>{{ log.rfid_uid }}</td>
-								<td>
-								{% if log.used_fingerprint %}
-									Yes
-								{% else %}
-									No
-								{% endif %}
-								</td>
-							</tr>
-							{% endfor %}
-						{% else %}
-							<tr>
-								<td colspan="5" style="text-align:center">No logs found.</td>
-							</tr>
+
+<ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
+    <li class="active"><a href="#view-logs" data-toggle="tab">View Logs</a></li>
+    <li><a href="#delete-logs" data-toggle="tab">Delete Logs</a></li>
+</ul>
+<div class="tab-content">
+	<div class="tab-pane active" id="view-logs">
+		<table id="logs-table" class="table table-hover tablesorter tablesaw"
+			data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[1,1]]">
+			<thead>
+				<tr>
+					<th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="2">
+						#
+					</th>
+					<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
+						Date
+					</th>
+					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="1">
+						Action
+					</th>
+					<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="3">
+						Details
+					</th>
+					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="4">
+						PIN
+					</th>
+					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="4">
+						RFID UID
+					</th>
+					<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="4">
+						Fingerprint
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% if logs|length > 0 %}
+					{% for log in logs %}
+					<tr class="
+						{% if log.action == 'Denied' %}
+							redded
 						{% endif %}
-					</tbody>
-				</table>
-			</div>
-		</div>
+					">
+						<td>{{ log.id }}</td>
+						<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
+						<td>{{ log.action }}</td>
+						<td>{{ log.details }}</td>
+						<td>{{ log.pin }}</td>
+						<td>{{ log.rfid_uid }}</td>
+						<td>
+						{% if log.used_fingerprint %}
+							Yes
+						{% else %}
+							
+						{% endif %}
+						</td>
+					</tr>
+					{% endfor %}
+				{% else %}
+					<tr>
+						<td colspan="7" style="text-align:center">No logs found.</td>
+					</tr>
+				{% endif %}
+			</tbody>
+		</table>
 	</div>
+	<div class="tab-pane" id="delete-logs">
+		<br/><br/>
+		<form class="form-horizontal" method="post" action="{% url 'delete logs' %}">
+			<div class="form-group" style="line-height:50px">
+				<label for="days" class="col-md-3 col-md-offset-2" style="text-align:right; vertical-align:middle;">Delete logs older than</label>
+				<div class="col-md-1">
+					<input type="text" class="form-control input-lg" id="days" name="days" value="30" autofocus/>
+				</div>
+				<label for="days" class="col-md-1" style="text-align:left; vertical-align:middle;">days</label>
+				<div class="col-md-2">
+					<button type="submit" class="btn btn-primary expand input-lg">Delete</button>
+				</div>
+			</div>
+			{% csrf_token %}
+		</form>
+	</div>
+
+
 </div>
 {% endblock %}

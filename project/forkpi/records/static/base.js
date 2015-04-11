@@ -147,45 +147,45 @@ $(document).ready(function() {
 		deleteKeypair($(this).attr('id'));
 	});
 	$(document.body).on('click', '.deactivate-btn', function(){
-		$(this).parent().parent().addClass('greyed'); // grey out the corresponding row
+		toggleActiveKeypair($(this).attr('id'));
+		$(this).parent().parent().parent().parent().addClass('greyed'); // grey out the corresponding row
 		$(this).removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
 		$(this).html("Activate");
-		toggleActiveKeypair($(this).attr('id'));
 	});
 	$(document.body).on('click', '.activate-btn', function(){
-		$(this).parent().parent().removeClass('greyed'); // ungrey the corresponding row
+		toggleActiveKeypair($(this).attr('id'));
+		$(this).parent().parent().parent().parent().removeClass('greyed'); // ungrey the corresponding row
 		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
 		$(this).html("Deactivate");
-		toggleActiveKeypair($(this).attr('id'));
 	});
 	// For users
 	// Deactivate
 	$(document.body).on('click', '.deactivate-btn-user', function(){
-		$(this).parent().parent().addClass('greyed'); // grey out the corresponding row
+		toggleActiveUser($(this).attr('id'));
+		$(this).parent().parent().parent().parent().addClass('greyed'); // grey out the corresponding row
 		$(this).removeClass('deactivate-btn-user btn-warning').addClass('activate-btn-user btn-success');
 		$(this).html("Activate");
-		toggleActiveUser($(this).attr('id'));
 	});
 	// Activate
 	$(document.body).on('click', '.activate-btn-user', function(){
-		$(this).parent().parent().removeClass('greyed'); // ungrey the corresponding row
+		toggleActiveUser($(this).attr('id'));
+		$(this).parent().parent().parent().parent().removeClass('greyed'); // ungrey the corresponding row
 		$(this).addClass('deactivate-btn-user btn-warning').removeClass('activate-btn-user btn-success');
 		$(this).html("Deactivate");
-		toggleActiveUser($(this).attr('id'));
 	});
 	// Demote
 	$(document.body).on('click', '.demote-btn-user', function(){
+		toggleStaff($(this).attr('id'));
+		$(this).html("Promote");
 		$('#star-'+$(this).attr('id')).hide();
 		$(this).removeClass('demote-btn-user btn-warning').addClass('promote-btn-user btn-success');
-		$(this).html("Promote to Admin");
-		toggleStaff($(this).attr('id'));
 	});
 	// Promote
 	$(document.body).on('click', '.promote-btn-user', function(){
+		toggleStaff($(this).attr('id'));
 		$('#star-'+$(this).attr('id')).show();
 		$(this).addClass('demote-btn-user btn-warning').removeClass('promote-btn-user btn-success');
-		$(this).html("Demote to Regular");
-		toggleStaff($(this).attr('id'));
+		$(this).html("Demote");
 	});
 	// Deny -- which is the same as delete, for now.
 	$(document.body).on('click', '.deny-btn-user', function(){
@@ -193,13 +193,13 @@ $(document).ready(function() {
 	});
 	// Approve
 	$(document.body).on('click', '.approve-btn-user', function(){
+		approveUser($(this).attr('id'));
 		$(this).parent().parent().removeClass('redded');
 		var promoteButton = '<button class="btn btn-success promote-btn-user" id="'+$(this).attr('id')+'">Promote to Admin</button> ';
 		var deactivateButton = '<button class="btn btn-warning deactivate-btn-user" id="'+$(this).attr('id')+'">Deactivate</button> ';
 		var deleteButton = '<button class="btn btn-danger delete-btn-user" id="'+$(this).attr('id')+'">Delete</button>';
 		$(this).parent().html(promoteButton + deactivateButton + deleteButton);
 		$('#unapproved-'+$(this).attr('id')).hide();
-		approveUser($(this).attr('id'));
 	});
 	// Delete
 	$(document.body).on('click', '.delete-btn-user', function(){

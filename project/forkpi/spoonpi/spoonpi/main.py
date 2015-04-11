@@ -102,7 +102,7 @@ class SpoonPi:
         if is_authorized:
             self.allow_access(names=names, **kwargs)
         else:
-            self.deny_access(reason='', **kwargs)
+            self.deny_access(reason='invalid keypair', **kwargs)
         return is_authorized
 
     def pin_authentication(self):
