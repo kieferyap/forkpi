@@ -427,10 +427,8 @@ class FingerprintScanner(object):
         self.backlight_on()
         while True:
             if self._run_command('CaptureFinger', parameter = 1 if high_quality else 0):
-                self.backlight_off()
                 return True
             elif not blocking: # give up
-                self.backlight_off()
                 return False
             else: # blocking -> try again
                 self.wait(1.5)

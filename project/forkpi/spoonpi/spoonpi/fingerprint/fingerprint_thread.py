@@ -25,8 +25,37 @@ class FingerprintThread(threading.Thread):
         while True:
             while self.is_polling and not self.finger_scanned:
                 try:
-                    self.template = self.fps.make_template(blocking=True)
-                    self.finger_scanned = True
+                    self.template = self.fps.make_template(blocking=False)
+                    if self.template:
+                        self.fps.backlight_off()
+
+                        self.fps.delete_template(_id=0)
+                        self.fps.upload_template(_id=0, template=self.template)
+
+                        self.matches = []
+                        match_found = False
+                        # fetch templates for this door from the forkpi db
+                        for _id, template in self.db.fetch_templates():
+                            # verify all templates against id=0
+                            if len(template) == 996:
+                                try:
+                                    template = binascii.unhexlify(bytes(template, 'utf-8'))
+                                except Exception:
+                                    pass
+                                else:
+                                    if self.fps.verify_template(_id=0, template=template):
+                                        self._print('Match with id %s' % _id)
+                                        # if template matches, add to list of keypair ids
+                                        self.matches.append(_id)
+                                        match_found = True
+                        
+                        if not match_found:
+                            self._print('No match found.')
+                            # This is so that the query for keypairs matching this fingerprint will return nothing
+                            self.matches = [-1]
+
+                        self.finger_scanned = True
+
                 except Exception:
                     self.fps = FingerprintScanner(debug=False)
             time.sleep(0.5)
@@ -35,30 +64,5 @@ class FingerprintThread(threading.Thread):
         print('  [FingerThread]', *args)
 
     def get_matches(self):
-        self.fps.delete_template(_id=0)
-        self.fps.upload_template(_id=0, template=self.template)
-
-        matches = []
-        match_found = False
-        # fetch templates for this door from the forkpi db
-        for _id, template in self.db.fetch_templates():
-            # verify all templates against id=0
-            if len(template) == 996:
-                try:
-                    template = binascii.unhexlify(bytes(template, 'utf-8'))
-                except Exception:
-                    pass
-                else:
-                    if self.fps.verify_template(_id=0, template=template):
-                        self._print('Match with id %s' % _id)
-                        # if template matches, add to list of keypair ids
-                        matches.append(_id)
-                        match_found = True
-        
-        if not match_found:
-            self._print('No match found.')
-            # This is so that the query for keypairs matching this fingerprint will return nothing
-            matches = [-1]
-
         self.finger_scanned = False
-        return matches
+        return self.matches

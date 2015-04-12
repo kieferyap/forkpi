@@ -51,18 +51,26 @@ def reencrypt_keypairs(old_key, new_key):
 
 @login_required
 def scan_rfid(request):
-	uid = RfidReader().read_tag()
-	return HttpResponse(uid)
-	# TODO prevent multiple pollings from happening
-	# response = HttpResponse("Please try again at a later time. Sorry for the inconvenience.")
-	# response.status_code = 400
-	# return response
+	rfid_uid = RfidReader().read_tag(blocking=False)
+	if rfid_uid:
+		return HttpResponse(rfid_uid)
+	else:
+		response = HttpResponse("No RFID tag detected")
+		response.status_code = 400
+		return response
 
 @login_required
 def scan_fingerprint(request):
-	template = FingerprintScanner(debug=False).make_template()
-	template = binascii.hexlify(template)
-	return HttpResponse(template)
+	fps = FingerprintScanner(debug=False)
+	template = fps.make_template(blocking=False)
+	fps.backlight_off()
+	if template:
+		template = binascii.hexlify(template)
+		return HttpResponse(template)
+	else:
+		response = HttpResponse("No finger detected")
+		response.status_code = 400
+		return response
 
 def is_valid_pin(pin):
 	return len(pin)==0 or pin.isdigit()
@@ -73,6 +81,7 @@ def new_keypair(request):
 	pin = request.POST['pin']
 	rfid_uid = request.POST['rfid_uid']
 	fingerprint_template = request.POST['fingerprint_template']
+	door_ids = request.POST['doors'].split(',')
 
 	is_error = False
 

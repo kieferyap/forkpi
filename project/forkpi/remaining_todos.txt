@@ -1,14 +1,18 @@
+New keypair add doors
 Separate Forkpi and Spoonpi users in database
 Keypair - last_edited_by field
+Pageinate logs (and maybe keypairs)
 [x] Add door name to logs
 [x] Fetch only keypairs that are mapped to this door
 Add a module which is for door administration (April Week 02)
 (Forkpi) Enter pin before allowing edit?
 Print pdf is not supported in Python 3.0-3.2
-Prevent entering keypair with no name
+Prevent entering keypair with no name, name must be unique
 Usability Test (April Week 03)
 Put back lockouts for rfid and fingerprint
-BUG: Scan RFID close window while polling -> next poll causes crash
+[.] BUG: Scan RFID close window while polling -> next poll causes crash -> non-blocking scan
+	[.] Same with fingerprint -> non-blocking scan
+	Still it is possible for multiple people to scan at the same time, just that it's less likely to happen
 BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users
 
 [x] write paper

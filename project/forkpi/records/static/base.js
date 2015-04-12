@@ -13,7 +13,19 @@ $(document).ready(function() {
 			filter_saveFilters: true,
 		}
 	});
+
+	$('#newDoors').tokenInput('/doors/search/', {
+		theme: 'facebook',
+		hintText: 'Type a door name...',
+		prePopulate: null,
+		preventDuplicates : true
+	});
 });
+
+
+// $(window).bind('beforeunload', function(){
+// 	return 'Are you sure you want to leave?';
+// });
 
 // For editing text
 $(document).ready(function() {
@@ -27,12 +39,12 @@ $(document).ready(function() {
 
 		var current = $(this).html();
 		var parent = $(this).parent();
-		var type = parent.attr('type');
+		var field = parent.data('field');
 		if(current.trim() == '- - -'){
 			current = '';
 		}
 		
-		if (type == 'edit-keypair-doors') {
+		if (field == 'doors') {
 			current = '<input type="text" class="editing-text col-md-8" value=""/>';
 		} else {
 			current = '<input type="text" class="editing-text col-md-8" value="'+current.trim()+'"/>';
@@ -40,18 +52,18 @@ $(document).ready(function() {
 		
 		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
 		
-		if (parent.attr('type') == 'edit-rfid') {
+		if (field == 'rfid') {
 			doneButton = '<div class="scan-edit-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
-		} else if (type == 'edit-fingerprint') {
+		} else if (field == 'fingerprint') {
 			doneButton = '<div class="scan-edit-fingerprint"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
 		}
 
 		parent.html(current + doneButton);
 		editableTextTrigger = true;
 
-		if (type == 'edit-keypair-doors') {
-			var kid = parent.attr('ajaxId');
-			var doors = eval(parent.attr('ajaxData'));
+		if (field == 'doors') {
+			var kid = parent.data('kid');
+			var doors = eval(parent.data('value'));
 
 			$('.editing-text').tokenInput('/doors/search/', {
 				theme: 'facebook',
@@ -77,14 +89,14 @@ $(document).ready(function() {
 	}).on('click', '.editable-done', function(){
 		
 		var parent = $(this).parent();
-		var type = parent.attr('type');
-		var ajaxId = parent.attr('ajaxId');
+		var field = parent.data('field');
+		var kid = parent.data('kid');
 
 		var newValue = '<span class="editable-text">';
 
-		if (type == 'edit-keypair-doors') {
+		if (field == 'doors') {
 			doors_json_new = $('.editing-text').tokenInput('get');
-			parent.attr('ajaxData', JSON.stringify(doors_json_new));
+			parent.data('value', JSON.stringify(doors_json_new));
 			var len = doors_json_new.length;
 			if (len == 0) {
 				newValue += '- - -';
@@ -94,7 +106,7 @@ $(document).ready(function() {
 				}
 			}
 		} else {
-			var ajaxUrl = parent.attr('ajaxUrl');
+			var ajaxUrl = parent.data('post-url');
 			var ajaxValue = parent.children('input').val().trim();
 			
 			if(ajaxValue == '') {
@@ -107,7 +119,7 @@ $(document).ready(function() {
 				type: 'POST',
 				url: ajaxUrl,
 				data: {
-					'kid': ajaxId,
+					'kid': kid,
 					'value': ajaxValue,
 					'csrfmiddlewaretoken': getToken()
 				},
@@ -127,16 +139,17 @@ $(document).ready(function() {
 
 	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
 		ajaxUrl = '/keypairs/scan/rfid';
-		var isEditing = $(this).parent().attr('type') == 'edit-rfid';
+		var isEditing = $(this).parent().data('action') == 'edit';
 
 		if(isEditing)
 			textSelector = '.editing-text';
 		else
-			textSelector = '#inputUid';
+			textSelector = '#newRfid';
 		
 		var scan_button = $(this);
 		scan_button.hide(256);	
-		$(textSelector).val('Waiting for RFID data...');
+		$(textSelector).val('')
+		$(textSelector).attr('placeholder', 'Waiting for RFID data...');
 
 		$.ajax({
 			type: 'POST',
@@ -147,23 +160,26 @@ $(document).ready(function() {
 			success: function(msg){
 				scan_button.show(256);
 				$(textSelector).val(msg);
+				$(textSelector).attr('placeholder', msg);
 			},
 			error: function(msg){
-				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+				scan_button.show(256);
+				$(textSelector).attr('placeholder', msg['responseText'])
 			}
 		});
 	}).on('click', '.scan-new-fingerprint, .scan-edit-fingerprint', function(e){
 		ajaxUrl = '/keypairs/scan/fingerprint';
-		var isEditing = $(this).parent().attr('type') == 'edit-fingerprint';
+		var isEditing = $(this).parent().data('action') == 'edit';
 
 		if(isEditing)
 			textSelector = '.editing-text';
 		else
-			textSelector = '#inputFinger';
+			textSelector = '#newFinger';
 	
 		var scan_button = $(this);
 		scan_button.hide(256);	
-		$(textSelector).val('Waiting for finger...');
+		$(textSelector).val('');
+		$(textSelector).attr('placeholder', 'Waiting for finger...')
 
 		$.ajax({
 			type: 'POST',
@@ -174,64 +190,69 @@ $(document).ready(function() {
 			success: function(msg){
 				scan_button.show(256);
 				$(textSelector).val(msg);
+				$(textSelector).attr('placeholder', msg);
 			},
 			error: function(msg){
-				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+				scan_button.show(256);
+				$(textSelector).val('')
+				$(textSelector).attr('placeholder', msg['responseText'])
 			}
 		});
 	});
 
 	// For keypairs
 	$(document.body).on('click', '.delete-btn', function(){
-		deleteKeypair($(this).attr('id'));
-	});
-	$(document.body).on('click', '.deactivate-btn', function(){
-		toggleActiveKeypair($(this).attr('id'));
-		$(this).parent().parent().parent().parent().addClass('greyed'); // grey out the corresponding row
+		var parent = $(this).parent();
+		var kid = parent.data('kid');
+		var postUrl = parent.data('post-url');
+		postToUrl(postUrl, {kid:kid});
+		$(this).closest('tr').hide(256);
+
+	}).on('click', '.deactivate-btn', function(){
+		var parent = $(this).parent();
+		var kid = parent.data('kid');
+		var postUrl = parent.data('post-url');
+		postToUrl(postUrl, {kid:kid});
+
+		$(this).closest('tr').addClass('greyed'); // grey out the corresponding row
 		$(this).removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
 		$(this).html("Activate");
-	});
-	$(document.body).on('click', '.activate-btn', function(){
-		toggleActiveKeypair($(this).attr('id'));
-		$(this).parent().parent().parent().parent().removeClass('greyed'); // ungrey the corresponding row
+
+	}).on('click', '.activate-btn', function(){
+		var parent = $(this).parent();
+		var kid = parent.data('kid');
+		var postUrl = parent.data('post-url');
+		postToUrl(postUrl, {kid:kid});
+
+		$(this).closest('tr').removeClass('greyed'); // ungrey the corresponding row
 		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
 		$(this).html("Deactivate");
 	});
+
 	// For users
-	// Deactivate
 	$(document.body).on('click', '.deactivate-btn-user', function(){
 		toggleActiveUser($(this).attr('id'));
-		$(this).parent().parent().parent().parent().addClass('greyed'); // grey out the corresponding row
+		$(this).closest('tr').addClass('greyed'); // grey out the corresponding row
 		$(this).removeClass('deactivate-btn-user btn-warning').addClass('activate-btn-user btn-success');
 		$(this).html("Activate");
-	});
-	// Activate
-	$(document.body).on('click', '.activate-btn-user', function(){
+	}).on('click', '.activate-btn-user', function(){
 		toggleActiveUser($(this).attr('id'));
-		$(this).parent().parent().parent().parent().removeClass('greyed'); // ungrey the corresponding row
+		$(this).closest('tr').removeClass('greyed'); // ungrey the corresponding row
 		$(this).addClass('deactivate-btn-user btn-warning').removeClass('activate-btn-user btn-success');
 		$(this).html("Deactivate");
-	});
-	// Demote
-	$(document.body).on('click', '.demote-btn-user', function(){
+	}).on('click', '.demote-btn-user', function(){
 		toggleStaff($(this).attr('id'));
 		$(this).html("Promote");
 		$('#star-'+$(this).attr('id')).hide();
 		$(this).removeClass('demote-btn-user btn-warning').addClass('promote-btn-user btn-success');
-	});
-	// Promote
-	$(document.body).on('click', '.promote-btn-user', function(){
+	}).on('click', '.promote-btn-user', function(){
 		toggleStaff($(this).attr('id'));
 		$('#star-'+$(this).attr('id')).show();
 		$(this).addClass('demote-btn-user btn-warning').removeClass('promote-btn-user btn-success');
 		$(this).html("Demote");
-	});
-	// Deny -- which is the same as delete, for now.
-	$(document.body).on('click', '.deny-btn-user', function(){
+	}).on('click', '.deny-btn-user', function(){
 		deleteUser($(this).attr('id'));
-	});
-	// Approve
-	$(document.body).on('click', '.approve-btn-user', function(){
+	}).on('click', '.approve-btn-user', function(){
 		approveUser(uid);
 		var uid = $(this).attr('id');
 		$(this).parent().parent().parent().parent().removeClass('redded');
@@ -240,9 +261,7 @@ $(document).ready(function() {
 		var deleteButton = '<button class="btn btn-danger delete-btn-user" id="'+uid+'">Delete</button>';
 		$(this).parent().parent().html(wrapButton(promoteButton) + wrapButton(deactivateButton) + wrapButton(deleteButton));
 		$('#unapproved-'+$(this).attr('id')).hide();
-	});
-	// Delete
-	$(document.body).on('click', '.delete-btn-user', function(){
+	}).on('click', '.delete-btn-user', function(){
 		deleteUser($(this).attr('id'));
 	});
 });
@@ -287,27 +306,15 @@ function deleteUser(uid){
 	postToUrl(ajaxUrl, {'uid':uid});
 }
 
-
-function toggleActiveKeypair(kid){
-	ajaxUrl = '/keypairs/toggleactive';
-	postToUrl(ajaxUrl, {'kid':kid});
-}
-
-function deleteKeypair(kid) {
-	$('#kp-'+kid).hide(256);
-	ajaxUrl = '/keypairs/delete';
-	postToUrl(ajaxUrl, {'kid':kid});
-}
-
 function getToken() {
 	return document.getElementsByName('csrfmiddlewaretoken')[0].value;
 }
 
-function postToUrl(url, data) {
+function postToUrl(postUrl, data) {
 	data['csrfmiddlewaretoken'] = getToken();
 	$.ajax({
 		type: 'POST',
-		url: ajaxUrl,
+		url: postUrl,
 		data: data,
 		success: function(msg){
 		},

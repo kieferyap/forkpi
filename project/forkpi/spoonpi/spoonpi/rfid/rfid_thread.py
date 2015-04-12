@@ -21,9 +21,10 @@ class RfidThread(threading.Thread):
         while True:
             while self.is_polling and not self.tag_swiped:
                 try:
-                    self.rfid_uid = self.rfid_reader.read_tag()
-                    self._print("Found a new UID:", self.rfid_uid)
-                    self.tag_swiped = True
+                    self.rfid_uid = self.rfid_reader.read_tag(blocking=True)
+                    if self.rfid_uid:
+                        self._print("Found a new UID:", self.rfid_uid)
+                        self.tag_swiped = True
                 except Exception:
                     self.rfid_reader = RfidReader()
             time.sleep(0.5)

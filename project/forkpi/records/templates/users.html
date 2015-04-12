@@ -14,7 +14,7 @@
 					<table id="keypairs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
 						<thead>
 							<tr>
-								<!--th class="col-md-1" data-placeholder="S..."># </th-->
+								<!--th class="col-md-1" data-placeholder="Search..."># </th-->
 								<th class="col-md-1" data-placeholder="Search...">Username </th>
 								<th class="col-md-2" data-placeholder="Search...">Email Address</th>
 								<th class="col-md-2" data-placeholder="Search...">Last Login</th>
@@ -23,87 +23,81 @@
 							</tr>
 						</thead>
 						<tbody>
-							{% if users|length > 0 %}
-								{% for user in users %}
-								<tr id="user-{{ user.id }}" class="
-									{% if not user.is_active %}
-										greyed
-									{% endif %}
-									{% if not user.is_superuser %}
-										redded
-									{% endif %}
-								">
-									<!--td>{{ user.id }}</td-->
+							{% for user in users %}
+							<tr id="user-{{ user.id }}" class="
+								{% if not user.is_active %}
+									greyed
+								{% endif %}
+								{% if not user.is_superuser %}
+									redded
+								{% endif %}
+							">
+								<!--td>{{ user.id }}</td-->
 
-									<!-- Username -->
-									<td>																
-										<span
-											id="star-{{ user.id }}"
-											class="glyphicon glyphicon-star small-text"
-											style="
-											{% if not user.is_staff %}
-												display: none;
-											{% endif %}
-											"
-										></span>
-										{% if not user.is_superuser %}
-											<span class="invisible">0</span>
-											<span id="unapproved-{{ user.id }}" class="small-text glyphicon glyphicon-exclamation-sign"></span>
-										{% endif %}				
-										{{ user.username }}
-									</td>
-
-									<!-- Name -->
-									<td>
-										{{ user.email }}<br/>
-										{{ user.firstname }} {{ user.lastname }}
-									</td>
-
-									<!-- Dates -->
-									<td>
-										{{ user.last_login | date:"Y-m-d H:i:s"}}
-									</td>
-									<td>
-										{{ user.date_joined | date:"Y-m-d H:i:s"}}
-									</td>
-
-									<!-- Actions -->
-									<td>
-									<div class="btn-group btn-group-justified" role="group">
-										{% if user.is_superuser %}
-											<div class="btn-group" role="group">
-											{% if user.is_staff %}
-												<button class="btn btn-warning demote-btn-user" id="{{ user.id }}">Demote</button>
-											{% else %}
-												<button class="btn btn-success promote-btn-user" id="{{ user.id }}">Promote</button>
-											{% endif %}
-											</div>
-											<div class="btn-group" role="group">
-											{% if user.is_active %}
-												<button class="btn btn-warning deactivate-btn-user" id="{{ user.id }}">Deactivate</button>
-											{% else %}
-												<button class="btn btn-success activate-btn-user" id="{{ user.id }}">Activate</button>
-											{% endif %}
-											</div>
-											<div class="btn-group" role="group">
-												<button class="btn btn-danger delete-btn-user" id="{{ user.id }}">Delete</button>
-											</div>
-										{% else %}
-										<div class="btn-group" role="group">
-											<button class="btn btn-success approve-btn-user" id="{{ user.id }}">Approve</button>
-										</div>
-										<div class="btn-group" role="group">
-											<button class="btn btn-danger deny-btn-user" id="{{ user.id }}">Deny</button>
-										</div>
+								<!-- Username -->
+								<td>																
+									<span
+										id="star-{{ user.id }}"
+										class="glyphicon glyphicon-star small-text"
+										style="
+										{% if not user.is_staff %}
+											display: none;
 										{% endif %}
-									</td>
-								</tr>
-								{% endfor %}
-							{% else %}
-								<tr>
-									<td colspan="5" style="text-align:center">No users found.</td>
-								</tr>
-							{% endif %}
+										"
+									></span>
+									{% if not user.is_superuser %}
+										<span class="invisible">0</span>
+										<span id="unapproved-{{ user.id }}" class="small-text glyphicon glyphicon-exclamation-sign"></span>
+									{% endif %}				
+									{{ user.username }}
+								</td>
+
+								<!-- Name -->
+								<td>
+									{{ user.email }}<br/>
+									{{ user.firstname }} {{ user.lastname }}
+								</td>
+
+								<!-- Dates -->
+								<td>
+									{{ user.last_login | date:"Y-m-d H:i:s"}}
+								</td>
+								<td>
+									{{ user.date_joined | date:"Y-m-d H:i:s"}}
+								</td>
+
+								<!-- Actions -->
+								<td>
+								<div class="btn-group btn-group-justified" role="group">
+									{% if user.is_superuser %}
+										<div class="btn-group" role="group">
+										{% if user.is_staff %}
+											<button class="btn btn-warning demote-btn-user" id="{{ user.id }}">Demote</button>
+										{% else %}
+											<button class="btn btn-success promote-btn-user" id="{{ user.id }}">Promote</button>
+										{% endif %}
+										</div>
+										<div class="btn-group" role="group">
+										{% if user.is_active %}
+											<button class="btn btn-warning deactivate-btn-user" id="{{ user.id }}">Deactivate</button>
+										{% else %}
+											<button class="btn btn-success activate-btn-user" id="{{ user.id }}">Activate</button>
+										{% endif %}
+										</div>
+										<div class="btn-group" role="group">
+											<button class="btn btn-danger delete-btn-user" id="{{ user.id }}">Delete</button>
+										</div>
+									{% else %}
+									<div class="btn-group" role="group">
+										<button class="btn btn-success approve-btn-user" id="{{ user.id }}">Approve</button>
+									</div>
+									<div class="btn-group" role="group">
+										<button class="btn btn-danger deny-btn-user" id="{{ user.id }}">Deny</button>
+									</div>
+									{% endif %}
+								</td>
+							</tr>
+							{% endfor %}
 						</tbody>
 					</table>
 				</div>

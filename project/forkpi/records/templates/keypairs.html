@@ -13,40 +13,57 @@
 	<div class="tab-pane" id="new-keypair">
 		<br/>
 		<div class="col-md-10 col-md-offset-1">
-			<form class="form-horizontal" accept-charset="UTF-8" action="{% url 'add keypair' %}" method="post">
+			<form class="form-horizontal" accept-charset="UTF-8" method="post" action="{% url 'add keypair' %}">
 				<div class="form-group">
 					<label for="name" class="col-md-2 control-label">Name</label>
-					<div class="col-md-10">
-						<input type="text" class="form-control" id="inputName" name="name" placeholder="John Smith">
+					<div class="col-md-10" data-action="new">
+						<input type="text" class="form-control"
+							   id="newName" name="name" placeholder="John Smith"/>
 					</div>
 				</div>
 				<div class="form-group">
-					<label for="pin" class="col-md-2 control-label">PIN</label>
+					<label for="doors" class="col-md-2 control-label">Doors</label>
 					<div class="col-md-10">
-						<input type="text" class="form-control" id="inputPin" name="pin"placeholder="1234">
+						<input type="text" class="form-control"
+							   id="newDoors" name="doors" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="pin" class="col-md-2 control-label">PIN</label>
+					<div class="col-md-10" data-action="new">
+						<input type="text" class="form-control"
+							   id="newPin" name="pin" placeholder="Enter numeric PIN of any length"/>
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="rfid_uid" class="col-md-2 control-label">RFID UID</label>
 					<div class="col-md-8">
-						<input type="text" class="form-control" id="inputUid" name="rfid_uid" placeholder="abcdef12">
+						<input type="text" class="form-control"
+							   id="newRfid" name="rfid_uid" placeholder="Scan for an RFID tag or paste the UID here"/>
 					</div>
-					<div class="col-md-2">
-						<input type="button" class="btn expand btn-success scan-new-rfid" name="scan-new-rfid" value="Scan RFID">
+					<div class="col-md-2" data-action="new">
+						<input type="button" class="btn expand btn-success scan-new-rfid"
+							   name="scan-new-rfid" value="Scan RFID"/>
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="fingerprint_template" class="col-md-2 control-label">Fingerprint</label>
 					<div class="col-md-8">
-						<input type="text" class="form-control" id="inputFinger" name="fingerprint_template" placeholder="0123456789abcdef012345...">
+						<input type="text" class="form-control"
+							   id="newFinger" name="fingerprint_template" placeholder="Scan for a finger or paste the template here" />
 					</div>
-					<div class="col-md-2">
-						<input type="button" class="btn expand btn-success scan-new-fingerprint" name="scan-new-fingerprint" value="Scan Finger">
+					<div class="col-md-2" data-action="new">
+						<input type="button" class="btn expand btn-success scan-new-fingerprint"
+							   name="scan-new-fingerprint" value="Scan Finger"/>
 					</div>
 				</div>
+
 				<div class="form-group">
 					<div class="col-md-10 col-md-offset-2">
-						<button class="btn expand btn-primary signup-button" type="submit">Add to Keypairs</button>
+						<button class="btn expand btn-primary signup-button" type="submit">
+							Add to Keypairs
+						</button>
 					</div>
 				</div>
 				{% csrf_token %}
@@ -84,7 +101,7 @@
 				</thead>
 				<tbody>
 					{% for keypair in keypairs %}
-					<tr id="kp-{{ keypair.id }}" class="
+					<tr class="
 						{% if not keypair.is_active %}
 							greyed
 						{% endif %}
@@ -92,14 +109,20 @@
 						<!-- <td>{{ keypair.id }}</td> -->
 
 						<!-- Name -->
-						<td ajaxUrl="{% url 'edit keypair name' %}" ajaxId="{{ keypair.id }}" ajaxField="name">
+						<td data-post-url="{% url 'edit keypair name' %}"
+							data-action="edit" data-field="name"
+							data-kid="{{ keypair.id }}" data-value="{{ keypair.name }}">
+
 							<span class="editable-text">
-							{{ keypair.name }}
+								{{ keypair.name }}
 							</span>
 						</td>
 
 						<!-- Doors -->
-						<td ajaxId="{{ keypair.id }}" type="edit-keypair-doors" ajaxData="{{ keypair.doors_json }}">
+						<td
+							data-action="edit" data-field="doors"
+							data-kid="{{ keypair.id }}" data-value="{{ keypair.doors_json }}">
+							
 							<span class="editable-text">
 								{% if keypair.doors_json %}
 									{% for door in keypair.doors_json %}
@@ -114,29 +137,38 @@
 						</td>
 
 						<!-- PIN -->
-						<td ajaxUrl="{% url 'edit keypair pin' %}" ajaxId="{{ keypair.id }}" ajaxField="pin">
+						<td data-post-url="{% url 'edit keypair pin' %}"
+							data-action="edit" data-field="pin"
+							data-kid="{{ keypair.id }}" data-value="{{ keypair.pin }}">
+
 							<span class="editable-text">
-							{% if keypair.pin %}
-								{{ keypair.pin }}
-							{% else %}
-								- - -
-							{% endif %}
+								{% if keypair.pin %}
+									{{ keypair.pin }}
+								{% else %}
+									- - -
+								{% endif %}
 							</span>
 						</td>
 
-						<!-- UID -->
-						<td ajaxUrl="{% url 'edit keypair rfid' %}" ajaxId="{{ keypair.id }}" ajaxField="uid" type="edit-rfid">
+						<!-- RFID UID -->
+						<td data-post-url="{% url 'edit keypair rfid' %}"
+							data-action="edit" data-field="rfid"
+							data-kid="{{ keypair.id }}" data-value="{{ keypair.rfid_uid }}">
+
 							<span class="editable-text">
-							{% if keypair.rfid_uid %}
-								{{ keypair.rfid_uid }}
-							{% else %}
-								- - -
-							{% endif %}
+								{% if keypair.rfid_uid %}
+									{{ keypair.rfid_uid }}
+								{% else %}
+									- - -
+								{% endif %}
 							</span>
 						</td>
 
 						<!-- Fingerprint -->
-						<td ajaxUrl="{% url 'edit keypair fingerprint' %}" ajaxId="{{ keypair.id }}" ajaxField="fingerprint" type="edit-fingerprint">
+						<td data-post-url="{% url 'edit keypair fingerprint' %}"
+							data-action="edit" data-field="fingerprint"
+							data-kid="{{ keypair.id }}" data-value="{{ keypair.fingerprint_template }}">
+
 							<span class="editable-text">
 								{% if keypair.fingerprint_template %}
 									{{ keypair.fingerprint_template }}
@@ -147,17 +179,29 @@
 						</td>
 						
 						<!-- Actions -->
-						<td id="action-{{ keypair.id }}" ajaxUrl="deletekeypair">
+						<td id="action-{{ keypair.id }}">
 							<div class="btn-group btn-group-justified" role="group">
-								<div class="btn-group" role="group">
+								<div class="btn-group" role="group"
+									 data-post-url="{% url 'keypair toggle active' %}"
+									 data-kid="{{ keypair.id }}">
+
 									{% if keypair.is_active %}
-										<button class="btn expand btn-warning task-cancelbox deactivate-btn" id="{{ keypair.id }}">Deactivate</button>
+										<button class="btn expand btn-warning task-cancelbox deactivate-btn">
+											Deactivate
+										</button>
 									{% else %}
-										<button class="btn expand btn-success task-cancelbox activate-btn" id="{{ keypair.id }}">Activate</button>
+										<button class="btn expand btn-success task-cancelbox activate-btn">
+											Activate
+										</button>
 									{% endif %}
 								</div>
-								<div class="btn-group" role="group">
-									<button class="btn btn-danger task-cancelbox delete-btn" id="{{ keypair.id }}">Delete</button>
+								<div class="btn-group" role="group"
+									 data-post-url="{% url 'delete keypair' %}"
+									 data-kid="{{ keypair.id }}">
+
+									<button class="btn btn-danger task-cancelbox delete-btn">
+										Delete
+									</button>
 								</div>
 							</div>
 						</td>
