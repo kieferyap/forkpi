@@ -3,7 +3,7 @@
 {% block content%}
 
 <ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
-    <li><a href="#new-keypair" data-toggle="tab">New Keypair</a></li>
+    <li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
     <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
 </ul>
 
@@ -16,9 +16,10 @@
 			<form class="form-horizontal" accept-charset="UTF-8" method="post" action="{% url 'add keypair' %}">
 				<div class="form-group">
 					<label for="name" class="col-md-2 control-label">Name</label>
-					<div class="col-md-10" data-action="new">
+					<div class="col-md-10">
 						<input type="text" class="form-control"
-							   id="newName" name="name" placeholder="John Smith"/>
+							   id="newName" name="name"
+							   placeholder="John Smith" />
 					</div>
 				</div>
 				<div class="form-group">
@@ -31,31 +32,36 @@
 
 				<div class="form-group">
 					<label for="pin" class="col-md-2 control-label">PIN</label>
-					<div class="col-md-10" data-action="new">
+					<div class="col-md-10">
 						<input type="text" class="form-control"
-							   id="newPin" name="pin" placeholder="Enter numeric PIN of any length"/>
+							   id="newPin" name="pin" 
+							   placeholder="Enter numeric PIN of any length"/>
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="rfid_uid" class="col-md-2 control-label">RFID UID</label>
 					<div class="col-md-8">
 						<input type="text" class="form-control"
-							   id="newRfid" name="rfid_uid" placeholder="Scan for an RFID tag or paste the UID here"/>
+							   id="newRfid" name="rfid_uid"
+							   placeholder="Scan for an RFID tag or paste the UID here" />
 					</div>
-					<div class="col-md-2" data-action="new">
-						<input type="button" class="btn expand btn-success scan-new-rfid"
-							   name="scan-new-rfid" value="Scan RFID"/>
+					<div class="col-md-2" data-scan-url="{% url 'scan rfid' %}"
+						 data-field="rfid" data-target-textbox="#newRfid">
+						<input type="button" class="btn expand btn-success scan-new"
+							   value="Scan RFID" />
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="fingerprint_template" class="col-md-2 control-label">Fingerprint</label>
 					<div class="col-md-8">
 						<input type="text" class="form-control"
-							   id="newFinger" name="fingerprint_template" placeholder="Scan for a finger or paste the template here" />
+							   id="newFinger" name="fingerprint_template"
+							   placeholder="Scan for a finger or paste the template here" />
 					</div>
-					<div class="col-md-2" data-action="new">
-						<input type="button" class="btn expand btn-success scan-new-fingerprint"
-							   name="scan-new-fingerprint" value="Scan Finger"/>
+					<div class="col-md-2" data-scan-url="{% url 'scan fingerprint' %}"
+						 data-field="fingerprint" data-target-textbox="#newFinger">
+						<input type="button" class="btn expand btn-success scan-new"
+							   value="Scan Finger"/>
 					</div>
 				</div>
 
@@ -73,7 +79,7 @@
 	<div class="tab-pane active" id="edit-keypairs">
 		<div class="col-md-12">
 			<table id="keypairs-table" class="table table-hover tablesorter tablesaw"
-					data-tablesaw-minimap data-tablesaw-mode="togglecolumn" data-sortList="[[0,0]]">
+					data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,0]]">
 				<thead>
 					<tr>
 						<!-- <th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="-1">
@@ -110,8 +116,8 @@
 
 						<!-- Name -->
 						<td data-post-url="{% url 'edit keypair name' %}"
-							data-action="edit" data-field="name"
-							data-kid="{{ keypair.id }}" data-value="{{ keypair.name }}">
+							data-field="name"
+							data-id="{{ keypair.id }}" data-value="{{ keypair.name }}">
 
 							<span class="editable-text">
 								{{ keypair.name }}
@@ -119,9 +125,11 @@
 						</td>
 
 						<!-- Doors -->
-						<td
-							data-action="edit" data-field="doors"
-							data-kid="{{ keypair.id }}" data-value="{{ keypair.doors_json }}">
+						<td data-search-url="{% url 'search doors' %}"
+							data-link-url="{% url 'link door to keypair' %}"
+							data-unlink-url="{% url 'unlink door from keypair' %}"
+							data-field="doors"
+							data-id="{{ keypair.id }}" data-value="{{ keypair.doors_json }}">
 							
 							<span class="editable-text">
 								{% if keypair.doors_json %}
@@ -138,8 +146,8 @@
 
 						<!-- PIN -->
 						<td data-post-url="{% url 'edit keypair pin' %}"
-							data-action="edit" data-field="pin"
-							data-kid="{{ keypair.id }}" data-value="{{ keypair.pin }}">
+							data-field="pin"
+							data-id="{{ keypair.id }}" data-value="{{ keypair.pin }}">
 
 							<span class="editable-text">
 								{% if keypair.pin %}
@@ -151,9 +159,9 @@
 						</td>
 
 						<!-- RFID UID -->
-						<td data-post-url="{% url 'edit keypair rfid' %}"
-							data-action="edit" data-field="rfid"
-							data-kid="{{ keypair.id }}" data-value="{{ keypair.rfid_uid }}">
+						<td data-post-url="{% url 'edit keypair rfid' %}" data-scan-url="{% url 'scan rfid' %}"
+							data-field="rfid" data-target-textbox=".editing-text"
+							data-id="{{ keypair.id }}" data-value="{{ keypair.rfid_uid }}">
 
 							<span class="editable-text">
 								{% if keypair.rfid_uid %}
@@ -165,9 +173,9 @@
 						</td>
 
 						<!-- Fingerprint -->
-						<td data-post-url="{% url 'edit keypair fingerprint' %}"
-							data-action="edit" data-field="fingerprint"
-							data-kid="{{ keypair.id }}" data-value="{{ keypair.fingerprint_template }}">
+						<td data-post-url="{% url 'edit keypair fingerprint' %}" data-scan-url="{% url 'scan fingerprint' %}"
+							data-field="fingerprint" data-target-textbox=".editing-text"
+							data-id="{{ keypair.id }}" data-value="{{ keypair.fingerprint_template }}">
 
 							<span class="editable-text">
 								{% if keypair.fingerprint_template %}
@@ -183,7 +191,7 @@
 							<div class="btn-group btn-group-justified" role="group">
 								<div class="btn-group" role="group"
 									 data-post-url="{% url 'keypair toggle active' %}"
-									 data-kid="{{ keypair.id }}">
+									 data-id="{{ keypair.id }}">
 
 									{% if keypair.is_active %}
 										<button class="btn expand btn-warning task-cancelbox deactivate-btn">
@@ -197,7 +205,7 @@
 								</div>
 								<div class="btn-group" role="group"
 									 data-post-url="{% url 'delete keypair' %}"
-									 data-kid="{{ keypair.id }}">
+									 data-id="{{ keypair.id }}">
 
 									<button class="btn btn-danger task-cancelbox delete-btn">
 										Delete

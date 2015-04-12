@@ -1,5 +1,5 @@
 body {
-	font: 18px/1.5em Helvetica, Arial, sans-serif;
+	font: 18px/1.5em Arial, sans-serif;
 	background-color: #EEE;
 }
 
@@ -63,26 +63,27 @@ th:last-child, td:last-child {
 	width: 100%;
 }
 
-.signup-textbox{
+.signup-textbox {
 	margin-top: 10px;
 	padding: 5px;
 }
 
-.signup-button{
+.signup-button {
 	margin-top: 15px;
 	padding: 5px;
 }
 
-.textarea_new_item{
+.textarea_new_item {
 	margin-top: 3px;
 	padding: 10px;
 	resize: none;
 }
-.list-btn{
+.list-btn {
 	padding: 5px;
 	padding-left: 8px;
 	padding-right: 8px;
 	margin-right: 3px;
+	margin-bottom: 5px;
 }
 
 .usertype-admin {
@@ -108,11 +109,8 @@ th:last-child, td:last-child {
 .alert-error .alert-link {
 	color: #843534;
 }
-.list-btn{
-	margin-bottom: 5px;
-}
 
-.editable-text{
+.editable-text {
 	float: left;
 	border: 1px solid rgba(0,0,0,0);
 	display: inline-block;
@@ -120,7 +118,7 @@ th:last-child, td:last-child {
 	padding: 2px;
 	border-radius: 3px;
 }
-.editable-text:hover{
+.editable-text:hover {
 	border: 1px solid #ADADAD;
 }
 
@@ -134,7 +132,7 @@ th:last-child, td:last-child {
 	text-align: center;
 }
 
-.editable-done, .scan-edit-rfid, .scan-edit-fingerprint{
+.editable-done, .scan-edit {
 	display: inline-block;	
 	padding-right: 4px;
 	padding-left: 4px;
@@ -143,7 +141,7 @@ th:last-child, td:last-child {
 	cursor: pointer;
 }
 
-.completed-check, .scan-edit-rfid, .scan-edit-fingerprint{
+.completed-check, .scan-edit {
 	position: relative;
 	top: 3px;
 	font-size: 20px;
@@ -151,13 +149,13 @@ th:last-child, td:last-child {
 	padding-left: 3px;
 }
 
-.control-label{
+.control-label {
 	padding-top: 0px !important;
 }
-.greyed{
+.greyed {
 	color: #CCCCCC;
 }
-.redded{
+.redded {
 	/*background-color: rgba(38, 166, 91, 0.2);*/
 	font-weight: 500;
 	color: #C0392B;

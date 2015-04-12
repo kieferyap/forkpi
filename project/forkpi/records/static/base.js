@@ -31,280 +31,209 @@ $(document).ready(function() {
 $(document).ready(function() {
 	var editableTextTrigger = false;
 
+	// Editing text
 	$(document.body).on('click', '.editable-text', function(){
-		if(editableTextTrigger){ // some other text is already being edited; close that first
+		if (editableTextTrigger) { // some other text is already being edited; close that first
 			$('.editable-done').trigger('click');
 			editableTextTrigger = false;
 		}
-
-		var current = $(this).html();
-		var parent = $(this).parent();
-		var field = parent.data('field');
-		if(current.trim() == '- - -'){
-			current = '';
-		}
-		
-		if (field == 'doors') {
-			current = '<input type="text" class="editing-text col-md-8" value=""/>';
-		} else {
-			current = '<input type="text" class="editing-text col-md-8" value="'+current.trim()+'"/>';
-		}
-		
-		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
-		
-		if (field == 'rfid') {
-			doneButton = '<div class="scan-edit-rfid"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
-		} else if (field == 'fingerprint') {
-			doneButton = '<div class="scan-edit-fingerprint"><span class="glyphicon glyphicon-search"></span></div>' + doneButton;
-		}
-
-		parent.html(current + doneButton);
+		// we are editing another textbox
 		editableTextTrigger = true;
 
-		if (field == 'doors') {
-			var kid = parent.data('kid');
-			var doors = eval(parent.data('value'));
+		var newHtml = ''; // the HTML that will replace this element
 
-			$('.editing-text').tokenInput('/doors/search/', {
+		var parent = $(this).parent();
+		var field = parent.data('field');
+		// generate the textbox that will replace this element
+		var currentValue = $(this).html().trim();
+		if (currentValue == '- - -') {
+			currentValue = ''; // effectively blank
+		} else if (field == 'doors') {
+			currentValue = ''; // the textbox should be empty because we will replace it later
+		}
+		newHtml += '<input type="text" class="editing-text col-md-8" value="' + currentValue + '" />';
+		
+		if (field == 'rfid' || field == 'fingerprint') {
+			var scanButton = '<div class="scan-edit"><span class="glyphicon glyphicon-search"></span></div>';
+			newHtml += scanButton;
+		}
+
+		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
+		newHtml += doneButton;
+
+		parent.html(newHtml);
+
+		if (field == 'doors') {
+			// replace the textbox with tokenInput
+			var kid = parent.data('id');
+			var doors = eval(parent.data('value'));
+			var searchUrl = parent.data('search-url');
+
+			$('.editing-text').tokenInput(searchUrl, {
 				theme: 'facebook',
 				hintText: null,
 				prePopulate: doors,
 				preventDuplicates : true,
-				onAdd: linkDoorToKeypair(kid),
-				onDelete: unlinkDoorFromKeypair(kid),
+				onAdd: function(door) {
+					postUrl = parent.data('link-url');
+					postToUrl(postUrl, {kid:kid, did:door.id})
+				},
+				onDelete: function(door) {
+					postUrl = parent.data('unlink-url');
+					postToUrl(postUrl, {kid:kid, did:door.id})
+				},
 			});
+			// the textbox will be replaced by a ul element, which we need to resize
 			var searchBox = parent.find('ul');
 			searchBox.addClass('col-md-10');
+			// put the cursor inside the search box
 			searchBox.click();
 		} else {
 			var textBox = parent.find('input');
+			// put the cursor inside the text box
 			textBox.focus();
+			// highlight everything inside the text box
 			textBox.select();
 		}
 		
-		$('.editing-text').on('click', function(e){
-			e.stopPropagation();
-		});
-		
-	}).on('click', '.editable-done', function(){
-		
+	}).on('click', '.editable-done', function() {
 		var parent = $(this).parent();
 		var field = parent.data('field');
-		var kid = parent.data('kid');
 
-		var newValue = '<span class="editable-text">';
+		var newHtml = '<span class="editable-text">';
 
 		if (field == 'doors') {
-			doors_json_new = $('.editing-text').tokenInput('get');
-			parent.data('value', JSON.stringify(doors_json_new));
-			var len = doors_json_new.length;
+			var newDoors = $('.editing-text').tokenInput('get');
+			parent.data('value', JSON.stringify(newDoors));
+
+			var len = newDoors.length;
 			if (len == 0) {
-				newValue += '- - -';
+				newHtml += '- - -';
 			} else {
 				for (var i = 0; i < len; i++) {
-					newValue += '<li class="token-input-token-facebook">' + doors_json_new[i].name + '</li>'
+					newHtml += '<li class="token-input-token-facebook">' + newDoors[i].name + '</li>'
 				}
 			}
-		} else {
-			var ajaxUrl = parent.data('post-url');
-			var ajaxValue = parent.children('input').val().trim();
-			
-			if(ajaxValue == '') {
-				newValue += '- - -';
-			} else {
-				newValue += ajaxValue;
-			}
+			// no need to send changes to server since it was already sent while editing (see onAdd and onDelete)
 
-			$.ajax({
-				type: 'POST',
-				url: ajaxUrl,
-				data: {
-					'kid': kid,
-					'value': ajaxValue,
-					'csrfmiddlewaretoken': getToken()
-				},
-				success: function(msg){
-				},
-				error: function(msg){
-					alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
-					location.reload();
-				}
-			});	
+		} else {
+			var newValue = parent.children('input').val().trim();
+			parent.data('value', newValue);
+			
+			if (newValue == '') {
+				newHtml += '- - -';
+			} else {
+				newHtml += newValue;
+			}
+			// send changes to server
+			var id = parent.data('id');
+			var postUrl = parent.data('post-url');
+			postToUrl(postUrl, {id:id, value:newValue});
+		}
+		newHtml += '</span>';	
+		parent.html(newHtml);
+
+		editableTextTrigger = false;
+		// $('.editing-text').off('click');
+
+	});
+
+	// Scanning RFID and Fingerprints
+	$(document.body).on('click', '.scan-new, .scan-edit', function(e){
+		var scanButton = $(this);
+		var parent = $(this).parent();
+		var target = parent.data('target-textbox');
+
+		var placeholder = '';
+		var field = parent.data('field');
+		if (field == 'rfid') {
+			placeholder = 'Waiting for RFID data...';
+		} else if (field == 'fingerprint') {
+			placeholder = 'Waiting for finger...';
 		}
 
-		newValue += '</span>';	
-		parent.html(newValue);
-		editableTextTrigger = false;
-		$('.editing-text').off('click');
+		// Clear target textbox and replace with placeholder
+		$(target).val('');
+		$(target).attr('placeholder', placeholder);
 
-	}).on('click', '.scan-new-rfid, .scan-edit-rfid', function(e){
-		ajaxUrl = '/keypairs/scan/rfid';
-		var isEditing = $(this).parent().data('action') == 'edit';
-
-		if(isEditing)
-			textSelector = '.editing-text';
-		else
-			textSelector = '#newRfid';
-		
-		var scan_button = $(this);
-		scan_button.hide(256);	
-		$(textSelector).val('')
-		$(textSelector).attr('placeholder', 'Waiting for RFID data...');
-
+		scanButton.hide(256);
 		$.ajax({
 			type: 'POST',
-			url: ajaxUrl,
+			url: parent.data('scan-url'),
 			data: {
-				'csrfmiddlewaretoken': getToken()
+				csrfmiddlewaretoken: getToken()
 			},
-			success: function(msg){
-				scan_button.show(256);
-				$(textSelector).val(msg);
-				$(textSelector).attr('placeholder', msg);
+			success: function(msg) {
+				scanButton.show(256);
+				$(target).val(msg);
+				$(target).attr('placeholder', '');
 			},
-			error: function(msg){
-				scan_button.show(256);
-				$(textSelector).attr('placeholder', msg['responseText'])
-			}
-		});
-	}).on('click', '.scan-new-fingerprint, .scan-edit-fingerprint', function(e){
-		ajaxUrl = '/keypairs/scan/fingerprint';
-		var isEditing = $(this).parent().data('action') == 'edit';
-
-		if(isEditing)
-			textSelector = '.editing-text';
-		else
-			textSelector = '#newFinger';
-	
-		var scan_button = $(this);
-		scan_button.hide(256);	
-		$(textSelector).val('');
-		$(textSelector).attr('placeholder', 'Waiting for finger...')
-
-		$.ajax({
-			type: 'POST',
-			url: ajaxUrl,
-			data: {
-				'csrfmiddlewaretoken': getToken()
-			},
-			success: function(msg){
-				scan_button.show(256);
-				$(textSelector).val(msg);
-				$(textSelector).attr('placeholder', msg);
-			},
-			error: function(msg){
-				scan_button.show(256);
-				$(textSelector).val('')
-				$(textSelector).attr('placeholder', msg['responseText'])
+			error: function(msg) {
+				// nothing was scanned: show error as textbox placeholder
+				scanButton.show(256);
+				$(target).attr('placeholder', msg['responseText'])
 			}
 		});
 	});
 
-	// For keypairs
-	$(document.body).on('click', '.delete-btn', function(){
-		var parent = $(this).parent();
-		var kid = parent.data('kid');
-		var postUrl = parent.data('post-url');
-		postToUrl(postUrl, {kid:kid});
-		$(this).closest('tr').hide(256);
+	// Keypair and User Actions
+	$(document.body).on('click', '.activate-btn', function(){
+		postIdToUrlInParent($(this));
+
+		$(this).closest('tr').removeClass('greyed'); // ungrey the corresponding row
+		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
+		$(this).html("Deactivate");
 
 	}).on('click', '.deactivate-btn', function(){
-		var parent = $(this).parent();
-		var kid = parent.data('kid');
-		var postUrl = parent.data('post-url');
-		postToUrl(postUrl, {kid:kid});
+		postIdToUrlInParent($(this));
 
 		$(this).closest('tr').addClass('greyed'); // grey out the corresponding row
 		$(this).removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
 		$(this).html("Activate");
 
-	}).on('click', '.activate-btn', function(){
-		var parent = $(this).parent();
-		var kid = parent.data('kid');
-		var postUrl = parent.data('post-url');
-		postToUrl(postUrl, {kid:kid});
+	}).on('click', '.delete-btn, .deny-btn', function(){
+		postIdToUrlInParent($(this));
 
-		$(this).closest('tr').removeClass('greyed'); // ungrey the corresponding row
-		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
-		$(this).html("Deactivate");
+		$(this).closest('tr').hide(256);
 	});
 
-	// For users
-	$(document.body).on('click', '.deactivate-btn-user', function(){
-		toggleActiveUser($(this).attr('id'));
-		$(this).closest('tr').addClass('greyed'); // grey out the corresponding row
-		$(this).removeClass('deactivate-btn-user btn-warning').addClass('activate-btn-user btn-success');
-		$(this).html("Activate");
-	}).on('click', '.activate-btn-user', function(){
-		toggleActiveUser($(this).attr('id'));
-		$(this).closest('tr').removeClass('greyed'); // ungrey the corresponding row
-		$(this).addClass('deactivate-btn-user btn-warning').removeClass('activate-btn-user btn-success');
-		$(this).html("Deactivate");
-	}).on('click', '.demote-btn-user', function(){
-		toggleStaff($(this).attr('id'));
+	// Additional User Actions
+	$(document.body).on('click', '.approve-btn', function(){
+		var parent = $(this).parent();
+		$.ajax({
+			type: 'POST',
+			url: parent.data('post-url'),
+			data: {
+				id: parent.data('id'),
+				csrfmiddlewaretoken: getToken(),
+			},
+			success: function(msg){
+				// need to update buttons and the number of unapproved users in the navbar
+				location.reload()
+			},
+			error: function(msg){
+				alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+				location.reload();
+			}
+		});
+
+	}).on('click', '.demote-btn', function(){
+		postIdToUrlInParent($(this));
+
+		var id = $(this).parent().data('id');
+		$('#star-' + id).hide();
+		$(this).removeClass('demote-btn btn-warning').addClass('promote-btn btn-success');
 		$(this).html("Promote");
-		$('#star-'+$(this).attr('id')).hide();
-		$(this).removeClass('demote-btn-user btn-warning').addClass('promote-btn-user btn-success');
-	}).on('click', '.promote-btn-user', function(){
-		toggleStaff($(this).attr('id'));
-		$('#star-'+$(this).attr('id')).show();
-		$(this).addClass('demote-btn-user btn-warning').removeClass('promote-btn-user btn-success');
+
+	}).on('click', '.promote-btn', function(){
+		postIdToUrlInParent($(this));
+
+		var id = $(this).parent().data('id');
+		$('#star-' + id).show();
+		$(this).addClass('demote-btn btn-warning').removeClass('promote-btn btn-success');
 		$(this).html("Demote");
-	}).on('click', '.deny-btn-user', function(){
-		deleteUser($(this).attr('id'));
-	}).on('click', '.approve-btn-user', function(){
-		approveUser(uid);
-		var uid = $(this).attr('id');
-		$(this).parent().parent().parent().parent().removeClass('redded');
-		var promoteButton = '<button class="btn btn-success promote-btn-user" id="'+uid+'">Promote</button> ';
-		var deactivateButton = '<button class="btn btn-warning deactivate-btn-user" id="'+uid+'">Deactivate</button> ';
-		var deleteButton = '<button class="btn btn-danger delete-btn-user" id="'+uid+'">Delete</button>';
-		$(this).parent().parent().html(wrapButton(promoteButton) + wrapButton(deactivateButton) + wrapButton(deleteButton));
-		$('#unapproved-'+$(this).attr('id')).hide();
-	}).on('click', '.delete-btn-user', function(){
-		deleteUser($(this).attr('id'));
 	});
 });
-
-
-function wrapButton(buttonHtml) {
-	return '<div class="btn-group btn-group-justified" role="group">' + buttonHtml + '</div>';
-}
-				
-var linkDoorToKeypair = function(kid) {
-	return function(door) {
-		ajaxUrl = '/keypairs/link_door';
-		postToUrl(ajaxUrl, {kid:kid, did:door.id})
-	}
-}
-
-var unlinkDoorFromKeypair = function(kid) {
-	return function(door) {
-		ajaxUrl = '/keypairs/unlink_door';
-		postToUrl(ajaxUrl, {kid:kid, did:door.id})
-	}
-}
-
-function toggleActiveUser(uid){
-	ajaxUrl = '/users/toggleactive';
-	postToUrl(ajaxUrl, {'uid':uid});
-}
-
-function toggleStaff(uid){
-	ajaxUrl = '/users/togglestaff';
-	postToUrl(ajaxUrl, {'uid':uid});
-}
-
-function approveUser(uid){
-	ajaxUrl = '/users/approve';
-	postToUrl(ajaxUrl, {'uid':uid});
-}
-
-function deleteUser(uid){
-	$('#user-'+uid).hide(256);
-	ajaxUrl = '/users/delete';
-	postToUrl(ajaxUrl, {'uid':uid});
-}
 
 function getToken() {
 	return document.getElementsByName('csrfmiddlewaretoken')[0].value;
@@ -323,4 +252,11 @@ function postToUrl(postUrl, data) {
 			location.reload();
 		}
 	});
+}
+
+function postIdToUrlInParent(element) {
+	var parent = element.parent();
+	var id = parent.data('id');
+	var postUrl = parent.data('post-url');
+	postToUrl(postUrl, {id:id});
 }

@@ -14,26 +14,26 @@ def all_users(request):
 
 @login_required
 def user_toggle_active(request):
-	user = User.objects.get(id = request.POST['uid'])
+	user = User.objects.get(id = request.POST['id'])
 	user.is_active = not user.is_active
 	user.save()
 	return HttpResponse("Successful.")
 
 @login_required
 def user_toggle_staff(request):
-	user = User.objects.get(id = request.POST['uid'])
+	user = User.objects.get(id = request.POST['id'])
 	user.is_staff = not user.is_staff
 	user.save()
 	return HttpResponse("Successful.")
 
 @login_required
 def approve_user(request):
-	user = User.objects.get(id = request.POST['uid'])
+	user = User.objects.get(id = request.POST['id'])
 	user.is_superuser = True
 	user.save()
 	return HttpResponse("Successful.")
 
 @login_required
 def delete_user(request):
-	User.objects.filter(id = request.POST['uid']).delete()
+	User.objects.filter(id = request.POST['id']).delete()
 	return HttpResponse("Successful.")

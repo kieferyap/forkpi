@@ -1,4 +1,4 @@
-New keypair add doors
+[x] New keypair add doors
 Separate Forkpi and Spoonpi users in database
 Keypair - last_edited_by field
 Pageinate logs (and maybe keypairs)

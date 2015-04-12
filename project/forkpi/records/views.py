@@ -25,7 +25,7 @@ def get_user_actions(request):
 			unapproved_count = User.objects.filter(is_superuser = False).count()
 			unapproved_count = ' ('+str(unapproved_count)+')' if unapproved_count > 0 else ''
 
-			userActions.append({'name':'Users'+unapproved_count,   'url':reverse('users')})
+			userActions.append({'name':'Users' + unapproved_count,   'url':reverse('users')})
 			userActions.append({'name':'Options',  'url':reverse('options')})
 
 		userActions.append({'name':'Logout',   'url':reverse('logout')})
