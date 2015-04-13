@@ -17,7 +17,8 @@ class Keypair(Model):
 	hash_rfid = TextField(default='')
 
 	last_edited_on = DateTimeField(default=datetime.now, auto_now=True, null=False, blank=False)
-	last_edited_by = ForeignKey(User)
+	# if user that edited is deleted, set last_edited_by to null (do not cascade delete)
+	last_edited_by = ForeignKey(User, on_delete=SET_NULL, null=True)
 
 
 class Log(Model):

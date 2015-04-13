@@ -2,6 +2,7 @@ from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.http import JsonResponse
 
 import hashlib
 import binascii
@@ -72,8 +73,8 @@ def scan_fingerprint(request):
 		response.status_code = 400
 		return response
 
-def is_valid_name(name):
-	name_exists = Keypair.objects.filter(name=name).count() > 0
+def is_valid_name(name, id=None):
+	name_exists = Keypair.objects.filter(name=name).exclude(id=id).count() > 0
 	return len(name)!=0 and not name_exists
 
 def is_valid_pin(pin):
@@ -112,10 +113,11 @@ def new_keypair(request):
 
 @login_required
 def edit_keypair_name(request):
+	kid = request.POST['id']
 	name = request.POST['value']
 
-	if is_valid_name(name):
-		keypair = Keypair.objects.get(id = request.POST['id'])
+	if is_valid_name(name, id=kid):
+		keypair = Keypair.objects.get(id=kid)
 		keypair.last_edited_by = request.user
 		keypair.name = name
 		keypair.save()
@@ -212,8 +214,8 @@ def print_pdf(request):
 
 @login_required
 def link_door_to_keypair(request):
-	keypair = Keypair.objects.get(id = request.POST['kid'])
-	door_id = request.POST['did']
+	keypair = Keypair.objects.get(id = request.POST['my_id'])
+	door_id = request.POST['link_id']
 
 	keypair.last_edited_by = request.user
 	keypair.doors.add(door_id)
@@ -222,11 +224,20 @@ def link_door_to_keypair(request):
 
 @login_required
 def unlink_door_from_keypair(request):
-	keypair = Keypair.objects.get(id = request.POST['kid'])
-	door_id = request.POST['did']
+	keypair = Keypair.objects.get(id = request.POST['my_id'])
+	door_id = request.POST['link_id']
 
 	keypair.last_edited_by = request.user
 	keypair.doors.remove(door_id)
 	keypair.save()
 
 	return HttpResponse("Successful.")
+
+@login_required
+def search_keypairs(request):
+	name = request.GET.get('q', '')
+	results = []
+	keypairs = Keypair.objects.filter(name__icontains=name)
+	for keypair in keypairs:
+		results.append({'id':keypair.id, 'name':keypair.name})
+	return JsonResponse(results, safe=False)

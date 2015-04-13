@@ -19,6 +19,7 @@ def get_user_actions(request):
 	if request.user.is_authenticated():
 		userActions = list()
 		userActions.append({'name':'Keypairs', 'url':reverse('keypairs')})
+		userActions.append({'name':'Doors', 'url':reverse('doors')})
 		userActions.append({'name':'Logs',     'url':reverse('logs')})
 
 		if request.user.is_staff:
@@ -48,8 +49,10 @@ def redirect_to_name(name):
 from .subviews.keypairs import keypairs_page, scan_rfid, scan_fingerprint, \
 	new_keypair, delete_keypair, \
 	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, \
-	keypair_toggle_active, print_pdf, link_door_to_keypair, unlink_door_from_keypair
-from .subviews.doors import search_doors
+	keypair_toggle_active, print_pdf, \
+	link_door_to_keypair, unlink_door_from_keypair, search_keypairs
+from .subviews.doors import doors_page, edit_door_name, \
+	link_keypair_to_door, unlink_keypair_from_door, search_doors
 from .subviews.session import login_page, logging_in, logout, must_be_logged_in
 from .subviews.signup import signup_page, add_user
 from .subviews.logs import logs_page, delete_logs_older_than

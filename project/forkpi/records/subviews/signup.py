@@ -29,7 +29,14 @@ def add_user(request):
 		return redirect_to_name('signup')
 
 	## Insert user into database
-	User.objects.create_user(username=username, password=password, email=email)
+	user = User.objects.create_user(username=username, password=password, email=email)
 
-	messages.add_message(request, messages.SUCCESS, 'Your sign up was successful and is now awaiting admin approval.')
+	## If this is the only user in the database, make this user a staff superuser
+	if User.objects.count() == 1:
+		user.is_superuser = True
+		user.is_staff = True
+		user.save()
+		messages.add_message(request, messages.SUCCESS, 'Sign-up successful! You may log in now.')
+	else:
+		messages.add_message(request, messages.SUCCESS, 'Your sign up was successful and is now awaiting admin approval.')
 	return redirect_to_name('login')

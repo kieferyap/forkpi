@@ -26,11 +26,16 @@ urlpatterns = patterns('',
     url(r'^keypairs/scan/rfid$', scan_rfid, name='scan rfid'),
     url(r'^keypairs/scan/fingerprint$', scan_fingerprint, name='scan fingerprint'),
     url(r'^keypairs/printpdf$', print_pdf, name='print pdf'),
+    url(r'^keypairs/search', search_keypairs, name='search keypairs'),
 
     url(r'^keypairs/link_door$', link_door_to_keypair, name='link door to keypair'),
     url(r'^keypairs/unlink_door$', unlink_door_from_keypair, name='unlink door from keypair'),
 
+    url(r'^doors/$', doors_page, name='doors'),
+    url(r'^doors/edit/name$', edit_door_name, name='edit door name'),
     url(r'^doors/search', search_doors, name='search doors'),
+    url(r'^doors/link_keypair$', link_keypair_to_door, name='link keypair to door'),
+    url(r'^doors/unlink_keypair$', unlink_keypair_from_door, name='unlink keypair from door'),
     
     url(r'^logs/$', logs_page, name='logs'),
     url(r'^logs/delete$', delete_logs_older_than, name='delete logs'),

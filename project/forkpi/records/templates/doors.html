@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content%}
+
+<div class="row">
+	<div class="col-md-10 col-md-offset-1">
+		<div class="row col-md-12">
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">Doors</b></h3>
+					<div class="pull-right">
+					</div>
+				</div>
+				<table id="doors-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
+					<thead>
+						<tr>
+							<th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="1">
+								#
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="persist">
+								Name
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="3">
+								Serial
+							</th>
+							<th class="col-md-7" data-placeholder="Search..." data-tablesaw-priority="2">
+								Keypairs
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% csrf_token %}
+						{% for door in doors %}
+						<tr>
+							<td>{{ forloop.counter }}</td>
+
+							<!-- Name -->
+							<td data-post-url="{% url 'edit door name' %}"
+								data-field="name"
+								data-id="{{ door.id }}" data-value="{{ door.name }}">
+
+								<span class="editable-text">
+									{{ door.name }}
+								</span>
+							</td>
+
+							<td>{{ door.serial }}</td>
+
+							<!-- Doors -->
+							<td data-search-url="{% url 'search keypairs' %}"
+								data-link-url="{% url 'link keypair to door' %}"
+								data-unlink-url="{% url 'unlink keypair from door' %}"
+								data-field="keypairs"
+								data-id="{{ door.id }}" data-value="{{ door.keypairs_json }}">
+								
+								<span class="editable-text">
+									{% if door.keypairs_json %}
+										{% for keypair in door.keypairs_json %}
+										<li class="token-input-token-facebook">
+											{{ keypair.name }}
+										</li>
+										{% endfor %}
+									{% else %}
+										- - -
+									{% endif %}
+								</span>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

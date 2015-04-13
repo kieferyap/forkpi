@@ -4,12 +4,10 @@ Pageinate logs (and maybe keypairs)
 	http://getbootstrap.com/components/#pagination
 	http://botmonster.com/jquery-bootpag/
 	http://www.phpfreaks.com/tutorial/basic-pagination
-Add a module which is for door administration (April Week 02)
 (Forkpi) Enter pin before allowing edit?
 Print pdf is not supported in Python 3.0-3.2
 Usability Test (April Week 03)
 Put back lockouts for rfid and fingerprint
-BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users
 Autohide messages
 
 [x] write paper
@@ -114,3 +112,5 @@ Autohide messages
 [.] BUG: Scan RFID close window while polling -> next poll causes crash -> non-blocking scan
 	[.] Same with fingerprint -> non-blocking scan
 	Still it is possible for multiple people to scan at the same time, just that it's less likely to happen
+[x] Add a module which is for door administration (April Week 02)
+[x] BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users

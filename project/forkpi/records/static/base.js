@@ -44,7 +44,7 @@ $(document).ready(function() {
 		var currentValue = $(this).html().trim();
 		if (currentValue == '- - -') {
 			currentValue = ''; // effectively blank
-		} else if (field == 'doors') {
+		} else if (field == 'doors' || field == 'keypairs') {
 			currentValue = ''; // the textbox should be empty because we will replace it later
 		}
 		newHtml += '<input type="text" class="editing-text col-md-8" value="' + currentValue + '" />';
@@ -59,24 +59,25 @@ $(document).ready(function() {
 
 		parent.html(newHtml);
 
-		if (field == 'doors') {
+		if (field == 'doors' || field == 'keypairs') {
 			// replace the textbox with tokenInput
-			var kid = parent.data('id');
-			var doors = eval(parent.data('value'));
+
+			var my_id = parent.data('id');
+			var links = eval(parent.data('value'));
 			var searchUrl = parent.data('search-url');
 
 			$('.editing-text').tokenInput(searchUrl, {
 				theme: 'facebook',
 				hintText: null,
-				prePopulate: doors,
+				prePopulate: links,
 				preventDuplicates : true,
-				onAdd: function(door) {
+				onAdd: function(link) {
 					postUrl = parent.data('link-url');
-					postToUrl(postUrl, {kid:kid, did:door.id})
+					postToUrl(postUrl, {my_id:my_id, link_id:link.id});
 				},
-				onDelete: function(door) {
+				onDelete: function(link) {
 					postUrl = parent.data('unlink-url');
-					postToUrl(postUrl, {kid:kid, did:door.id})
+					postToUrl(postUrl, {my_id:my_id, link_id:link.id});
 				},
 			});
 			// the textbox will be replaced by a ul element, which we need to resize
@@ -98,7 +99,7 @@ $(document).ready(function() {
 
 		var newHtml = '<span class="editable-text">';
 
-		if (field == 'doors') {
+		if (field == 'doors' || field == 'keypairs') {
 			var newDoors = $('.editing-text').tokenInput('get');
 			parent.data('value', JSON.stringify(newDoors));
 

@@ -13,18 +13,34 @@ def all_users(request):
 		return redirect_to_name('index')
 
 @login_required
-def user_toggle_active(request):
-	user = User.objects.get(id = request.POST['id'])
-	user.is_active = not user.is_active
-	user.save()
-	return HttpResponse("Successful.")
+def user_toggle_staff(request):
+	uid = int(request.POST['id'])
+
+	if request.user.id == uid:
+		messages.add_message(request, messages.ERROR, "You cannot demote yourself!")
+		response = HttpResponse('Invalid action')
+		response.status_code = 400
+		return response
+	else:
+		user = User.objects.get(id=uid)
+		user.is_staff = not user.is_staff
+		user.save()
+		return HttpResponse("Successful.")
 
 @login_required
-def user_toggle_staff(request):
-	user = User.objects.get(id = request.POST['id'])
-	user.is_staff = not user.is_staff
-	user.save()
-	return HttpResponse("Successful.")
+def user_toggle_active(request):
+	uid = int(request.POST['id'])
+
+	if request.user.id == uid:
+		messages.add_message(request, messages.ERROR, "You cannot deactivate yourself!")
+		response = HttpResponse('Invalid action')
+		response.status_code = 400
+		return response
+	else:
+		user = User.objects.get(id=uid)
+		user.is_active = not user.is_active
+		user.save()
+		return HttpResponse("Successful.")
 
 @login_required
 def approve_user(request):
@@ -36,5 +52,13 @@ def approve_user(request):
 
 @login_required
 def delete_user(request):
-	User.objects.filter(id = request.POST['id']).delete()
-	return HttpResponse("Successful.")
+	uid = int(request.POST['id'])
+
+	if request.user.id == uid:
+		messages.add_message(request, messages.ERROR, "You cannot delete yourself!")
+		response = HttpResponse('Invalid action')
+		response.status_code = 400
+		return response
+	else:
+		User.objects.filter(id = uid).delete()
+		return HttpResponse("Successful.")
