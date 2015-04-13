@@ -4,21 +4,29 @@ from django.contrib.auth.models import User
 from datetime import datetime
 
 class Keypair(Model):
-	name = TextField(default='')
+	name = TextField(null=False, blank=False, unique=True)
+	is_active = BooleanField(default=True)
+
+	doors = ManyToManyField('Door')
+
 	pin = TextField(default='', null=True, blank=True)
 	rfid_uid = TextField(default='', null=True, blank=True)
 	fingerprint_template = TextField(default='', null=True, blank=True)
+	
 	hash_pin = TextField(default='')
 	hash_rfid = TextField(default='')
-	is_active = BooleanField(default=True)
-	doors = ManyToManyField('Door')
+
+	last_edited_on = DateTimeField(default=datetime.now, auto_now=True, null=False, blank=False)
+	last_edited_by = ForeignKey(User)
 
 
 class Log(Model):
-	created_on = DateTimeField(auto_now_add=True, default=datetime.now)
+	created_on = DateTimeField(default=datetime.now, auto_now_add=True, null=False, blank=False)
 	door = ForeignKey('Door')
+
 	action = TextField(default='')
 	details = TextField(default='', null=True, blank=True)
+
 	pin = TextField(default='', null=True, blank=True)
 	rfid_uid = TextField(default='', null=True, blank=True)
 	used_fingerprint = BooleanField(default=False)
@@ -32,7 +40,3 @@ class Option(Model):
 class Door(Model):
 	name = TextField(default='', unique=True)
 	serial = TextField(unique=True)
-
-# class Keypair_Door(Model):
-# 	keypair = ForeignKey('Keypair')
-# 	door = ForeignKey('Door')

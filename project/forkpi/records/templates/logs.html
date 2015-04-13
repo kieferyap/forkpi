@@ -9,12 +9,12 @@
 <div class="tab-content">
 	<div class="tab-pane active" id="view-logs">
 		<table id="logs-table" class="table table-hover tablesorter tablesaw"
-			data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,1]]">
+			data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,0]]">
 			<thead>
 				<tr>
-					<!-- <th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="2">
+					<th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="2">
 						#
-					</th> -->
+					</th>
 					<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="persist">
 						Date
 					</th>
@@ -45,7 +45,7 @@
 							redded
 						{% endif %}
 					">
-						<!-- <td>{{ log.id }}</td> -->
+						<td>{{ forloop.counter }}</td>
 						<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
 						<td>{{ log.door.name }}
 						<td>{{ log.action }}</td>

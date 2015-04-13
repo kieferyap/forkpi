@@ -29,7 +29,7 @@ def hash_string(value):
 
 @login_required
 def keypairs_page(request):
-	keypairs = Keypair.objects.all()
+	keypairs = Keypair.objects.all().order_by('-last_edited_on')
 	for keypair in keypairs:
 		keypair.pin = decrypt(keypair.pin)
 		keypair.rfid_uid = decrypt(keypair.rfid_uid)
@@ -72,6 +72,10 @@ def scan_fingerprint(request):
 		response.status_code = 400
 		return response
 
+def is_valid_name(name):
+	name_exists = Keypair.objects.filter(name=name).count() > 0
+	return len(name)!=0 and not name_exists
+
 def is_valid_pin(pin):
 	return len(pin)==0 or pin.isdigit()
 
@@ -85,6 +89,9 @@ def new_keypair(request):
 
 	is_error = False
 
+	if not is_valid_name(name):
+		messages.add_message(request, messages.ERROR, 'Name must be unique and not blank.')
+		is_error = True
 	if not is_valid_pin(pin):
 		messages.add_message(request, messages.ERROR, 'PIN must be blank or numeric.')
 		is_error = True
@@ -96,7 +103,7 @@ def new_keypair(request):
 	hashrfid = hash_string(rfid_uid)
 
 	keypair = Keypair.objects.create(name=name, pin=encrypt(pin), rfid_uid=encrypt(rfid_uid),
-			hash_pin=hashpin, hash_rfid=hashrfid, fingerprint_template=fingerprint_template)
+			hash_pin=hashpin, hash_rfid=hashrfid, fingerprint_template=fingerprint_template, last_edited_by=request.user)
 	if door_ids:
 		door_ids = door_ids.split(',')
 		keypair.doors.add(*door_ids)
@@ -106,8 +113,18 @@ def new_keypair(request):
 @login_required
 def edit_keypair_name(request):
 	name = request.POST['value']
-	Keypair.objects.filter(id = request.POST['id']).update(name=name)
-	return HttpResponse("Successful.")
+
+	if is_valid_name(name):
+		keypair = Keypair.objects.get(id = request.POST['id'])
+		keypair.last_edited_by = request.user
+		keypair.name = name
+		keypair.save()
+		return HttpResponse("Successful.")
+	else:
+		messages.add_message(request, messages.ERROR, 'Name must be unique and not blank.')
+		response = HttpResponse('Invalid name')
+		response.status_code = 400
+		return response
 
 @login_required
 def edit_keypair_pin(request):
@@ -115,6 +132,7 @@ def edit_keypair_pin(request):
 
 	if is_valid_pin(pin):
 		keypair = Keypair.objects.get(id = request.POST['id'])
+		keypair.last_edited_by = request.user
 		keypair.pin = encrypt(pin)
 		keypair.hash_pin = hash_string(pin)
 		keypair.save()
@@ -129,6 +147,8 @@ def edit_keypair_pin(request):
 def edit_keypair_rfid(request):
 	rfid_uid = request.POST['value']
 	keypair = Keypair.objects.get(id = request.POST['id'])
+
+	keypair.last_edited_by = request.user
 	keypair.rfid_uid = encrypt(rfid_uid)
 	keypair.hash_rfid = hash_string(rfid_uid)
 	keypair.save()
@@ -138,6 +158,8 @@ def edit_keypair_rfid(request):
 def edit_keypair_fingerprint(request):
 	fingerprint_template = request.POST['value']
 	keypair = Keypair.objects.get(id = request.POST['id'])
+
+	keypair.last_edited_by = request.user
 	keypair.fingerprint_template = fingerprint_template
 	keypair.save()
 	return HttpResponse("Successful.")
@@ -150,6 +172,8 @@ def delete_keypair(request):
 @login_required
 def keypair_toggle_active(request):
 	keypair = Keypair.objects.get(id = request.POST['id'])
+
+	keypair.last_edited_by = request.user
 	keypair.is_active = not keypair.is_active
 	keypair.save()
 	return HttpResponse("Successful.")
@@ -189,13 +213,20 @@ def print_pdf(request):
 @login_required
 def link_door_to_keypair(request):
 	keypair = Keypair.objects.get(id = request.POST['kid'])
-	door = Door.objects.get(id = request.POST['did'])
-	keypair.doors.add(door)
+	door_id = request.POST['did']
+
+	keypair.last_edited_by = request.user
+	keypair.doors.add(door_id)
+	keypair.save()
 	return HttpResponse("Successful.")
 
 @login_required
 def unlink_door_from_keypair(request):
 	keypair = Keypair.objects.get(id = request.POST['kid'])
-	door = Door.objects.get(id = request.POST['did'])
-	keypair.doors.remove(door)
+	door_id = request.POST['did']
+
+	keypair.last_edited_by = request.user
+	keypair.doors.remove(door_id)
+	keypair.save()
+
 	return HttpResponse("Successful.")

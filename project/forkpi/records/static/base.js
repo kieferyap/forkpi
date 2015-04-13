@@ -14,7 +14,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$('#newDoors').tokenInput('/doors/search/', {
+	$('#newDoors').tokenInput($('#newDoors').parent().data('search-url'), {
 		theme: 'facebook',
 		hintText: 'Type a door name...',
 		prePopulate: null,
@@ -22,10 +22,6 @@ $(document).ready(function() {
 	});
 });
 
-
-// $(window).bind('beforeunload', function(){
-// 	return 'Are you sure you want to leave?';
-// });
 
 // For editing text
 $(document).ready(function() {
@@ -125,17 +121,29 @@ $(document).ready(function() {
 			} else {
 				newHtml += newValue;
 			}
+			newHtml += '</span>';
+			
 			// send changes to server
 			var id = parent.data('id');
 			var postUrl = parent.data('post-url');
-			postToUrl(postUrl, {id:id, value:newValue});
+			postToUrl(postUrl, {id:id, value:newValue}, function() {
+				// for correctness the HTML must only be updated on success, 
+				// but it is less responsive
+				// parent.html(newHtml);
+			});
 		}
-		newHtml += '</span>';	
+		newHtml += '</span>';
 		parent.html(newHtml);
 
 		editableTextTrigger = false;
 		// $('.editing-text').off('click');
 
+	});
+
+	$(window).bind('beforeunload', function(){
+		if (editableTextTrigger) { // some text is being edited -> confirm first
+			return 'Are you sure you want to leave?';
+		}
 	});
 
 	// Scanning RFID and Fingerprints
@@ -178,23 +186,26 @@ $(document).ready(function() {
 
 	// Keypair and User Actions
 	$(document.body).on('click', '.activate-btn', function(){
-		postIdToUrlInParent($(this));
-
-		$(this).closest('tr').removeClass('greyed'); // ungrey the corresponding row
-		$(this).addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
-		$(this).html("Deactivate");
+		var btn = $(this);
+		postIdToUrlInParent(btn, function(msg) {
+			btn.closest('tr').removeClass('greyed'); // ungrey the corresponding row
+			btn.addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
+			btn.html("Deactivate");
+		});
 
 	}).on('click', '.deactivate-btn', function(){
-		postIdToUrlInParent($(this));
-
-		$(this).closest('tr').addClass('greyed'); // grey out the corresponding row
-		$(this).removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
-		$(this).html("Activate");
+		var btn = $(this);
+		postIdToUrlInParent(btn, function(msg) {
+			btn.closest('tr').addClass('greyed'); // grey out the corresponding row
+			btn.removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
+			btn.html("Activate");
+		});
 
 	}).on('click', '.delete-btn, .deny-btn', function(){
-		postIdToUrlInParent($(this));
-
-		$(this).closest('tr').hide(256);
+		var btn = $(this);
+		postIdToUrlInParent(btn, function(msg) {
+			btn.closest('tr').hide(256);
+		});
 	});
 
 	// Additional User Actions
@@ -208,7 +219,7 @@ $(document).ready(function() {
 				csrfmiddlewaretoken: getToken(),
 			},
 			success: function(msg){
-				// need to update buttons and the number of unapproved users in the navbar
+				// need to update user action buttons and the number of unapproved users in the navbar
 				location.reload()
 			},
 			error: function(msg){
@@ -218,20 +229,22 @@ $(document).ready(function() {
 		});
 
 	}).on('click', '.demote-btn', function(){
-		postIdToUrlInParent($(this));
-
+		var btn = $(this);
 		var id = $(this).parent().data('id');
-		$('#star-' + id).hide();
-		$(this).removeClass('demote-btn btn-warning').addClass('promote-btn btn-success');
-		$(this).html("Promote");
+		postIdToUrlInParent(btn, function() {
+			$('#star-' + id).hide();
+			btn.removeClass('demote-btn btn-warning').addClass('promote-btn btn-success');
+			btn.html("Promote");
+		});
 
 	}).on('click', '.promote-btn', function(){
-		postIdToUrlInParent($(this));
-
+		var btn = $(this);
 		var id = $(this).parent().data('id');
-		$('#star-' + id).show();
-		$(this).addClass('demote-btn btn-warning').removeClass('promote-btn btn-success');
-		$(this).html("Demote");
+		postIdToUrlInParent(btn, function() {
+			$('#star-' + id).show();
+			btn.addClass('demote-btn btn-warning').removeClass('promote-btn btn-success');
+			btn.html("Demote");
+		});
 	});
 });
 
@@ -239,14 +252,13 @@ function getToken() {
 	return document.getElementsByName('csrfmiddlewaretoken')[0].value;
 }
 
-function postToUrl(postUrl, data) {
+function postToUrl(postUrl, data, onSuccess) {
 	data['csrfmiddlewaretoken'] = getToken();
 	$.ajax({
 		type: 'POST',
 		url: postUrl,
 		data: data,
-		success: function(msg){
-		},
+		success: onSuccess,
 		error: function(msg){
 			alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
 			location.reload();
@@ -254,9 +266,9 @@ function postToUrl(postUrl, data) {
 	});
 }
 
-function postIdToUrlInParent(element) {
+function postIdToUrlInParent(element, onSuccess) {
 	var parent = element.parent();
 	var id = parent.data('id');
 	var postUrl = parent.data('post-url');
-	postToUrl(postUrl, {id:id});
+	postToUrl(postUrl, {id:id}, onSuccess);
 }

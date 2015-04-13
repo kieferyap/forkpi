@@ -31,6 +31,7 @@ def approve_user(request):
 	user = User.objects.get(id = request.POST['id'])
 	user.is_superuser = True
 	user.save()
+	messages.add_message(request, messages.SUCCESS, "Successfully approved '%s'." % user.username)
 	return HttpResponse("Successful.")
 
 @login_required

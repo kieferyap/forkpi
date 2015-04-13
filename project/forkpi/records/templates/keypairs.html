@@ -7,11 +7,10 @@
     <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
 </ul>
 
-<br/>
 
 <div class="tab-content">
 	<div class="tab-pane" id="new-keypair">
-		<br/>
+		<br/><br/>
 		<div class="col-md-10 col-md-offset-1">
 			<form class="form-horizontal" accept-charset="UTF-8" method="post" action="{% url 'add keypair' %}">
 				<div class="form-group">
@@ -24,7 +23,7 @@
 				</div>
 				<div class="form-group">
 					<label for="doors" class="col-md-2 control-label">Doors</label>
-					<div class="col-md-10">
+					<div class="col-md-10" data-search-url="{% url 'search doors' %}">
 						<input type="text" class="form-control"
 							   id="newDoors" name="doors" />
 					</div>
@@ -82,27 +81,30 @@
 					data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,0]]">
 				<thead>
 					<tr>
-						<!-- <th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="-1">
+						<th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="-1">
 							#
-						</th> -->
-						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="persist">
+						</th>
+						<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
 							Name
 						</th>
-						<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="2">
+						<th class="col-md-6" data-placeholder="Search..." data-tablesaw-priority="2">
 							Doors
 						</th>
-						<th class="col-md-2" data-placeholder="Search..." data-tablesaw-priority="3">
+						<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="3">
 							PIN
 						</th>
-						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
+						<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="4">
 							RFID UID
 						</th>
-						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="5">
+						<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="5">
 							Fingerprint
 						</th>
-						<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="7">
+						<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="7">
 							Actions
 						</th>
+						<!-- <th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="10">
+							Last Edited By
+						</th> -->
 					</tr>
 				</thead>
 				<tbody>
@@ -112,7 +114,7 @@
 							greyed
 						{% endif %}
 					">
-						<!-- <td>{{ keypair.id }}</td> -->
+						<td>{{ forloop.counter }}</td>
 
 						<!-- Name -->
 						<td data-post-url="{% url 'edit keypair name' %}"
@@ -213,6 +215,15 @@
 								</div>
 							</div>
 						</td>
+
+						<!-- <td>
+							<div>
+								{{ keypair.last_edited_by.username }}
+							</div>
+							<div class="small-text">
+								{{ keypair.last_edited_on | date:"Y-m-d H:i"}}
+							</div>
+						</td> -->
 					</tr>
 					{% endfor %}
 				</tbody>
