@@ -179,3 +179,7 @@ th:last-child, td:last-child {
 .bootstrap-tagsinput {
 	width: 100%;
 }
+
+.mouseover-text{
+	border-bottom: 1px dotted #ba0000;
+}

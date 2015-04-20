@@ -2,8 +2,8 @@
 
 {% block content%}
 <div class="row">
-	<div class="col-md-10 col-md-offset-1">
-		<div class="row col-md-12">
+	<div class="col-md-12">
+		<div class="row">
 			<div class="panel panel-primary">
 				<div class="panel-heading">
 					<h3 class="panel-title">Options</b></h3>
@@ -14,8 +14,9 @@
 					<thead>
 						<tr>
 							<th class="col-md-4" data-placeholder="Search...">Name</th>
-							<th class="col-md-4" data-placeholder="Search...">Current Value</th>
-							<th class="col-md-4" data-placeholder="Search...">Default Value</th>
+							<th class="col-md-7" data-placeholder="Search...">Description</th>
+							<th class="col-md-2" data-placeholder="Search...">Current Value</th>
+							<th class="col-md-2" data-placeholder="Search...">Default Value</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -24,13 +25,12 @@
 							{% for option in options %}
 							<tr>
 								<td>
-									{% if option.flavor_text|length > 0 %}
-										{{ option.flavor_text }}
-									{% else %}
-										{{ option.name }}
-									{% endif %}
+									{{ option.flavor_text }}
 								</td>
-								<td ajaxUrl={% url 'edit option value' %} ajaxId="{{ option.id }}" ajaxField="name">
+								<td>
+									{{ option.description }}
+								</td>
+								<td data-post-url={% url 'edit option value' %} data-id="{{ option.id }}" data-field="name">
 									<span class="editable-text">
 									{{ option.value }}
 									</span>

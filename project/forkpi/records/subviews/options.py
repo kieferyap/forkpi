@@ -20,7 +20,7 @@ def options_page(request):
 @login_required
 def edit_option_value(request):
 	value = request.POST['value']
-	Option.objects.filter(id = request.POST['kid']).update(value=value)
+	Option.objects.filter(id = request.POST['id']).update(value=value)
 	return HttpResponse("Successful.")
 
 @login_required

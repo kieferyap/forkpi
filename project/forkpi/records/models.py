@@ -37,6 +37,7 @@ class Option(Model):
 	value = TextField(default='')
 	default = TextField()
 	flavor_text = TextField(default='')
+	description = TextField(default='')
 
 class Door(Model):
 	name = TextField(default='', unique=True)

@@ -1,9 +1,11 @@
+[x] UI enhancements on tab
+[x] UI enhancements on the view/edit keypair tabls
+[%] (Forkpi) Enter pin before allowing edit?
 Separate Forkpi and Spoonpi users in database
 Keypair - last_edited_by field
 Add door name to logs
 Fetch only keypairs that are mapped to this door
 Add a module which is for door administration (April Week 02)
-(Forkpi) Enter pin before allowing edit?
 Print pdf is not supported in Pyhton 3.0-3.2
 Prevent entering keypair with no name
 Usability Test (April Week 03)

@@ -40,7 +40,6 @@ def edit_door_name(request):
 def link_keypair_to_door(request):
 	door = Door.objects.get(id = request.POST['my_id'])
 	keypair_id = request.POST['link_id']
-	print('link')
 
 	door.keypair_set.add(keypair_id)
 	door.save()

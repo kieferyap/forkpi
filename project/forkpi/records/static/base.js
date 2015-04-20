@@ -207,6 +207,60 @@ $(document).ready(function() {
 		postIdToUrlInParent(btn, function(msg) {
 			btn.closest('tr').hide(256);
 		});
+	}).on('click', '.edit-btn', function(){
+		var parent = $(this).parent();
+		var id = parent.data('id');
+		var name = $('#name-'+id).html().trim();
+		if($('#pin-'+id).html().trim() != ''){
+
+			var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
+			var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
+			var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">Enter PIN of user ('+name+'):</h4>';
+
+			var modalFooterCloseBtn = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+			var modalFooterSubmitBtn = '<button type="button" class="btn btn-primary pin-authenticate-btn">Submit</button>';
+			var modalBodyInput = 'Enter PIN: <input type="password" class="modal-pin"></input>';
+
+			var modalBody = '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'</span>';
+			var modalFooter = modalFooterCloseBtn + " " + modalFooterSubmitBtn;
+			var modalHeader = modalHeaderCloseContainer + modalHeaderText;
+
+		} else {
+			var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+			$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
+		}
+
+		$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+		$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
+		$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
+
+	}).on('click', '.pin-authenticate-btn', function(){
+		var parent = $('.modal-pin').parent();
+		var id = parent.data('id');
+		var modalBodyInput = 'Enter PIN: <input type="password" class="modal-pin"></input>';
+		var originalModalBody = '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'</span>';
+
+		postIdToUrlInParent($('.modal-pin'), function(msg) {
+			if(msg.trim() != ''){
+				var name = $('#name-'+id).html().trim();
+				var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
+				var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
+				var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">'+name+'\'s Credentials</h4>';
+
+				var modalHeader = modalHeaderCloseContainer + modalHeaderText;
+				var modalBody = $('#edit-credentials-'+id).html();
+				var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+
+				$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
+				$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
+				$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+			}
+			else{
+				var errorMessage = '<div class="alert alert-error">Incorrect PIN</div>';
+				var modalBody = errorMessage + originalModalBody;
+				$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+			}
+		});
 	});
 
 	// Additional User Actions
@@ -237,7 +291,6 @@ $(document).ready(function() {
 			btn.removeClass('demote-btn btn-warning').addClass('promote-btn btn-success');
 			btn.html("Promote");
 		});
-
 	}).on('click', '.promote-btn', function(){
 		var btn = $(this);
 		var id = $(this).parent().data('id');
@@ -271,5 +324,6 @@ function postIdToUrlInParent(element, onSuccess) {
 	var parent = element.parent();
 	var id = parent.data('id');
 	var postUrl = parent.data('post-url');
-	postToUrl(postUrl, {id:id}, onSuccess);
+	var val = $(element).val();
+	postToUrl(postUrl, {id:id, val:val}, onSuccess);
 }

@@ -249,7 +249,7 @@ def authenticate_pin(request):
 	pin = hash_string(request.POST['val'])
 
 	response_text = ""
-	if Keypair.objects.filter(hash_pin=pin, id=kid):
+	if Keypair.objects.filter(hash_pin=pin):
 		response_text = "true"
 
 	return HttpResponse(response_text)

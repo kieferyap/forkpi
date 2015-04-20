@@ -20,6 +20,8 @@ class SpoonPi:
         self.attempt_limit = self.load_option('attempt_limit')
         self.lockout_time = self.load_option('lockout_time_minutes') * 60
         self.keypad_timeout = self.load_option('keypad_timeout_seconds')
+        self.max_transaction_time = self.load_option('max_transaction_time_seconds')
+        self.lock_release_time = self.load_option('lock_release_time_seconds')
 
         print('Loading (F)ingerprint Scanner...')
         self.fingerprint_thread = FingerprintThread(lambda: ForkpiDB())
@@ -33,7 +35,7 @@ class SpoonPi:
         # maps RFID UIDs to incorrect streak and remaining lockout time
         self.lockout_table = list()
         # ends a pending transaction after a timer if the current self.factors are not enough to be authenticated
-        self.new_timer = lambda: Timer(3, self.deny_then_end_transaction, kwargs={'reason':'insufficient credentials'})
+        self.new_timer = lambda: Timer(self.max_transaction_time, self.deny_then_end_transaction, kwargs={'reason':'insufficient credentials'})
         self.transaction_timer = self.new_timer()
         # start polling for cards and fingers
         self.rfid_thread.start()
@@ -57,8 +59,10 @@ class SpoonPi:
         names = ', '.join(names)
         print("> Allowed %s" % names)
         self.db.log_allowed(names=names, **kwargs)
+        # Unlock door; lock door upon being closed
         self.led.clear_then_puts("Access\n granted")
-        time.sleep(2)
+        time.sleep(self.lock_release_time)
+        # If door was not opened, lock door
 
     def deny_access(self, reason, led_message="Access\n denied", *args, **kwargs):
         assert len(args) == 0

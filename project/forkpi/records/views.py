@@ -50,7 +50,8 @@ from .subviews.keypairs import keypairs_page, scan_rfid, scan_fingerprint, \
 	new_keypair, delete_keypair, \
 	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, \
 	keypair_toggle_active, print_pdf, \
-	link_door_to_keypair, unlink_door_from_keypair, search_keypairs
+	link_door_to_keypair, unlink_door_from_keypair, search_keypairs, \
+	authenticate_pin
 from .subviews.doors import doors_page, edit_door_name, \
 	link_keypair_to_door, unlink_keypair_from_door, search_doors
 from .subviews.session import login_page, logging_in, logout, must_be_logged_in

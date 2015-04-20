@@ -9,6 +9,34 @@ Print pdf is not supported in Python 3.0-3.2
 Usability Test (April Week 03)
 Put back lockouts for rfid and fingerprint
 Autohide messages
+Modal dialog for editing keypair (prompt first for one of three auth factors)
+Initialize options table and ensure name is not modified
+options table: applies_to
+		Attempt Limit
+			The max streak of failed attempts where an RFID tag or fingerprint is presented and the wrong PIN is entered.<br/>This is to prevent guessing the PIN via brute force.
+			Applies to: RFID+PIN users, Fingerprint+PIN users
+
+		Lockout Time
+			The amount of time to block the RFID tag or fingerprint from further use once the incorrect streak reaches the attempt limit.
+			Applies to: RFID+PIN users, Fingerprint+PIN users
+
+		Keypad Timeout
+			The max amount of time between key presses. Exceed this and the attempt will be considered as failed.
+			Applies to: RFID+PIN users, Fingerprint+PIN users
+
+		Max Transaction Time
+			The max amount of time between presenting two authentication tokens.
+			Applies to: RFID+PIN users, Fingerprint+PIN users, RFID+Fingerprint users
+
+		Lock Release Time
+			The amount of time to release the lock upon a successful attempt.
+			Applies to: Everyone
+
+		update records_option set description='The amount of time to block the RFID tag or fingerprint from further use once the incorrect streak reaches the attempt limit.' where id=1;
+		update records_option set description='The max amount of time to wait between key presses. Exceed this and the attempt will be considered as failed.' where id=3;
+		update records_option set description='The max amount of time to wait between presenting two authentication tokens. Exceed this and the attempt will be considered as failed. ' where id=38;
+		update records_option set description='The amount of time to release the lock upon a successful attempt.' where id=39;
+
 
 [x] write paper
 	[x] Cost
@@ -114,3 +142,4 @@ Autohide messages
 	Still it is possible for multiple people to scan at the same time, just that it's less likely to happen
 [x] Add a module which is for door administration (April Week 02)
 [x] BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users
+[x] Add options for transaction timer, allow timer, deny timer
