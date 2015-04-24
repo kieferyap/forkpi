@@ -1,11 +1,33 @@
-This is pdfTeX, Version 3.1415926-2.4-1.40.13 (MiKTeX 2.9) (preloaded format=pdftex 2014.9.9)  9 SEP 2014 21:46
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.9.12)  19 APR 2015 10:17
 entering extended mode
-**K:/Programming/CS*198*Thesis/paper/biblio.bib
-("K:/Programming/CS 198 Thesis/paper/biblio.bib")
-*
-! Emergency stop.
-<*> K:/Programming/CS*198*Thesis/paper/biblio.bib
-                                                 
-End of file on the terminal!
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**biblio.bib
+(./biblio.bib
+LaTeX2e <2011/06/27>
+Babel <3.9h> and hyphenation patterns for 2 languages loaded.
 
-!  ==> Fatal error occurred, no output PDF file produced!
+! LaTeX Error: Missing \begin{document}.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.1 @
+     misc{KeylessDoorProsCons,
+? x
+ 
+Here is how much of TeX's memory you used:
+ 7 strings out of 495028
+ 266 string characters out of 6181497
+ 45944 words of memory out of 5000000
+ 3315 multiletter control sequences out of 15000+600000
+ 3640 words of font info for 14 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 5i,0n,4p,41b,14s stack positions out of 5000i,500n,10000p,200000b,80000s
+No pages of output.
+PDF statistics:
+ 0 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 500000)
+ 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+

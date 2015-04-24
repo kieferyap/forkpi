@@ -1,0 +1,43 @@
+\section{Background}
+
+\subsection{Authentication Factors}
+To pass through a locked door, a person would need to present one or more authentication factors. In traditional keyed doors, that factor would be a single (metal) key, which is an example of a possession-based factor. Possesion-based is one of three major types of authentication factors:
+\begin{enumerate}
+	\item \textbf{Knowledge}: Something the user knows (e.g. PINs)
+	\item \textbf{Possession}: Something the user has (e.g. RFID cards)
+	\item \textbf{Inherence} or \textbf{Biometrics}: Something the user is (e.g. fingerprints)
+\end{enumerate}
+
+Each factor type has its own strengths and weaknesses, as illustrated in the table below. For consistency, each criterion is stated such that a Y is an advantage.
+
+\begin{table}[h]
+	\begin{threeparttable}
+		\begin{tabular}{|l|c|c|c|}
+%         \begin{tabular}{|p{3cm}|c|c|c|}
+			\hline		                                & Knowledge & Possession & Inherence  \\ \hline
+			Does not generate false positives/negatives & Y         & Y          &            \\
+			Does not have to be carried around          & Y         &            & Y          \\
+			Cannot be cloned or stolen                  & Y         &            & Y\tnote{2} \\
+			Cannot be guessed by brute force            &           & Y\tnote{1} & Y          \\
+			Fast input and processing time              &           & Y          &            \\
+			Cannot be lost or forgotten                 &           &            & Y\tnote{3} \\ \hline
+		\end{tabular}
+		\begin{tablenotes}
+		    \item[1] RFID security can be brute forced if the RFID reader can be spoofed by cards with reprogrammed UIDs (unique identifiers). The attacker can simply try all possible UIDs by repeatedly changing the UID on the same card.
+		    \item[2] Fingerprints can be cloned if the scanner cannot distinguish between real and replicated fingerprints.
+		    \item[3] People can lose their fingerprints, but it is a much rarer event than losing keys or forgetting passwords.
+		\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+
+\subsection{Authentication Mechanisms} % Single and multi-factor
+
+In choosing the appropriate authentication mechanism to use for a door security system, one needs to consider each factor type's strengths and weaknesses as mentioned above. For example, if only RFID security is employed, it would be easy for a thief to steal a card and grant himself access. This vulnerability can be solved by employing fingerprints instead, as those cannot be stolen, but in turn, it will make the system unreliable. Depending on the accuracy of the fingerprint matching algorithm, authorized persons might be denied access, or worse, unauthorized persons might be granted access.
+
+However, modern door security systems are not limited to employing only a single factor. Multi-factor authentication is a common way to combine the strengths and mitigate the weaknesses of individual factors. For example, before withdrawing money from an ATM (Automated Teller Machine), one has to present his/her ATM card (a possession-based factor) followed by the PIN (a knowledge-based factor). Gunson et al. \cite{Gunson2011} observed that users find single-factor to be more convenient and easier to use, while multi-factor is more secure but takes longer to complete.
+
+\subsection{Raspberry Pi}
+
+After deciding the authentication mechanism/s to be used, a device would be needed to control all the necessary peripherals. For example, in a two-factor RFID \& fingerprint security system, the peripherals would be the RFID reader, the fingerprint scanner, the electric lock, and optionally the display. This device can be either a computer or a microcontroller, and should preferably be cheap and small since one unit would have to be embedded on each door.
+
+The Raspberry Pi is an example of one such device. It is a credit-card sized computer that comes with pins that can be used to communicate with or provide power to peripherals. The Raspberry Pi model we have, Model B \cite{RPi1ModelB}, is an obsolete model that costs \$35, uses an SD card for storage, and comes with 26 pins, 2 USB ports and 512 MB RAM. For the same price, one can buy the newer and better Raspberry Pi 2 Model B \cite{RPi2ModelB} instead, which uses a micro SD card for storage, comes with 40 pins, 4 USB ports and 1 GB RAM. Both models have an ethernet port and an HDMI port for video output.

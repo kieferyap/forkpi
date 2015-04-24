@@ -1,0 +1,55 @@
+\section{Methodology}
+
+% List all auth mechanisms that will be tackled
+The authentication methods that were implemented for the project are the following: PIN, RFID, and Fingerprint. Two-factor authentication methods were implemented as well. 
+
+% Per auth mechanism
+\subsection{Assembling the Components}
+See appendix
+%\subsubsection{Tutorials Used}
+%\subsubsection{Summary}
+
+\subsection{Testing the Components}
+
+\subsubsection{PIN}
+For usability purposes, the maximum prescribed length for PIN is 6 digits \cite{ISO9564-1_2002}. However, it should be noted that a 4-digit PIN is easier to remember than a 6-digit PIN, although easier to crack.
+
+To compute for the average time it takes to guess a single PIN using brute force: $$T = (g \cdot t) + (L \cdot \frac gn) $$ where $g$ is the average number of guesses needed, $t$ is the average time it takes to try out a single PIN, $L$ is the waiting time after a single lock-out, and $n$ is the number of wrong attempts it takes before being locked-out.
+
+\subsubsection{RFID}
+The primary security concern is the issue of stolen or replicated tokens. Replication can be performed by scanning the code of an authorized token, and reprogramming another token to contain the same code. Attackers do not need to have access to the actual token, as they can find out about the code simply by placing keyloggers near the RFID reader. % Ten RFID tags were reprogrammed and tested against the system. Five of them were previously authorized, then reprogrammed to contain unauthorized codes, while the other five were reprogrammed to contain authorized codes.
+
+\subsubsection{Fingerprint}
+% metrics: log capacity, fingerprint db size, far and frr
+% security concerns: silicon thumb, dead thumb
+%Severed thumbs of illegal settlers were used to determine whether or not the system can recognize thumbs of 
+
+The metrics that were used in measuring security were the False Acceptance Rate (FAR) and the False Rejection Rate (FRR). FRR was measured at fixed FARs of 0.01\% and 0.001\% using samples from 50 different individuals. Another security metric that was used was whether the system only accepted fingerprints from living humans. This was tested using dummy fingers made from various materials.
+
+\subsection{Accompanying Software}
+The authentication system comes with a web application called ForkPi, which enables administrators to register new users to and delete them from the database. The application also allows for the editing of the users' credentials. The software also maintains a log of all logging attempts (successful or not) for the last 30 days.
+
+Critical information such as the RFID UID and PIN is encrypted using 128-bit AES with the user's name as the key. The administrator passwords are MD5-hashed and salted with the administrator's username. 
+
+% assemble
+    % tutorial/s that will be used
+    % summary
+
+
+% test
+    % How to define success? metrics, benchmarks
+    % 1) security
+    %    PIN - 4-digit, 6-digit PINS
+    %          brute force permutations to try = (nPerms)/2
+    %    RFID - stolen tokens
+    %           8-digit codes, reprogrammed codes can fool reader?
+    %      vulnerable to "keyloggers"? reprogram a tag to match auth code
+    %    Fing - FalsePosRate, FalseNegRate
+    %           can be fooled by non-human or dead finger?
+    % 2) usability
+    %    PIN - how many seconds to input a PIN
+    %    RFID - how fast to recognize code
+    %    Fing - how fast to recognize print, log capacity, fingerprint db size
+    % 3) cost - compare to previous
+% survey
+% This was tested by using plastic, Play-doh, rubber, wax, and Plaster of Paris, to make replicas (2 per material) of authorized fingerprints. 

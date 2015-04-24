@@ -1,6 +1,7 @@
-\subsection{Identification and Authentication}
+\section{Literature Review}
 
-Authentication generally comes in two parts. The first step, \textbf{identification}, is the act of claiming an identity, a set of attributes that describes an entity (e.g. a user is identified by its username, a person is identified by their fingerprint). Once the entity is identified, \textbf{authentication} is done to verify that the entity is indeed who it says it is \cite{Pasupathinathan2009}. Authentication is performed using various \textbf{factor}s, which can be classified into three major types:
+\subsection{Identification and Authentication}
+Security in authentication systems generally comes in two parts. The first step, \textbf{identification}, is the act of claiming an identity, a set of attributes that describes an entity (e.g. a user is identified by its username, a person is identified by their fingerprint). Once the entity is identified, \textbf{authentication} is done to verify that the entity is indeed who it says it is \cite{Pasupathinathan2009}. Authentication is performed using various \textbf{factor}s, which can be classified into three major types:
 \begin{enumerate}
 \item \textbf{Knowledge}: Something the entity knows (e.g. passwords)
 \item \textbf{Biometrics}: Something the entity is (e.g. fingerprints)
@@ -15,52 +16,52 @@ Authentication generally comes in two parts. The first step, \textbf{identificat
 
 \subsection{Hardware-based Authentication}
 \subsubsection{Disadvantages of Hardware-based Authentication}
-The hardware used in hardware-based authentication has to be manufactured, shipped, inventoried, distributed and tracked. It also has a higher maintenance cost because it has a vendor-defined lifetime and a lengthy replacement process. Software, on the other hand, can be created as needed on the fly. It also has a customer-specified lifetime and a faster replacement or renewal process. As a result, reports have shown that software-based authentication is 95 percent cheaper than hardware-based authentication \cite{InfoSecurity2012}.
+The hardware used in hardware-based authentication has to be manufactured, shipped, inventoried, distributed and tracked. It also has a higher maintenance cost because it has a vendor-defined lifetime and a lengthy replacement process. Software, on the other hand, can be created as needed on the fly. It also has a customer-specified lifetime and a faster replacement or renewal process \cite{AAMHS2011}. As a result, reports have shown that software-based authentication is 95 percent cheaper than hardware-based authentication \cite{InfoSecurity2012}.
     
 \subsubsection{Advantages of Hardware-based Authentication}
-While software has many advantages over hardware in terms of authentication, a lot organizations still prefer hardware tokens because they feel that their keys are more secure with a physical layer of protection. There are also instances where hardware-based authentication is the only applicable scenario. These scenarios include physical protection such as doors and safes.
+While software has many advantages over hardware in terms of authentication, a lot of organizations still prefer hardware tokens because they feel that their keys are more secure with a physical layer of protection \cite{AAMHS2011}. There are also scenarios where hardware-based authentication is the only applicable method. These scenarios include physical protection such as doors and safes.
 
 \subsection{Factors in Hardware-Based Authentication Systems}
-\begin{enumerate}
-    \item \textbf{PIN}s are the most commonly used knowledge-based authentication method. Longer PINs mean better security since it takes more time to guess by brute force.
-    \item \textbf{Smart cards} contain cryptographic keys that are based on the public key infrastructure (PKI) \cite{AAMHS2011}. They are considered to be very secure and can hold a lot of useful information. Since smart card security also usually involves entering a PIN, security is not entirely breached should the card fall into other people's hands.
-    \item \textbf{Radio-frequency identification tags} are typically attached to objects which they identify and transfer information using electromagnetic or radio waves. They are usually cheaper than smart cards but hold less information. Like smart cards, much of the security they provide is lost when stolen.
-    \item \textbf{Biometrics} such as fingerprint, voice, iris or face patterns uniquely identify individuals and are more secure than possession-based factors in the sense that they are difficult to steal or replicate, but less secure in that they can generate false positives and false negatives \cite{AAMHS2011}.
-\end{enumerate}
+\subsubsection{PIN}
+\textbf{PIN}s are the most commonly used knowledge-based authentication method. Longer PINs mean better security since it takes more time to guess by brute force. Another way to deter brute force attacks is to lock out the user for a fixed amount of time after a streak of failed attempts. PINs see use mostly in multi-factor hardware-based authentication systems, but they are also viable for single-factor if the system is small-scale or for personal use only, like safes or lockers.
+
+\subsubsection{Smart card}
+\textbf{Smart cards} contain cryptographic keys that are based on the public key infrastructure (PKI) \cite{AAMHS2011}. Smart card-based systems are considered to be highly secure because of their resilience against brute force attacks. The drawback to smart cards (and possession-based factors in general), though, is that the security is compromised should the security token fall into others' hands. To mitigate this, they can be combined with knowledge or biometric-based factors, which are harder to steal.
+
+\subsubsection{RFID}
+\textbf{Radio-frequency identification tags} are typically attached to objects which they identify and transfer information using electromagnetic or radio waves. Each RFID tag has a unique identifier (UID) that is assigned at manufacture time. They are usually cheaper than smart cards but hold less information. Like smart cards, much of the security they provide is lost when stolen, so it is best to combine them with other factors.
+
+\subsubsection{Biometric}
+\textbf{Biometrics} such as fingerprint, voice, iris or face patterns uniquely identify individuals and are more secure than possession-based factors in the sense that they are difficult to steal or replicate, but less secure in that they can generate false positives and false negatives \cite{AAMHS2011}.
+
+When authenticating using biometrics, it is critical to minimize two errors: the false acceptance rate and the false rejection rate. False acceptance rate is the probability of unauthorized users being granted access to the system. False rejection rate is the probability of authorized users being denied access to the system.
+
 
 \subsection{Cost of Hardware-based Authentication Systems}
 \subsubsection{PIN-based}
-PINs see use mostly in multi-factor hardware-based authentication systems, but they are also viable for single-factor if the system is small or for personal use only, like safes or lockers. For example, the REL.RB3002 Series PIN Locks that are used to provide extra security to doors cost \$265.71 per lock. \cite{KeylexPin} 
+Electronic PIN Door Locks sold in the online retail store, Lowes, cost \$162 on average \cite{LowesKeypadLocks}. The price range is roughly from \$148 to \$176.
 
 \subsubsection{RFID-based}
-The two main components of RFID systems are tags and readers. There are two kinds of tags -- active and passive, with active tags are more expensive than passive tags. The cost of passive tags are typically at around twenty cents when purchased en masse, while the cost of active tags range from ten to fifty dollars each, even when purchased en masse. The cost of UHF (Ultra High Frequency) readers range from \$500 to \$3000, depending on their functionality \cite{Violino2005}.
+RFID systems have two primary components: tags and readers. There are two kinds of tags -- active and passive, with active tags being more expensive than passive tags. The cost of passive tags are typically at around twenty cents when purchased en masse, while the cost of active tags range from ten to fifty dollars each, even when purchased en masse \cite{Violino2005}. The cost of High Frequency readers range from \$200 to \$300, depending on their functionality \cite{Violino2006}.
 
 \subsubsection{Smart card-based}
 The AL5H is a door locking authentication system which is designed for use by hotels \cite{MiwaLock}.  It has undergone vigorous test installations at the Essex Inn, Chicago, and at the Hyatt and ANA Hotels, Tokyo, and at the Bay Landing Hotel, San Fransisco. It is capable of reading both Magstripe and smart cards. The system is available for \$229 each at LodgeMart \cite{LodgemartMiwaLock}.
 
 \subsubsection{Biometric-based}
-When authenticating using biometrics, it is important to minimize two errors: the false acceptance rate and the false rejection rate. False acceptance rate is the probability of unauthorized users being granted access to the system. False rejection rate is the probability of authorized users being denied access to the system.
-
 The MegaMatcher biometric software engine can authenticate users based on various biometrics. When authenticating using a single fingerprint, the false rejection rate is 0.174\% at a fixed false acceptance rate of 0.0001\%\cite{MegaMatcher}. The components of the fingerprint module cost \$222.49 in total\cite{MegaMatcherPrices}.
-
-%\begin{enumerate}
-    %\item Fingerprint
-    %\item Voice
-    %\item Eye
-    %\item Face
-%\end{enumerate}
 
 \subsubsection{Barcode-based}
 ChurchTrac, a church database system, uses ID cards or tags with printed barcodes for checking in members and guests. These tags are also used to determine which individuals are allowed to pick-up children from the church. For small churches (up to 100 people), the Windows version is free while the online version costs \$1.35 a week \cite{ChurchTrac}.
 
+
 \subsection{Possible Cost of Authentication Using Raspberry Pi}
-Having Raspberry Pi as the target platform in developing authentication systems seems to significantly reduce the cost. For example, Pi Lock is an open-source authentication system built on the Raspberry Pi and uses RFID and PIN technologies to secure doors. It also provides means to monitor all secured doors and manage user permissions within a network. The fundamental components cost around \$85 in total \cite{PiLock}, which is relatively cheap compared to other RFID authentication systems.
+Having Raspberry Pi as the target platform in developing authentication systems seems to significantly reduce the cost. For example, Pi Lock is an open-source authentication system built on the Raspberry Pi and uses RFID and PIN technologies to secure doors. It also provides means to monitor all secured doors and manage user permissions within a network. The fundamental components cost around \$85 in total \cite{PiLock}, which is relatively cheap compared to other RFID authentication systems. Another benefit is that the code can be made open source, so that the system can be customized to fit each user's needs.
 
-After evaluating the trade-offs between security, cost and usability, it was decided that PINs, RFID tags and fingerprints would provide the best security at a reasonable cost. Smart cards are quite expensive to produce, costing \$2 to \$10 \cite{CardwerkSmartCard}. On the other hand, barcodes are inexpensive but the patterns are easy to forge or replicate. For the biometrics, there are many different types, but from the tests conducted by MegaMatcher, fingerprints seem to have the lowest false acceptance and false rejection rates \cite{MegaMatcher}.
+After evaluating the trade-offs between security, cost and usability, it was decided that PINs, RFID tags and fingerprints would provide the best security at a reasonable cost. Smart cards are quite expensive to produce, costing \$2 to \$10 \cite{CardwerkSmartCard}. On the other hand, barcodes are inexpensive but the patterns are easy to forge or replicate. For the biometrics, there are many different types, but from the tests conducted by MegaMatcher, fingerprints seem to be the most reliable, having the lowest error rates \cite{MegaMatcher}.
 
-Regardless of the factor/s to be used used, three components will be needed, namely a Raspberry Pi Model A (\$25), an OLED Graphic Display (\$17.50), and a Solenoid Lock (\$14.95). Prices were taken from Adafruit's online store.
+Regardless of the factor/s to be used, three components will be needed, namely a Raspberry Pi Model A (\$25), an OLED Graphic Display (\$17.50), and a Solenoid Lock (\$14.95). Prices were taken from Adafruit's online store.
 
-If single-factor PIN is used, a \$3.95 keypad will be needed, putting the final price at \textbf{\$61.40}. This is 77\% less expensive than the previously mentioned REL.RB3002 Series PIN Locks.
+If single-factor PIN is used, a \$3.95 keypad will be needed, putting the final price at \textbf{\$61.40}. This is 67\% less expensive than the electronic PIN locks sold in Lowes.
 
 If RFID is used alongside PIN, additional components would be needed, namely the PN532 NFC/RFID controller breakout board (\$39.95) and the Adafruit Assembled Pi Cobbler Breakout + Cable for Raspberry Pi (\$6.50), which puts the final price at \textbf{\$107.85}. The RFID MiFare tags would cost \$2.50 each. The reader is at least 78\% less expensive than its UHF counterparts. The tags are about \$1.6 more expensive, but the system should still be cheaper as a whole provided that only a few tags (around 200) will be used. However, note that UHF readers can detect tags at much larger distances.
 

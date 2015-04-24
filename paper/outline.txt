@@ -1,0 +1,36 @@
+Introduction
+Background
+  Authentication Factors
+  Single and multi-factor Authentication
+  Raspberry Pi
+Related Work
+  Commercial Systems
+    CD-R King Time Attendance System
+      http://www.cdrking.com/?mod=products&type=view&sid=15859&main=156
+    F6 Fingerprint Access Control
+      http://secukey.company.frbiz.com/p99909799-fingerprint-access-control-model-f6.html
+  Open Source Systems
+    Pi-Lock
+      http://pi-lock.com/
+      https://github.com/pbernasconi/pi-lock
+    Open Access Control
+      https://code.google.com/p/open-access-control/
+Design and Architecture
+  Hardware Configuration
+  Software Overview
+Implementation
+  SpoonPi
+  ForkPi
+Evaluation
+  Security
+  Usability
+  Cost-effectiveness
+Future Work and Conclusions
+  Exit button
+  Emergency power supply
+  Date and Time-based entry
+  Alarm
+Appendix
+  Set-up Tutorial
+  Why ForkPi?
+Bibliography

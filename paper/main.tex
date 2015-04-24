@@ -1,5 +1,10 @@
-\documentclass[a4paper, 11pt]{article}
+\documentclass[a4paper, 10pt]{article}
+% \documentclass[a4paper]{acm_proc_article-sp}
+% \documentclass[journal]{IEEEtran}
 \usepackage{url}
+\usepackage{enumitem}
+\usepackage{threeparttable}
+\usepackage{tabularx}
 
 \begin{document}
 
@@ -7,35 +12,22 @@
 \input{authors}
 \maketitle
 
-\begin{abstract}
-\end{abstract}
+\input{abstract}
 
-\section{Introduction}
+\input{intro}
+\input{background}
+\input{related-work}
+\input{design}
+\input{implementation}
+\input{evaluation}
+\input{future-work-conclusion}
+% \input{appendix}
 
-\section{Literature Review}
-\input{lit-review}
-
-\section{Problem Statement}
-\input{problem-stmt}
-
-\section{Methodology}
-% How to define success? metrics, benchmarks
-% 1) security
-%    PIN - 4-digit, 6-digit PINS
-%          brute force permutations to try = (nPerms)/2
-%    RFID - stolen tokens
-%           8-digit codes, reprogrammed codes can fool reader?
-%      vulnerable to "keyloggers"? reprogram a tag to match authorized code
-%    Fing - FalsePosRate, FalseNegRate
-%           can be fooled by non-human or dead finger?
-% 2) usability - survey
-%    PIN - how many seconds to input a PIN
-%    RFID - how fast to recognize code
-%    Fing - how fast to recognize print, log capacity, fingerprint db size
-% 3) cost - compare to previous
-% demonstrate the scientific method
-
-\section{Conclusion}
+% \input{lit-review}
+% \input{problem-stmt}
+% \input{methodology}
+% \input{res-and-disc}
+% \input{appendix}
 
 \bibliographystyle{plain}
 \bibliography{biblio}

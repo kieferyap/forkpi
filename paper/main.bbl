@@ -1,68 +1,25 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{1}
 
-\bibitem{MiwaLock}
-{AL5H} hotel lock system.
-\newblock \url{http://www.miwalock.com/product/al5h/}. Last accessed 25
-  September 2014.
+\bibitem{Gunson2011}
+Nancie Gunson, Diarmid Marshall, Hazel Morton, and Mervyn Jack.
+\newblock User perceptions of security and usability of single-factor and
+  two-factor authentication in automated telephone banking.
+\newblock {\em computers \& security}, 30(4):208--220, 2011.
 
-\bibitem{ChurchTrac}
-Barcode check-in and child security.
+\bibitem{KeylessDoorProsCons}
+Pros and cons of a keyless door entry, October 2014.
 \newblock
-  \url{http://www.churchtrac.com/knowledgebase/checkin_child_security.htm}.
-  Last accessed 24 September 2014.
+  \url{http://www.locksmithorting.com/pros-and-cons-of-a-keyless-door-entry}.
+  Last accessed 18 April 2015.
 
-\bibitem{MegaMatcher}
-Megamatcher algorithm features and capabilities.
-\newblock \url{http://www.neurotechnology.com/megamatcher-technology.html}.
-  Last accessed 26 September 2014.
+\bibitem{RPi1ModelB}
+{Raspberry Pi 1 Model B+}.
+\newblock \url{https://www.raspberrypi.org/products/model-b-plus/}. Last
+  accessed 19 April 2015.
 
-\bibitem{LodgemartMiwaLock}
-Miwa {AL5H} hotel lock.
-\newblock \url{http://www.lodgemart.com/mialholo.html}. Last accessed 25
-  September 2014.
-
-\bibitem{KeylexPin}
-{PIN} code locks -- {REL.RB3002} series pin locks.
-\newblock \url{http://www.keylex.co.uk/acatalog/Pin-Code-Locks.html}. Last
-  accessed 26 September 2014.
-
-\bibitem{CardwerkSmartCard}
-Smart card technology.
-\newblock \url{http://www.cardwerk.com/smartcards/smartcard_technology.aspx}.
-  Last accessed 26 September 2014.
-
-\bibitem{InfoSecurity2012}
-Software-based authentication 95\% cheaper than hardware-based authentication,
-  report shows, July 2012.
-\newblock
-  \url{http://www.infosecurity-magazine.com/news/software-based-authentication-95-cheaper-than/}.
-  Last accessed 13 September 2014.
-
-\bibitem{MegaMatcherPrices}
-Prices for megamatcher, March 2014.
-\newblock \url{http://www.neurotechnology.com/prices-megamatcher.html}. Last
-  accessed 26 September 2014.
-
-\bibitem{PiLock}
-Paolo Bernasconi.
-\newblock Raspberry pi {RFID} door lock.
-\newblock \url{http://www.pi-lock.com}. Last accessed 24 September 2014.
-
-\bibitem{Pasupathinathan2009}
-Vijayakrishnan Pasupathinathan.
-\newblock {\em Hardware-based Identification and Authentication Systems}.
-\newblock PhD thesis, Macquarie University, 2009.
-
-\bibitem{AAMHS2011}
-CA~Technologies.
-\newblock Advanced authentication methods: Software vs. hardware, 2011.
-\newblock
-  \url{http://www.ca.com/~/media/Files/whitepapers/ebook-advanced-authenticaiton-methods.pdf}.
-  Last accessed 13 September 2014.
-
-\bibitem{Violino2005}
-Bob Violino.
-\newblock {RFID} system components and costs.
-\newblock {\em RFID Journal}, January 2005.
+\bibitem{RPi2ModelB}
+{Raspberry Pi 2 Model B}.
+\newblock \url{https://www.raspberrypi.org/products/raspberry-pi-2-model-b/}.
+  Last accessed 19 April 2015.
 
 \end{thebibliography}
