@@ -3,525 +3,12 @@ Module for the Sparkfun fingerprint scanner
 Product Page: https://www.sparkfun.com/products/11792
 Datasheet: http://cdn.sparkfun.com/datasheets/Sensors/Biometric/GT-511C3_datasheet_V1%201_20130411%5B4%5D.pdf
 """
-import struct
 import serial
-import binascii
 import time
 
-def hexlify(_bytes):
-    """
-    Parameters
-    ----------
-    _bytes : bytes
-
-    Returns
-    -------
-    str
-        Hex representation of _bytes separated by spaces
-
-    Example
-    -------
-    >>> hexlify(bytes([0xA1, 0x2F, 0xC3]))
-    'A1 2F C3'
-
-    """
-    # return ' '.join(binascii.hexlify(ch) for ch in _bytes)
-    # return binascii.hexlify(_bytes)
-    return ' '.join(["{0:0>2X}".format(b) for b in _bytes])
-
-def byte_checksum(_bytes):
-    """
-    Parameters
-    ----------
-    _bytes : bytes
-
-    Returns
-    -------
-    int
-        Sum of all bytes in _bytes truncated to a word (two bytes)
-
-    Example
-    -------
-    >>> byte_checksum(bytes([0xF0, 0x0F]))
-    255
-
-    """
-    return sum(_bytes) & 0xFFFF
-
-
-class CommandPacket(object):
-    """
-    Packs commands and parameters into bytes that can be sent.
-
-    Command packet format is:
-        Byte  1    : START_CODE_1  (1 byte )
-        Byte  2    : START_CODE_2  (1 byte )
-        Byte  3-4  : DEVICE_ID     (2 bytes)
-        Byte  5-8  : parameter     (4 bytes)
-        Byte  9-10 : command code  (2 bytes)
-        Byte 11-12 : checksum      (2 bytes)
-
-    Notes
-    -----
-        `START_CODE_1`, `START_CODE_2`, and `DEVICE_ID` are all fixed to the values specified below.
-
-        `checksum` contains the sum of all other bytes, truncated to 2 bytes.
-
-    Attributes
-    ----------
-    START_CODE_1 : int
-        First byte of command packet. Fixed to 0x55.
-    START_CODE_2 : int
-        Second byte of command packet. Fixed to 0xAA.
-    DEVICE_ID : int
-        Device ID. Fixed to 0x0001.
-    COMMANDS : dict
-        Maps command names to command codes.
-    name : str
-        Command name, must be in COMMANDS.
-    command_code : str
-        Command code, mapped from `name`.
-    parameter : int
-        Command parameter.
-
-    """
-
-    START_CODE_1 = 0x55
-    START_CODE_2 = 0xAA
-    DEVICE_ID = 0x0001
-
-    COMMANDS = {
-        'Open'                : 0x01, # Open Initialization
-        'Close'               : 0x02, # Close Termination
-        'ChangeBaudrate'      : 0x04, # ChangeBaudrate Change UART baud rate
-        'CmosLed'             : 0x12, # CmosLed Control CMOS LED
-        'GetEnrollCount'      : 0x20, # Get enrolled fingerprint count
-        'CheckEnrolled'       : 0x21, # Check whether the specified ID is already enrolled
-        'EnrollStart'         : 0x22, # Start an enrollment
-        'Enroll1'             : 0x23, # Make 1st template for an enrollment
-        'Enroll2'             : 0x24, # Make 2nd template for an enrollment
-        'Enroll3'             : 0x25, # Make 3rd template for an enrollment, merge three templates into one template, save merged template to the database
-        'IsPressFinger'       : 0x26, # Check if a finger is placed on the sensor
-        'DeleteID'            : 0x40, # Delete the fingerprint with the specified ID
-        'DeleteAll'           : 0x41, # Delete all fingerprints from the database
-        'Verify1_1'           : 0x50, # Verification of the capture fingerprint image with the specified ID
-        'Identify1_N'         : 0x51, # Identification of the capture fingerprint image with the database
-        'VerifyTemplate1_1'   : 0x52, # Verification of a fingerprint template with the specified ID
-        'IdentifyTemplate1_N' : 0x53, # Identification of a fingerprint template with the database
-        'CaptureFinger'       : 0x60, # Capture a fingerprint image(256x256) from the sensor
-        'MakeTemplate'        : 0x61, # Make template for transmission
-        'GetImage'            : 0x62, # Download the captured fingerprint image(256x256)
-        'GetRawImage'         : 0x63, # Capture & Download raw fingerprint image(320x240)
-        'GetTemplate'         : 0x70, # Download the template of the specified ID
-        'SetTemplate'         : 0x71, # Upload the template of the specified ID
-    }
-
-    def __init__(self, command_name, parameter=0):
-        """
-        Parameters
-        ----------
-        command_name : str
-            Command name, name must be in COMMANDS.
-        parameter : int, optional
-            Command parameter , defaults to 0.
-
-        Raises
-        ------
-        ValueError
-            If `command_name` is not in `COMMANDS`.
-
-        """
-        if command_name in self.COMMANDS:
-            self.name = command_name
-            self.command_code = self.COMMANDS[command_name]
-            self.parameter = parameter
-        else:
-            raise ValueError("%s not in command list" % command_name)
-
-    def _pack_bytes(self, little_endian=True):
-        """
-        Packs this object's attributes into bytes according to the specified format.
-
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to True.
-            True for little endian, False for big endian.
-
-        Returns
-        -------
-        bytes
-            Bytes of the command packet formatted in the byte order specified.
-
-        """
-        if little_endian:
-            byte_order = '<'
-        else: # big endian
-            byte_order = '>'
-
-        _bytes = struct.pack(byte_order + 'BBHiH', # byte byte word dword/(signed int) word
-                self.START_CODE_1, self.START_CODE_2, self.DEVICE_ID, self.parameter, self.command_code)
-        checksum = byte_checksum(_bytes)
-        _bytes += struct.pack(byte_order + 'H', checksum)
-        return _bytes
-
-    def serialize_bytes(self, little_endian=False):
-        """
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to False.
-            True for little endian, False for big endian.
-
-        Returns
-        ------
-        str
-            Hex representation of packed bytes in the byte order specified.
-
-        Example
-        -------
-        >>> command = CommandPacket('Open', parameter=1)
-        >>> command.serialize_bytes() # big endian
-        '55 AA 00 01 00 00 00 01 00 01 01 02'
-        >>> command.serialize_bytes(little_endian=True)
-        '55 AA 01 00 01 00 00 00 01 00 02 01'
-
-        """
-        _bytes = self._pack_bytes(little_endian)
-        return hexlify(_bytes)
-
-    def __bytes__(self):
-        """
-        Converts the command packet into bytes ready to be sent to the FPS.
-        Bytes are formatted in little endian order.
-
-        Returns
-        ------
-        bytes
-            Packed bytes in little endian order.
-
-        """
-        return self._pack_bytes(little_endian=True)
-        
-
-class ResponsePacket(object):
-    """
-    Unpacks bytes from the response packet sent by the FPS.
-
-    Response packet format is:
-        Byte  1    : START_CODE_1 (1 byte )
-        Byte  2    : START_CODE_2 (1 byte )
-        Byte  3-4  : DEVICE_ID    (2 bytes)
-        Byte  5-8  : parameter    (4 bytes)
-        Byte  9-10 : response     (2 bytes)
-        Byte 11-12 : checksum     (2 bytes)
-
-    Notes
-    -----
-        `START_CODE_1`, `START_CODE_2`, and `DEVICE_ID` are all fixed to the values specified below.
-
-        `response` is 0x0030 if command is successful (ack).
-                      0x0031 if command failed (nack).
-
-        `parameter` contains the output parameter if ack.
-                             the error code if nack.
-
-        `checksum` contains the sum of all other bytes, truncated to 2 bytes.
-
-    Attributes
-    ----------
-    START_CODE_1 : int
-        First byte of command packet. Fixed to 0x55.
-    START_CODE_2 : int
-        Second byte of command packet. Fixed to 0xAA.
-    DEVICE_ID : int
-        Device ID. Fixed to 0x0001.
-    ERRORS : dict
-        Maps error codes to error names.
-    _bytes : bytes
-        The response packet as sent by the FPS.
-    ack : bool
-        True if ack, False if nack.
-    parameter : int
-        Output parameter (if ack).
-    error_code : int
-        Error code (if nack).
-    error : str
-        Error description, mapped from `error_code` (if nack).
-
-    """
-
-    START_CODE_1 = 0x55
-    START_CODE_2 = 0xAA
-    DEVICE_ID = 0x0001
-
-    ERRORS = {
-        0x1001: 'NACK_TIMEOUT'              , # Obsolete, capture timeout
-        0x1002: 'NACK_INVALID_BAUDRATE'     , # Obsolete, Invalid serial baud rate
-        0x1003: 'NACK_INVALID_POS'          , # The specified ID is not between 0~199
-        0x1004: 'NACK_IS_NOT_USED'          , # The specified ID is not used
-        0x1005: 'NACK_IS_ALREADY_USED'      , # The specified ID is already used
-        0x1006: 'NACK_COMM_ERR'             , # Communication Error
-        0x1007: 'NACK_VERIFY_FAILED'        , # 1:1 Verification Failure
-        0x1008: 'NACK_IDENTIFY_FAILED'      , # 1:N Identification Failure
-        0x1009: 'NACK_DB_IS_FULL'           , # The database is full
-        0x100A: 'NACK_DB_IS_EMPTY'          , # The database is empty
-        0x100B: 'NACK_TURN_ERR'             , # Obsolete, Invalid order of the enrollment (The order was not as: EnrollStart -> Enroll1 -> Enroll2 -> Enroll3)
-        0x100C: 'NACK_BAD_FINGER'           , # Too bad fingerprint
-        0x100D: 'NACK_ENROLL_FAILED'        , # Enrollment Failure
-        0x100E: 'NACK_IS_NOT_SUPPORTED'     , # The specified command is not supported
-        0x100F: 'NACK_DEV_ERR'              , # Device Error, especially if Crypto-Chip is trouble
-        0x1010: 'NACK_CAPTURE_CANCELED'     , # Obsolete, The capturing is canceled
-        0x1011: 'NACK_INVALID_PARAM'        , # Invalid parameter
-        0x1012: 'NACK_FINGER_IS_NOT_PRESSED', # Finger is not pressed          
-    }
-
-    def __init__(self, _bytes):
-        """
-        Parameters
-        ----------
-        _bytes : bytes
-            The response packet as sent by the FPS.
-
-        Raises
-        ------
-        AssertionError
-            If one of the start codes, device ID, or checksum is incorrect.
-
-        """
-        self._bytes = _bytes
-        self._unpack_bytes()
-
-    def _unpack_bytes(self):
-        """
-        Unpacks this object's attributes from the bytes according to the specified format.
-
-        Raises
-        ------
-        AssertionError
-            If one of the start codes, device ID, or checksum is incorrect.
-
-        """
-        values = struct.unpack('<BBHiHH', self._bytes) # byte byte word dword word word
-        assert values[0] == self.START_CODE_1
-        assert values[1] == self.START_CODE_2
-        assert values[2] == self.DEVICE_ID
-        response = values[4]
-        checksum = values[5]
-        assert checksum == byte_checksum(self._bytes[:-2])
-        self.ack = True if response == 0x30 else False
-        if self.ack:
-            self.parameter = values[3]
-        else:
-            self.error_code = values[3]
-            self.error = self.ERRORS.get(self.error_code, "DUPLICATE_ID_" + str(self.error_code))
-
-    def __bytes__(self):
-        """
-        Returns
-        -------
-        bytes
-            The bytes passed upon initialization.
-
-        """
-        return self._bytes
-
-    def __bool__(self):
-        """
-        Allows the ResponsePacket object to function as a condition (e.g. in an if statement).
-
-        Returns
-        -------
-        bool
-            True if ack, False if nack
-
-        """
-        return self.ack
-
-    def serialize_bytes(self, little_endian=False):
-        """
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to False.
-            True for little endian, False for big endian.
-
-        Returns
-        ------
-        str
-            Hex representation of packed bytes in the byte order specified.
-
-        Example
-        -------
-        >>> _bytes = bytes([0x55, 0xAA, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x00, 0x30, 0x01])
-        >>> response = ResponsePacket(_bytes)
-        >>> response.serialize_bytes() # big endian
-        '55 AA 00 01 00 00 00 00 00 30 01 30'
-        >>> response.serialize_bytes(little_endian=True)
-        '55 AA 01 00 00 00 00 00 30 00 30 01'
-
-        """
-        if little_endian:
-            _bytes = self._bytes
-        else:
-            values = struct.unpack('<BBHiHH', self._bytes) # byte byte word dword word word
-            _bytes = struct.pack('>BBHiHH', *values)
-        return hexlify(_bytes)
-
-
-class DataPacket(object):
-    """
-    Packs / unpacks bytes that can be sent to / received from the FPS.
-
-    Data packet format is:
-        Byte     1       : START_CODE_1 (1 byte )
-        Byte     2       : START_CODE_2 (1 byte )
-        Byte     3-4     : DEVICE_ID    (2 bytes)
-        Byte     5-{N+4} : data         (N bytes)
-        Byte {N+5}-{N+6} : checksum     (2 bytes)
-
-    Notes
-    -----
-        `START_CODE_1`, `START_CODE_2`, and `DEVICE_ID` are all fixed to the values specified below.
-
-        The length of `data` is pre-defined depending on the protocol stage.
-
-        `checksum` contains the sum of all other bytes, truncated to 2 bytes.
-
-    Attributes
-    ----------
-    START_CODE_1 : int
-        First byte of command packet. Fixed to 0x5A.
-    START_CODE_2 : int
-        Second byte of command packet. Fixed to 0xA5.
-    DEVICE_ID : int
-        Device ID. Fixed to 0x0001.
-    _bytes : bytes
-        The data packet as sent by the FPS.
-    data_length : int
-        Length of the data (not the packet).
-    data : bytes
-        The data itself (without the other packet attributes).
-    """
-
-    START_CODE_1 = 0x5A
-    START_CODE_2 = 0xA5
-    DEVICE_ID = 0x0001
-
-    def __init__(self, _bytes=None, data=None):
-        """
-        Parameters
-        ----------
-        _bytes : bytes, optional
-            The data packet as sent by the FPS, defaults to None.
-            Set this variable when unpacking data from FPS.
-        data : bytes
-            The data portion of the packet, defaults to None.
-            Set this variable when packing data to be sent to FPS.
-
-        Raises
-        ------
-        AssertionError
-            If both of, or neither of, _bytes and data are set to None.
-            When unpacking, if one of the start codes, device ID, or checksum is incorrect.
-
-        """
-        assert _bytes or data # one of them
-        assert not (_bytes and data) # but not both
-        if _bytes: # unpack data from bytes
-            self._bytes = _bytes
-            self.data_length = len(_bytes) - 6
-            self._unpack_bytes()
-        elif data: # pack data to bytes
-            self.data = bytes(data)
-            self.data_length = len(self.data)
-            self._pack_bytes()
-
-    def _pack_bytes(self, little_endian=True):
-        """
-        Packs this object's attributes into bytes according to the specified format.
-
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to True.
-            True for little endian, False for big endian.
-
-        Returns
-        -------
-        bytes
-            Bytes of the data packet formatted in the byte order specified.
-
-        """
-        if little_endian:
-            byte_order = '<'
-        else: # big endian
-            byte_order = '>'
-
-        _bytes = struct.pack(byte_order + 'BBH%ds' % self.data_length, # byte byte word dword word
-                self.START_CODE_1, self.START_CODE_2, self.DEVICE_ID, self.data)
-        checksum = byte_checksum(_bytes)
-        _bytes += struct.pack(byte_order + 'H', checksum)
-        self._bytes = _bytes
-        return self._bytes
-
-    def _unpack_bytes(self):
-        """
-        Unpacks this object's attributes from the bytes according to the specified format.
-
-        Raises
-        ------
-        AssertionError
-            If one of the start codes, device ID, or checksum is incorrect.
-
-        """
-        values = struct.unpack('<BBH%dsH' % self.data_length, self._bytes) # byte byte word var word
-        assert values[0] == self.START_CODE_1
-        assert values[1] == self.START_CODE_2
-        assert values[2] == self.DEVICE_ID
-        self.data = values[3]
-        assert len(self.data) == self.data_length
-        assert values[4] == byte_checksum(self._bytes[:-2])
-        return self.data
-
-    def serialize_bytes(self, little_endian=False):
-        """
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to False.
-            True for little endian, False for big endian.
-
-        Returns
-        ------
-        str
-            Hex representation of packed bytes in the byte order specified.
-
-        Example
-        -------
-        >>> _bytes = bytes([0x5A, 0xA5, 0x01, 0x00, 0x01, 0x00, 0x01, 0x01])
-        >>> data_packet = DataPacket(_bytes=_bytes)
-        >>> data_packet.serialize_bytes()
-        '5A A5 00 01 01 00 01 01'
-        >>> data_packet.serialize_bytes(little_endian=True)
-        '5A A5 01 00 01 00 01 01'
-
-        """
-        return hexlify(self._pack_bytes(little_endian))
-
-    def __bytes__(self):
-        """
-        Converts the data packet into bytes ready to be sent to the FPS.
-        Bytes are formatted in little endian order.
-
-        Returns
-        ------
-        bytes
-            Packed bytes in little endian order.
-
-        """
-        return self._pack_bytes(little_endian=True)
-
+from .command_packet import CommandPacket
+from .response_packet import ResponsePacket
+from .data_packet import DataPacket
 
 class FingerprintScanner(object):
     
@@ -606,34 +93,34 @@ class FingerprintScanner(object):
         response = self._run_command('GetEnrollCount')
         return response.parameter
 
-    def is_enrolled(self, _id):
+    def is_enrolled(self, tid):
         """
             Parameter: The ID to be checked
             Returns: True if the ID is enrolled, False if not
         """
-        response = self._run_command('CheckEnrolled', parameter=_id)
+        response = self._run_command('CheckEnrolled', parameter=tid)
         return response.ack
 
-    def find_free_id(self):
+    def find_free_tid(self):
         """
             Returns: The first free ID, -1 if db is full
         """
-        for _id in range(200):
-            if not self.is_enrolled(_id):
-                return _id
+        for tid in range(200):
+            if not self.is_enrolled(tid):
+                return tid
         return -1
 
     def enroll_template(self, tries=3, delay=1.5):
 
-        if self.start_enroll(_id=-1, tries=tries, delay=1.5):
+        if self.start_enroll(tid=-1, tries=tries, delay=1.5):
             if self.debug:
                 print('Enrolling template')
-            template = self.complete_enroll(_id=-1, tries=tries)
+            template = self.complete_enroll(tid=-1, tries=tries)
             if self.debug and template:
                 print('Enroll successful')
             return template
 
-    def enroll_finger(self, _id=None, tries=3, delay=1.5):
+    def enroll_finger(self, tid=None, tries=3, delay=1.5):
         """
             The entire three-stage enrollment process
             Parameter: The ID to be enrolled (auto-searches for a free ID if not specified)
@@ -642,33 +129,33 @@ class FingerprintScanner(object):
         if self.debug:
             print('Place your finger on the scanner')
 
-        if _id: # user specified an ID
-            if self.is_enrolled(_id): # ID is already enrolled
+        if tid: # user specified an ID
+            if self.is_enrolled(tid): # ID is already enrolled
                 if self.debug:
-                    print('ID %s is already enrolled' % _id)
+                    print('ID %s is already enrolled' % tid)
                 return -1
         else:
-            _id = self.find_free_id()
-            if _id < 0: # database is full
+            tid = self.find_free_tid()
+            if tid < 0: # database is full
                 return -1
 
-        if self.start_enroll(_id=_id, tries=tries, delay=1.5):
+        if self.start_enroll(tid=tid, tries=tries, delay=1.5):
             if self.debug:
-                print('Enrolling with id %s' % _id)
-            if self.complete_enroll(_id, tries=tries):
+                print('Enrolling with id %s' % tid)
+            if self.complete_enroll(tid, tries=tries):
                 if self.debug:
                     print('Enroll successful')
-                return _id
+                return tid
 
         return -1
 
-    def start_enroll(self, _id, tries=3, delay=1.5):
+    def start_enroll(self, tid, tries=3, delay=1.5):
         """
             First and second stage of enrollment process
             Parameter: The ID to be enrolled
             Returns: True if successful, False if not
         """
-        if self._run_command('EnrollStart', parameter=_id): # Enroll start success
+        if self._run_command('EnrollStart', parameter=tid): # Enroll start success
             if self._enroll(1, tries):
                 self.wait(delay)
                 if self._enroll(2, tries):
@@ -676,13 +163,13 @@ class FingerprintScanner(object):
                     return True
         return False
 
-    def complete_enroll(self, _id, tries=3):
+    def complete_enroll(self, tid, tries=3):
         """
             Third stage of enrollment process
             Parameter: The ID to be enrolled
-            Returns: If _id >= 0, boolean success. If _id==-1, template data
+            Returns: If tid >= 0, boolean success. If tid==-1, template data
         """
-        if _id >= 0:
+        if tid >= 0:
             ret = self._enroll(3, tries)
         else: # id == -1
             if self._capture_finger(tries):
@@ -718,12 +205,12 @@ class FingerprintScanner(object):
         response = self._run_command('IsPressFinger')
         return response.parameter == 0
 
-    def delete_template(self, _id):
+    def delete_template(self, tid):
         """
             Deletes the specified template ID from the database
             Returns: True if successful, False if position invalid
         """
-        response = self._run_command('DeleteID', parameter=_id)
+        response = self._run_command('DeleteID', parameter=tid)
         return response.ack
 
     def delete_all(self):
@@ -734,14 +221,14 @@ class FingerprintScanner(object):
         response = self._run_command('DeleteAll')
         return response.ack
 
-    def verify_finger(self, _id, tries=3):
+    def verify_finger(self, tid, tries=3):
         """
             Checks the currently pressed finger against a specific ID
             Parameter: 0-199 (id number to be checked)
             Returns: True if match, False if not
         """
         if self._capture_finger(high_quality=False, tries=tries):
-            response = self._run_command('Verify1_1', parameter=_id)
+            response = self._run_command('Verify1_1', parameter=tid)
             return response.ack
         else:
             return False
@@ -759,8 +246,8 @@ class FingerprintScanner(object):
         else:
             return -1
 
-    def verify_template(self, _id, template):
-        if self._run_command('VerifyTemplate1_1', parameter=_id):
+    def verify_template(self, tid, template):
+        if self._run_command('VerifyTemplate1_1', parameter=tid):
             self._send_data(data=template)
             response = self._receive_response()
             return response.ack
@@ -813,25 +300,25 @@ class FingerprintScanner(object):
         self.backlight_off()
         return None
 
-    def download_template(self, _id):
+    def download_template(self, tid):
         """
             Downloads a template from the database
             Parameter: 0-199 ID number
             Returns: the template requested (498 bytes)
         """
-        if self._run_command('GetTemplate', parameter=_id):
+        if self._run_command('GetTemplate', parameter=tid):
             data = self._receive_data(498)
             return data
         return None
 
-    def upload_template(self, _id, template):
+    def upload_template(self, tid, template):
         """
             Uploads a template to the database
             Parameter: 0-199 ID number, template (498 bytes)
             Returns: True if successful, False if not
         """
         # the addition of 0x00ff0000 below is so that duplication check is not performed
-        if self._run_command('SetTemplate', parameter=0x00ff0000 + _id):
+        if self._run_command('SetTemplate', parameter=0x00ff0000 + tid):
             self._send_data(data=template)
             response = self._receive_response()
             return response.ack
@@ -851,14 +338,14 @@ class FingerprintScanner(object):
 
     def _receive_response(self, timeout=None):
         self._serial.setTimeout(timeout)
-        _bytes = self._serial.read(size=12)
+        bytes_ = self._serial.read(size=12)
 
-        if len(_bytes) < 12:
+        if len(bytes_) < 12:
             if self.debug:
                 print('read:')
             return None
         
-        response = ResponsePacket(_bytes)
+        response = ResponsePacket(bytes_)
         if self.debug:
             print('read:', response.serialize_bytes(little_endian=self.little_endian))
             if not response.ack:
@@ -876,13 +363,13 @@ class FingerprintScanner(object):
         packet_length = data_length + 6 # the +6 comes from the other non-data parts of the packet
 
         self._serial.setTimeout(timeout)
-        _bytes = self._serial.read(size=packet_length)
+        bytes_ = self._serial.read(size=packet_length)
         assert self._serial.inWaiting() == 0 # that should be all
 
-        if len(_bytes) < packet_length:
+        if len(bytes_) < packet_length:
             return None
 
-        packet = DataPacket(_bytes=_bytes)
+        packet = DataPacket(bytes_=bytes_)
         if self.debug:
             print('data:', packet.serialize_bytes(little_endian=self.little_endian))
             print('dlen:', len(packet.data))
@@ -898,26 +385,26 @@ if __name__ == '__main__':
     # fps.backlight_off()
 
     # Enrollment
-    # enroll_id = fps.enroll_finger(_id=None, tries=3)
+    # enroll_id = fps.enroll_finger(tid=None, tries=3)
     template = fps.enroll_template(tries=3)
 
 
     # Identification
-    # identify_id = fps.identify_finger(tries=3)
+    # identify_iid = fps.identify_finger(tries=3)
     # if identify_id >= 0:
     #     print('Match with id %s' % identify_id)
     # else:
     #    print('No match found')
 
     # for i in range(5):
-    #     template = fps.download_template(_id=i)
+    #     template = fps.download_template(tid=i)
 
     # fps.delete_all()
     # template = fps.make_template(tries=3)
-    # fps.upload_template(_id=0, template=template)
-    # print fps.verify_template(_id=4, template=template)
+    # fps.upload_template(tid=0, template=template)
+    # print fps.verify_template(tid=4, template=template)
 
-    # print fps.verify_finger(_id=4, tries=3)
+    # print fps.verify_finger(tid=4, tries=3)
 
     # fps.make_image()
     

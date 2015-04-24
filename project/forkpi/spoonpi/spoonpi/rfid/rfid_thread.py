@@ -1,5 +1,6 @@
 import time
 import threading
+
 from .rfid_reader import RfidReader
 
 class RfidThread(threading.Thread):

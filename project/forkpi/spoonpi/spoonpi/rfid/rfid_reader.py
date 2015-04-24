@@ -1,9 +1,9 @@
+from binascii import hexlify
+
 try:
     import py532lib.mifare as mifare
 except ImportError:
     from .py532lib import mifare as mifare
-
-from binascii import hexlify
 
 class RfidReader():
 

@@ -29,13 +29,13 @@ class FingerprintThread(threading.Thread):
                     if self.template:
                         self.fps.backlight_off()
 
-                        self.fps.delete_template(_id=0)
-                        self.fps.upload_template(_id=0, template=self.template)
+                        self.fps.delete_template(tid=0)
+                        self.fps.upload_template(tid=0, template=self.template)
 
                         self.matches = []
                         match_found = False
                         # fetch templates for this door from the forkpi db
-                        for _id, template in self.db.fetch_templates():
+                        for tid, template in self.db.fetch_templates():
                             # verify all templates against id=0
                             if len(template) == 996:
                                 try:
@@ -43,10 +43,10 @@ class FingerprintThread(threading.Thread):
                                 except Exception:
                                     pass
                                 else:
-                                    if self.fps.verify_template(_id=0, template=template):
-                                        self._print('Match with id %s' % _id)
+                                    if self.fps.verify_template(tid=0, template=template):
+                                        self._print('Match with id %s' % tid)
                                         # if template matches, add to list of keypair ids
-                                        self.matches.append(_id)
+                                        self.matches.append(tid)
                                         match_found = True
                         
                         if not match_found:
