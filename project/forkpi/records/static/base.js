@@ -25,7 +25,11 @@ $(document).ready(function() {
 
 // For editing text
 $(document).ready(function() {
+	// some text is being edited
 	var editableTextTrigger = false;
+
+	// some editing text in the modal was opened
+	var editedTextInModal = false;
 
 	// Editing text
 	$(document.body).on('click', '.editable-text', function(){
@@ -40,6 +44,13 @@ $(document).ready(function() {
 
 		var parent = $(this).parent();
 		var field = parent.data('field');
+		
+		// these fields are in the modal
+		if (field == 'pin' || field == 'rfid' || field == 'fingerprint') {
+			editedTextInModal = true;
+		}
+
+
 		// generate the textbox that will replace this element
 		var currentValue = $(this).html().trim();
 		if (currentValue == '- - -') {
@@ -210,8 +221,9 @@ $(document).ready(function() {
 	}).on('click', '.edit-btn', function(){
 		var parent = $(this).parent();
 		var id = parent.data('id');
-		var name = $('#name-'+id).html().trim();
-		if($('#pin-'+id).html().trim() != ''){
+		var name = $('#name-'+id).parent().data('value');
+
+		if($('#pin-'+id).parent().data('value') != '') {
 
 			var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
 			var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
@@ -219,20 +231,19 @@ $(document).ready(function() {
 
 			var modalFooterCloseBtn = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
 			var modalFooterSubmitBtn = '<button type="button" class="btn btn-primary pin-authenticate-btn">Submit</button>';
-			var modalBodyInput = 'Enter PIN: <input type="password" class="modal-pin"></input>';
+			var modalBodyInput = 'Enter PIN: <input type="password" class="modal-pin" id="modal-pin"></input>';
 
 			var modalBody = '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'</span>';
 			var modalFooter = modalFooterCloseBtn + " " + modalFooterSubmitBtn;
 			var modalHeader = modalHeaderCloseContainer + modalHeaderText;
 
-		} else {
-			var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+			$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
 			$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
-		}
+			$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
 
-		$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
-		$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
-		$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
+		} else {
+			editKeypair(id); 
+		}
 
 	}).on('click', '.pin-authenticate-btn', function(){
 		var parent = $('.modal-pin').parent();
@@ -242,18 +253,7 @@ $(document).ready(function() {
 
 		postIdToUrlInParent($('.modal-pin'), function(msg) {
 			if(msg.trim() != ''){
-				var name = $('#name-'+id).html().trim();
-				var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
-				var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
-				var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">'+name+'\'s Credentials</h4>';
-
-				var modalHeader = modalHeaderCloseContainer + modalHeaderText;
-				var modalBody = $('#edit-credentials-'+id).html();
-				var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
-
-				$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
-				$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
-				$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+				editKeypair(id);
 			}
 			else{
 				var errorMessage = '<div class="alert alert-error">Incorrect PIN</div>';
@@ -261,6 +261,13 @@ $(document).ready(function() {
 				$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
 			}
 		});
+	});
+
+	// On edit modal close
+	$('#edit-modal').on('hidden.bs.modal', function () {
+		if (editedTextInModal) {
+			location.reload();
+		}
 	});
 
 	// Additional User Actions
@@ -326,4 +333,19 @@ function postIdToUrlInParent(element, onSuccess) {
 	var postUrl = parent.data('post-url');
 	var val = $(element).val();
 	postToUrl(postUrl, {id:id, val:val}, onSuccess);
+}
+
+function editKeypair(id){
+	var name = $('#name-'+id).html().trim();
+	var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
+	var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
+	var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">'+name+'\'s Credentials</h4>';
+
+	var modalHeader = modalHeaderCloseContainer + modalHeaderText;
+	var modalBody = $('#edit-credentials-'+id).html();
+	var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
 }

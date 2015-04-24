@@ -25,7 +25,7 @@ class FingerprintThread(threading.Thread):
         while True:
             while self.is_polling and not self.finger_scanned:
                 try:
-                    self.template = self.fps.make_template(blocking=False)
+                    self.template = self.fps.make_template(tries=1)
                     if self.template:
                         self.fps.backlight_off()
 

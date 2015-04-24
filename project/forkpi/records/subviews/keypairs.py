@@ -63,8 +63,8 @@ def scan_rfid(request):
 @login_required
 def scan_fingerprint(request):
 	fps = FingerprintScanner(debug=False)
-	template = fps.make_template(blocking=False)
-	fps.backlight_off()
+	template = fps.enroll_template(tries=3)
+	# fps.backlight_off()
 	if template:
 		template = binascii.hexlify(template)
 		return HttpResponse(template)
@@ -98,7 +98,7 @@ def new_keypair(request):
 		is_error = True
 
 	if is_error:
-		return redirect_to_name('keypairs/')
+		return redirect_to_name('keypairs')
 
 	hashpin = hash_string(pin)
 	hashrfid = hash_string(rfid_uid)

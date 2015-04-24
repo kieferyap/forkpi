@@ -1,15 +1,16 @@
+Name (and other required fields) - red asterisk
+Dummy fingerprint and rfid scanner
+GitHub documentation
 Separate Forkpi and Spoonpi users in database
 Pageinate logs (and maybe keypairs)
 	https://djangosnippets.org/snippets/1391/
 	http://getbootstrap.com/components/#pagination
 	http://botmonster.com/jquery-bootpag/
 	http://www.phpfreaks.com/tutorial/basic-pagination
-(Forkpi) Enter pin before allowing edit?
 Print pdf is not supported in Python 3.0-3.2
 Usability Test (April Week 03)
 Put back lockouts for rfid and fingerprint
 Autohide messages
-Modal dialog for editing keypair (prompt first for one of three auth factors)
 Initialize options table and ensure name is not modified
 options table: applies_to
 		Attempt Limit
@@ -143,3 +144,5 @@ options table: applies_to
 [x] Add a module which is for door administration (April Week 02)
 [x] BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users
 [x] Add options for transaction timer, allow timer, deny timer
+[x] Modal dialog for editing keypair (prompt first for one of three auth factors)
+[x] (Forkpi) Enter pin before allowing edit?
