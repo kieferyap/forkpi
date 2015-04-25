@@ -89,30 +89,6 @@ class ResponsePacket(object):
         self.bytes_ = bytes_
         self._unpack_bytes()
 
-    def _unpack_bytes(self):
-        """
-        Unpacks this object's attributes from the bytes according to the specified format.
-
-        Raises
-        ------
-        AssertionError
-            If one of the start codes, device ID, or checksum is incorrect.
-
-        """
-        values = struct.unpack('<BBHiHH', self.bytes_) # byte byte word dword word word
-        assert values[0] == self.START_CODE_1
-        assert values[1] == self.START_CODE_2
-        assert values[2] == self.DEVICE_ID
-        response = values[4]
-        checksum = values[5]
-        assert checksum == byte_checksum(self.bytes_[:-2])
-        self.ack = True if response == 0x30 else False
-        if self.ack:
-            self.parameter = values[3]
-        else:
-            self.error_code = values[3]
-            self.error = self.ERRORS.get(self.error_code, "DUPLICATE_ID_" + str(self.error_code))
-
     def __bytes__(self):
         """
         Returns
@@ -164,3 +140,27 @@ class ResponsePacket(object):
             values = struct.unpack('<BBHiHH', self.bytes_) # byte byte word dword word word
             bytes_ = struct.pack('>BBHiHH', *values)
         return hexlify(bytes_)
+
+    def _unpack_bytes(self):
+        """
+        Unpacks this object's attributes from the bytes according to the specified format.
+
+        Raises
+        ------
+        AssertionError
+            If one of the start codes, device ID, or checksum is incorrect.
+
+        """
+        values = struct.unpack('<BBHiHH', self.bytes_) # byte byte word dword word word
+        assert values[0] == self.START_CODE_1
+        assert values[1] == self.START_CODE_2
+        assert values[2] == self.DEVICE_ID
+        response = values[4]
+        checksum = values[5]
+        assert checksum == byte_checksum(self.bytes_[:-2])
+        self.ack = True if response == 0x30 else False
+        if self.ack:
+            self.parameter = values[3]
+        else:
+            self.error_code = values[3]
+            self.error = self.ERRORS.get(self.error_code, "DUPLICATE_ID_" + str(self.error_code))

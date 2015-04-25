@@ -69,6 +69,44 @@ class DataPacket(object):
             self.data_length = len(self.data)
             self._pack_bytes()
 
+    def __bytes__(self):
+        """
+        Converts the data packet into bytes ready to be sent to the FPS.
+        Bytes are formatted in little endian order.
+
+        Returns
+        ------
+        bytes
+            Packed bytes in little endian order.
+
+        """
+        return self._pack_bytes(little_endian=True)
+
+    def serialize_bytes(self, little_endian=False):
+        """
+        Parameters
+        ----------
+        little_endian : bool, optional
+            Byte order, defaults to False.
+            True for little endian, False for big endian.
+
+        Returns
+        ------
+        str
+            Hex representation of packed bytes in the byte order specified.
+
+        Example
+        -------
+        >>> bytes_ = bytes([0x5A, 0xA5, 0x01, 0x00, 0x01, 0x00, 0x01, 0x01])
+        >>> data_packet = DataPacket(bytes_=bytes_)
+        >>> data_packet.serialize_bytes()
+        '5A A5 00 01 01 00 01 01'
+        >>> data_packet.serialize_bytes(little_endian=True)
+        '5A A5 01 00 01 00 01 01'
+
+        """
+        return hexlify(self._pack_bytes(little_endian))
+
     def _pack_bytes(self, little_endian=True):
         """
         Packs this object's attributes into bytes according to the specified format.
@@ -115,41 +153,3 @@ class DataPacket(object):
         assert len(self.data) == self.data_length
         assert values[4] == byte_checksum(self.bytes_[:-2])
         return self.data
-
-    def serialize_bytes(self, little_endian=False):
-        """
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to False.
-            True for little endian, False for big endian.
-
-        Returns
-        ------
-        str
-            Hex representation of packed bytes in the byte order specified.
-
-        Example
-        -------
-        >>> bytes_ = bytes([0x5A, 0xA5, 0x01, 0x00, 0x01, 0x00, 0x01, 0x01])
-        >>> data_packet = DataPacket(bytes_=bytes_)
-        >>> data_packet.serialize_bytes()
-        '5A A5 00 01 01 00 01 01'
-        >>> data_packet.serialize_bytes(little_endian=True)
-        '5A A5 01 00 01 00 01 01'
-
-        """
-        return hexlify(self._pack_bytes(little_endian))
-
-    def __bytes__(self):
-        """
-        Converts the data packet into bytes ready to be sent to the FPS.
-        Bytes are formatted in little endian order.
-
-        Returns
-        ------
-        bytes
-            Packed bytes in little endian order.
-
-        """
-        return self._pack_bytes(little_endian=True)

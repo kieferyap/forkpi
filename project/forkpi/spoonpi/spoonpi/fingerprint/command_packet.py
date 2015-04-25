@@ -90,6 +90,44 @@ class CommandPacket(object):
         else:
             raise ValueError("%s not in command list" % command_name)
 
+    def __bytes__(self):
+        """
+        Converts the command packet into bytes ready to be sent to the FPS.
+        Bytes are formatted in little endian order.
+
+        Returns
+        ------
+        bytes
+            Packed bytes in little endian order.
+
+        """
+        return self._pack_bytes(little_endian=True)
+  
+    def serialize_bytes(self, little_endian=False):
+        """
+        Parameters
+        ----------
+        little_endian : bool, optional
+            Byte order, defaults to False.
+            True for little endian, False for big endian.
+
+        Returns
+        ------
+        str
+            Hex representation of packed bytes in the byte order specified.
+
+        Example
+        -------
+        >>> command = CommandPacket('Open', parameter=1)
+        >>> command.serialize_bytes() # big endian
+        '55 AA 00 01 00 00 00 01 00 01 01 02'
+        >>> command.serialize_bytes(little_endian=True)
+        '55 AA 01 00 01 00 00 00 01 00 02 01'
+
+        """
+        bytes_ = self._pack_bytes(little_endian)
+        return hexlify(bytes_)
+    
     def _pack_bytes(self, little_endian=True):
         """
         Packs this object's attributes into bytes according to the specified format.
@@ -116,42 +154,3 @@ class CommandPacket(object):
         checksum = byte_checksum(bytes_)
         bytes_ += struct.pack(byte_order + 'H', checksum)
         return bytes_
-
-    def serialize_bytes(self, little_endian=False):
-        """
-        Parameters
-        ----------
-        little_endian : bool, optional
-            Byte order, defaults to False.
-            True for little endian, False for big endian.
-
-        Returns
-        ------
-        str
-            Hex representation of packed bytes in the byte order specified.
-
-        Example
-        -------
-        >>> command = CommandPacket('Open', parameter=1)
-        >>> command.serialize_bytes() # big endian
-        '55 AA 00 01 00 00 00 01 00 01 01 02'
-        >>> command.serialize_bytes(little_endian=True)
-        '55 AA 01 00 01 00 00 00 01 00 02 01'
-
-        """
-        bytes_ = self._pack_bytes(little_endian)
-        return hexlify(bytes_)
-
-    def __bytes__(self):
-        """
-        Converts the command packet into bytes ready to be sent to the FPS.
-        Bytes are formatted in little endian order.
-
-        Returns
-        ------
-        bytes
-            Packed bytes in little endian order.
-
-        """
-        return self._pack_bytes(little_endian=True)
-      
