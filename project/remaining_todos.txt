@@ -5,11 +5,12 @@
 [x] Prevent entering keypair with no name
 
 SpoonPi
-	Fetch only keypairs that are mapped to this door
+	[x] Investigate fingerprint class separation bug
 	Investigate fingerprint suddenly failing bug
+	Fetch only keypairs that are mapped to this door
 ForkPi
-	Enrolling the fingerprint (that three-time thing)
-	Do the same for the Edit Keypairs
+	[x] Enrolling the fingerprint visual! (that three-time thing)
+	[x] Do the same for the Edit Keypairs
 	Don't put the information in the invisible
 	Just one textbox, but free to put anything
 	Print pdf is not supported in Pyhton 3.0-3.2
@@ -21,7 +22,6 @@ Others
 	Separate Forkpi and Spoonpi users in database
 	Usability Test (April Week 03)
 	Put back lockouts for rfid and fingerprint
-
 
 [x] write paper
 	[x] Cost

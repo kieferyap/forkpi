@@ -3,7 +3,7 @@ Module for the Sparkfun fingerprint scanner GT-511C3
 Product Page : https://www.sparkfun.com/products/11792
 Datasheet : http://cdn.sparkfun.com/datasheets/Sensors/Biometric/GT-511C3_datasheet_V1%201_20130411%5B4%5D.pdf
 """
-# import serial
+import serial
 import time
 
 from .command_packet import CommandPacket
@@ -35,19 +35,19 @@ class FingerprintScanner(object):
     ----------
     debug : bool
         True to print nack errors and packets sent to / received from FPS, False to print nothing.
-    little_endian : bool
+    is_little_endian : bool
         True to print packets in little endian byte order, False for big endian.
 
     """
     
-    def __init__(self, debug=False, little_endian=False):
+    def __init__(self, debug=False, is_little_endian=False):
         """
         Parameters
         ----------
         debug : bool, optional
             Set to True to print nack errors and packets sent to / received from FPS.
             Defaults to False (do not print).
-        little_endian : bool, optional
+        is_little_endian : bool, optional
             True to print packets in little endian byte order, False for big endian.
             Defaults to False (print in big endian).
 
@@ -58,7 +58,7 @@ class FingerprintScanner(object):
 
         """
         self.debug = debug
-        self.little_endian = little_endian
+        self.is_little_endian = is_little_endian
         try:
             self._serial = serial.Serial(port='/dev/ttyAMA0', baudrate=9600, timeout=None)
             self.open(timeout=0.1)
@@ -718,7 +718,7 @@ class FingerprintScanner(object):
         command = CommandPacket(*args, **kwargs)
         if self.debug:
             print('\nCommand:', command.name)
-            print('sent:', command.serialize_bytes(little_endian=self.little_endian))
+            print('sent:', command.serialize_bytes(is_little_endian=self.is_little_endian))
         self._serial.write(bytes(command))
 
     def _receive_response(self, timeout=None):
@@ -747,7 +747,7 @@ class FingerprintScanner(object):
         
         response = ResponsePacket(bytes_)
         if self.debug:
-            print('read:', response.serialize_bytes(little_endian=self.little_endian))
+            print('read:', response.serialize_bytes(is_little_endian=self.is_little_endian))
             if not response.ack:
                 print('ERROR:', response.error)
         return response
@@ -768,7 +768,7 @@ class FingerprintScanner(object):
         """
         packet = DataPacket(data=data)
         if self.debug:
-            print('data:', packet.serialize_bytes(little_endian=self.little_endian))
+            print('data:', packet.serialize_bytes(is_little_endian=self.is_little_endian))
             print('dlen:', len(packet.data))
         self._serial.write(bytes(packet))
 
@@ -800,13 +800,13 @@ class FingerprintScanner(object):
 
         packet = DataPacket(bytes_=bytes_)
         if self.debug:
-            print('data:', packet.serialize_bytes(little_endian=self.little_endian))
+            print('data:', packet.serialize_bytes(is_little_endian=self.is_little_endian))
             print('dlen:', len(packet.data))
         return packet.data
 
 
 if __name__ == '__main__':
-    fps = FingerprintScanner(debug=True)
+    fps = FingerprintScanner(debug=False)
     # fps.backlight_on()
     # for i in range(10):
     #     print(fps.is_finger_pressed())
@@ -815,6 +815,8 @@ if __name__ == '__main__':
 
     # Enrollment
     # enroll_id = fps.enroll_finger(tid=None, tries=3)
+    # template = fps.enroll_template(tries=3)
+    # fps = FingerprintScanner(debug=True)
     template = fps.enroll_template(tries=3)
 
 

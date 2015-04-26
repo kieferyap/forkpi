@@ -169,6 +169,11 @@ $(document).ready(function() {
 		if (field == 'rfid') {
 			placeholder = 'Waiting for RFID data...';
 		} else if (field == 'fingerprint') {
+			alert("WARNING: Please pay close attention to the fingerprint scanner:\n"
+				+"1. PRESS FINGER on the scanner when it LIGHTS UP. (Blue light)\n"
+				+"2. REMOVE FINGER when the LIGHT GOES OFF.\n"
+				+"3. You will need to press your finger THREE TIMES.\n"
+				+"This is for a higher matching accuracy. Thank you very much for understanding.");
 			placeholder = 'Waiting for finger...';
 		}
 
@@ -253,7 +258,7 @@ $(document).ready(function() {
 
 		postIdToUrlInParent($('.modal-pin'), function(msg) {
 			if(msg.trim() != ''){
-				editKeypair(id);
+				editKeypair(msg);
 			}
 			else{
 				var errorMessage = '<div class="alert alert-error">Incorrect PIN</div>';
@@ -335,14 +340,60 @@ function postIdToUrlInParent(element, onSuccess) {
 	postToUrl(postUrl, {id:id, val:val}, onSuccess);
 }
 
-function editKeypair(id){
+function editKeypair(id, msg){
+	var arr = JSON.pase(msg);
+
 	var name = $('#name-'+id).html().trim();
 	var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
 	var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
 	var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">'+name+'\'s Credentials</h4>';
 
+	var userPIN = arr['pin'];
+	var userRFID = arr['rfid_uid'];
+	var userFING = arr['fingerprint_template'];
+
+	if(!userPIN){userPIN = '- - -';}
+	if(!userRFID){userRFID = '- - -';}
+	if(!userFING){userFING = '- - -';}
+
+	var bodyPIN = 
+		'<div style="font-weight: bold">PIN:</div>'+
+		'<span class="edit-pin"'+
+			'data-post-url="'+$('#post-url-pin').val()+'"'+
+			'data-field="pin"'+
+			'data-id="'+id+'" data-value="'+userPIN+'">'+
+			'<span class="editable-text" id="pin-'+id+'">'+
+				userPIN+
+			'</span>'+
+		'</span>'+
+		'<hr style="clear:both;"/>';
+
+	var bodyRFID = 
+		'<div style="font-weight: bold">RFID UID:</div>'+
+		'<span class="edit-rfid"'+
+			'data-post-url="'+$('#post-url-rfid').val()+'" data-scan-url="'+$('#scan-url-fingerprint').val()+'"'+
+			'data-field="rfid" data-target-textbox=".editing-text"'+
+			'data-id="'+id+'" data-value="'+userRFID+'">'+
+			'<span class="editable-text">'+
+				userRFID+
+			'</span>'+
+		'</span>'+
+		'<hr style="clear:both;"/>';
+
+	var bodyFING = 
+		'<div style="font-weight: bold">Fingerprint:</div>'+
+		'<span class="edit-fingerprint"'+
+			'data-post-url="'+$('#post-url-fingerprint').val()+'" data-scan-url="'+$('#scan-url-fingerprint').val()+'"'+
+			'data-field="/keypairs/edit/fingerprint" data-target-textbox=".editing-text"'+
+			'data-id="'+id+'" data-value="'+userFING+'">'+
+			'<span class="editable-text">'+
+				userFING+
+			'</span>'+
+		'</span>'+
+		'<hr style="clear:both;"/>';
+
+	var modalBody = bodyPIN + bodyRFID + bodyFING
 	var modalHeader = modalHeaderCloseContainer + modalHeaderText;
-	var modalBody = $('#edit-credentials-'+id).html();
 	var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
 
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);

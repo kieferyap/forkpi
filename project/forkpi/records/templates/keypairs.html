@@ -7,6 +7,12 @@
 	<li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
 </ul>
 
+<input type="hidden" id="scan-url-rfid" value="{% url 'scan rfid' %}"/>
+<input type="hidden" id="scan-url-fingerprint" value="{% url 'scan fingerprint' %}"/>
+<input type="hidden" id="post-url-rfid" value="{% url 'edit keypair rfid' %}"/>
+<input type="hidden" id="post-url-fingerprint" value="{% url 'edit keypair fingerprint' %}"/>
+<input type="hidden" id="post-url-pin" value="{% url 'edit keypair pin' %}"/>
+
 <!--ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
     <li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
     <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
@@ -241,54 +247,6 @@
 									</div>
 								</div>
 							</td>
-
-							<span class="invisible" id="edit-credentials-{{ keypair.id }}">
-								<div style="font-weight: bold">PIN:</div>
-								<span class="edit-pin"
-									data-post-url="{% url 'edit keypair pin' %}"
-									data-field="pin"
-									data-id="{{ keypair.id }}" data-value="{{ keypair.pin }}">
-
-									<span class="editable-text" id="pin-{{ keypair.id }}">
-										{% if keypair.pin %}
-											{{ keypair.pin }}
-										{% else %}
-											- - -
-										{% endif %}
-									</span>
-								</span>
-								<hr style="clear:both;"/>
-								<div style="font-weight: bold">RFID UID:</div>
-								<span class="edit-rfid"
-									data-post-url="{% url 'edit keypair rfid' %}" data-scan-url="{% url 'scan rfid' %}"
-									data-field="rfid" data-target-textbox=".editing-text"
-									data-id="{{ keypair.id }}" data-value="{{ keypair.rfid_uid }}">
-								
-									<span class="editable-text">
-										{% if keypair.rfid_uid %}
-											{{ keypair.rfid_uid }}
-										{% else %}
-											- - -
-										{% endif %}
-									</span>
-								</span>
-								<hr style="clear:both;"/>
-								<div style="font-weight: bold">Fingerprint:</div>
-								<span class="edit-fingerprint"
-									data-post-url="{% url 'edit keypair fingerprint' %}" data-scan-url="{% url 'scan fingerprint' %}"
-									data-field="fingerprint" data-target-textbox=".editing-text"
-									data-id="{{ keypair.id }}" data-value="{{ keypair.fingerprint_template }}">
-
-									<span class="editable-text">
-										{% if keypair.fingerprint_template %}
-											{{ keypair.fingerprint_template }}
-										{% else %}
-											- - -
-										{% endif %}
-									</span>
-								</span>
-							</span>
-
 
 							<!-- <td>
 								<div>

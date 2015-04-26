@@ -101,13 +101,13 @@ class CommandPacket(object):
             Packed bytes in little endian order.
 
         """
-        return self._pack_bytes(little_endian=True)
+        return self._pack_bytes(is_little_endian=True)
   
-    def serialize_bytes(self, little_endian=False):
+    def serialize_bytes(self, is_little_endian=False):
         """
         Parameters
         ----------
-        little_endian : bool, optional
+        is_little_endian : bool, optional
             Byte order, defaults to False.
             True for little endian, False for big endian.
 
@@ -121,20 +121,20 @@ class CommandPacket(object):
         >>> command = CommandPacket('Open', parameter=1)
         >>> command.serialize_bytes() # big endian
         '55 AA 00 01 00 00 00 01 00 01 01 02'
-        >>> command.serialize_bytes(little_endian=True)
+        >>> command.serialize_bytes(is_little_endian=True)
         '55 AA 01 00 01 00 00 00 01 00 02 01'
 
         """
-        bytes_ = self._pack_bytes(little_endian)
+        bytes_ = self._pack_bytes(is_little_endian)
         return hexlify(bytes_)
     
-    def _pack_bytes(self, little_endian=True):
+    def _pack_bytes(self, is_little_endian=True):
         """
         Packs this object's attributes into bytes according to the specified format.
 
         Parameters
         ----------
-        little_endian : bool, optional
+        is_little_endian : bool, optional
             Byte order, defaults to True.
             True for little endian, False for big endian.
 
@@ -144,7 +144,7 @@ class CommandPacket(object):
             Bytes of the command packet formatted in the byte order specified.
 
         """
-        if little_endian:
+        if is_little_endian:
             byte_order = '<'
         else: # big endian
             byte_order = '>'

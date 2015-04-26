@@ -111,11 +111,11 @@ class ResponsePacket(object):
         """
         return self.ack
 
-    def serialize_bytes(self, little_endian=False):
+    def serialize_bytes(self, is_little_endian=False):
         """
         Parameters
         ----------
-        little_endian : bool, optional
+        is_little_endian : bool, optional
             Byte order, defaults to False.
             True for little endian, False for big endian.
 
@@ -130,11 +130,11 @@ class ResponsePacket(object):
         >>> response = ResponsePacket(bytes_)
         >>> response.serialize_bytes() # big endian
         '55 AA 00 01 00 00 00 00 00 30 01 30'
-        >>> response.serialize_bytes(little_endian=True)
+        >>> response.serialize_bytes(is_little_endian=True)
         '55 AA 01 00 00 00 00 00 30 00 30 01'
 
         """
-        if little_endian:
+        if is_little_endian:
             bytes_ = self.bytes_
         else:
             values = struct.unpack('<BBHiHH', self.bytes_) # byte byte word dword word word

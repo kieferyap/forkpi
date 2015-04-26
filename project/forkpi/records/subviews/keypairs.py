@@ -249,7 +249,10 @@ def authenticate_pin(request):
 	pin = hash_string(request.POST['val'])
 
 	response_text = ""
-	if Keypair.objects.filter(hash_pin=pin, id=kid):
-		response_text = "true"
+	keypair = Keypair.objects.filter(hash_pin=pin, id=kid)
 
-	return HttpResponse(response_text)
+	if keypair:
+		# print("WHY:"+str(keypair))
+		response_text = {'pin':0, 'rfid_uid':keypair.rfid_uid, 'fingerprint_template':keypair.fingerprint_template}
+
+	return JsonResponse(response_text)
