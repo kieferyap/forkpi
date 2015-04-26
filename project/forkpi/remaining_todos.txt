@@ -1,18 +1,37 @@
-Name (and other required fields) - red asterisk
-Dummy fingerprint and rfid scanner
-GitHub documentation
-Separate Forkpi and Spoonpi users in database
-Pageinate logs (and maybe keypairs)
-	https://djangosnippets.org/snippets/1391/
-	http://getbootstrap.com/components/#pagination
-	http://botmonster.com/jquery-bootpag/
-	http://www.phpfreaks.com/tutorial/basic-pagination
-Print pdf is not supported in Python 3.0-3.2
-Usability Test (April Week 03)
-Put back lockouts for rfid and fingerprint
-Autohide messages
-Initialize options table and ensure name is not modified
-options table: applies_to
+
+SpoonPi
+	[x] Investigate fingerprint class separation bug
+	Put back lockouts for rfid and fingerprint
+	Investigate fingerprint suddenly failing bug
+	Fetch only keypairs that are mapped to this door
+ForkPi
+	[x] Enrolling the fingerprint visual! (that three-time thing)
+	[x] Do the same for the Edit Keypairs
+	[%] Don't put the information in the invisible
+	Initialize options table and ensure name is not modified
+	Autohide messages
+	Name (and other required fields) - red asterisk
+	Just one textbox, but free to put anything
+	Print pdf is not supported in Pyhton 3.0-3.2
+	Keypair - last_edited_by field
+	BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users
+	BUG: Multi-tab polling (former: Scan RFID close window while polling -> next poll causes crash)
+	Add door name to logs
+	Pageinate logs (and maybe keypairs)
+		https://djangosnippets.org/snippets/1391/
+		http://getbootstrap.com/components/#pagination
+		http://botmonster.com/jquery-bootpag/
+		http://www.phpfreaks.com/tutorial/basic-pagination
+Others
+	Separate Forkpi and Spoonpi users in database
+	Usability Test (April Week 03)
+	Put back lockouts for rfid and fingerprint
+	GitHub documentation
+	Dummy fingerprint and rfid scanner
+	Usability Test (April Week 03)
+	
+	
+	options table: applies_to
 		Attempt Limit
 			The max streak of failed attempts where an RFID tag or fingerprint is presented and the wrong PIN is entered.<br/>This is to prevent guessing the PIN via brute force.
 			Applies to: RFID+PIN users, Fingerprint+PIN users

@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -248,11 +249,10 @@ def authenticate_pin(request):
 	kid = request.POST['id']
 	pin = hash_string(request.POST['val'])
 
-	response_text = ""
-	keypair = Keypair.objects.filter(hash_pin=pin, id=kid)
-
-	if keypair:
-		# print("WHY:"+str(keypair))
-		response_text = {'pin':0, 'rfid_uid':keypair.rfid_uid, 'fingerprint_template':keypair.fingerprint_template}
-
-	return JsonResponse(response_text)
+	try:
+		# Exception thrown if incorrect password supplied.
+		keypair = Keypair.objects.get(hash_pin=pin, id=kid)
+		response_text = {'pin':decrypt(keypair.pin), 'rfid_uid':decrypt(keypair.rfid_uid), 'fingerprint_template':keypair.fingerprint_template}
+		return JsonResponse(response_text, safe=False)
+	except ObjectDoesNotExist:
+		return HttpResponse("")
