@@ -247,12 +247,18 @@ def search_keypairs(request):
 def authenticate_pin(request):
 	# return HttpResponse("HYEAH")
 	kid = request.POST['id']
-	pin = hash_string(request.POST['val'])
+	auth_val = hash_string(request.POST['val'])
+	auth_type = request.POST['type']
 
 	try:
-		# Exception thrown if incorrect password supplied.
-		keypair = Keypair.objects.get(hash_pin=pin, id=kid)
-		response_text = {'pin':decrypt(keypair.pin), 'rfid_uid':decrypt(keypair.rfid_uid), 'fingerprint_template':keypair.fingerprint_template}
-		return JsonResponse(response_text, safe=False)
+		if auth_type == 'pin':
+			# Exception thrown if incorrect password supplied.
+			keypair = Keypair.objects.get(hash_pin=auth_val, id=kid)
+			response_text = {'pin':decrypt(keypair.pin), 'rfid_uid':decrypt(keypair.rfid_uid), 'fingerprint_template':keypair.fingerprint_template}
+			return JsonResponse(response_text, safe=False)
+		elif auth_type == 'rfid':
+			keypair = Keypair.objects.get(hash_rfid=auth_val, id=kid)
+			response_text = {'pin':decrypt(keypair.pin), 'rfid_uid':decrypt(keypair.rfid_uid), 'fingerprint_template':keypair.fingerprint_template}
+			return JsonResponse(response_text, safe=False)
 	except ObjectDoesNotExist:
 		return HttpResponse("")

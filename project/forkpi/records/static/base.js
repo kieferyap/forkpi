@@ -163,17 +163,22 @@ $(document).ready(function() {
 		var scanButton = $(this);
 		var parent = $(this).parent();
 		var target = parent.data('target-textbox');
-
 		var placeholder = '';
 		var field = parent.data('field');
+
+		if(strcmp('#modal-credential', target) == 0){
+			$(target).attr('type', 'text');
+			$('#modal-active-field').val(field);
+		}
+
 		if (field == 'rfid') {
 			placeholder = 'Waiting for RFID data...';
 		} else if (field == 'fingerprint') {
-			alert("WARNING: Please pay close attention to the fingerprint scanner:\n"
-				+"1. PRESS FINGER on the scanner when it LIGHTS UP. (Blue light)\n"
-				+"2. REMOVE FINGER when the LIGHT GOES OFF.\n"
-				+"3. You will need to press your finger THREE TIMES.\n"
-				+"This is for a higher matching accuracy. Thank you very much for understanding.");
+			// alert("WARNING: Please pay close attention to the fingerprint scanner:\n"
+			// 	+"1. PRESS FINGER on the scanner when it LIGHTS UP. (Blue light)\n"
+			// 	+"2. REMOVE FINGER when the LIGHT GOES OFF.\n"
+			// 	+"3. You will need to press your finger THREE TIMES.\n"
+			// 	+"This is for a higher matching accuracy. Thank you very much for understanding.");
 			placeholder = 'Waiting for finger...';
 		}
 
@@ -228,42 +233,67 @@ $(document).ready(function() {
 		var id = parent.data('id');
 		var name = $('#name-'+id).parent().data('value');
 
-		if($('#pin-'+id).parent().data('value') != '') {
+		// Modal header stuff
+		var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
+		var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
+		var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">Enter any credential of user ('+name+'):</h4>';
 
-			var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
-			var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
-			var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">Enter PIN of user ('+name+'):</h4>';
+		// Modal footer stuff
+		var modalFooterSubmitBtn = '<button type="button" class="btn btn-primary modal-authenticate-btn">Submit</button>';
+		var modalFooterBtnRFID = '<input type="button" class="btn expand btn-success scan-new" value="Scan RFID" />';
+		var modalFooterBtnFING = '<input type="button" class="btn expand btn-success scan-new" value="Scan Finger"/>';
+		var modalFooterBtnPIN = '<input type="button" class="btn expand btn-success modal-enter-pin" value="Enter PIN"/>';
+		var modalFooterDivRFID =
+			'<span class="col-md-3" data-scan-url="'+$('#scan-url-rfid').val()+'"'+
+				'data-field="rfid" data-target-textbox="#modal-credential">'+
+				modalFooterBtnRFID+
+			'</span>';
+		var modalFooterDivFING =
+			'<span class="col-md-3" data-scan-url="'+$('#scan-url-fingerprint').val()+'"'+
+				'data-field="fingerprint" data-target-textbox="#modal-credential">'+
+				modalFooterBtnFING+
+			'</span>';
+		var modalFooterDivPIN = 
+			'<span class="col-md-3" data-target-textbox="#modal-credential">'+
+				modalFooterBtnPIN+
+			'</span>';
 
-			var modalFooterCloseBtn = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
-			var modalFooterSubmitBtn = '<button type="button" class="btn btn-primary pin-authenticate-btn">Submit</button>';
-			var modalBodyInput = 'Enter PIN: <input type="password" class="modal-pin" id="modal-pin"></input>';
+		// Modal body stuff
+		var modalBodyError = '<div class="alert alert-error modal-error-credentials" style="display:none">Incorrect credentials</div>';
+		var modalBodyInput = '<input class="col-md-12" type="password" class="modal-credential" id="modal-credential" placeholder="Enter PIN, swipe RFID, or scan fingerprint of user ('+name+')" />';
+		var modalBodyType = 'Current active credential: <input type="text" data-id="'+id+'" id="modal-active-field" value="pin" disabled="true"/>';
 
-			var modalBody = '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'</span>';
-			var modalFooter = modalFooterCloseBtn + " " + modalFooterSubmitBtn;
-			var modalHeader = modalHeaderCloseContainer + modalHeaderText;
+		// Altogether now
+		var modalBody = modalBodyError + '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'<br/><br/>'+modalBodyType+'</span><br/>';
+		var modalFooter = modalFooterDivPIN + " " + modalFooterDivRFID + " " + modalFooterDivFING + " " + modalFooterSubmitBtn;
+		var modalHeader = modalHeaderCloseContainer + modalHeaderText;
 
-			$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
-			$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
-			$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
+		$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+		$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
+		$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
 
-		} else {
-			// editKeypair(id); 
-		}
-
-	}).on('click', '.pin-authenticate-btn', function(){
-		var parent = $('.modal-pin').parent();
+	}).on('click', '.modal-enter-pin', function(){
+		var parent = $('.edit-btn').parent();
 		var id = parent.data('id');
-		var modalBodyInput = 'Enter PIN: <input type="password" class="modal-pin"></input>';
-		var originalModalBody = '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'</span>';
+		var name = $('#name-'+id).parent().data('value');
+		$('#modal-credential').val('');
 
-		postIdToUrlInParent($('.modal-pin'), function(msg) {
+		$('#modal-credential').focus();
+		$('#modal-active-field').val('pin');
+		$('#modal-credential').attr('placeholder', 'Enter PIN, swipe RFID, or scan fingerprint of user ('+name+')');
+		$('#modal-credential').attr('type', 'password');
+	}).on('click', '.modal-authenticate-btn', function(){
+		var parent = $('#modal-credential').parent();
+		var id = parent.data('id');
+
+		postToUrl('/keypairs/authenticate_pin', {id:id,val:$('#modal-credential').val(),type:$('#modal-active-field').val()}, function(msg) {
 			if(msg != ''){
+				// alert(msg);
 				editKeypair(id, msg);
 			}
 			else{
-				var errorMessage = '<div class="alert alert-error">Incorrect PIN</div>';
-				var modalBody = errorMessage + originalModalBody;
-				$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+				$('.modal-error-credentials').show();
+				$('#modal-credential').val();
 			}
 		});
 	});
@@ -397,4 +427,18 @@ function editKeypair(id, msg){
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+}
+
+function strcmp ( str1, str2 ) {
+	// http://kevin.vanzonneveld.net
+	// +   original by: Waldo Malqui Silva
+	// +      input by: Steve Hilder
+	// +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
+	// +    revised by: gorthaur
+	// *     example 1: strcmp( 'waldo', 'owald' );
+	// *     returns 1: 1
+	// *     example 2: strcmp( 'owald', 'waldo' );
+	// *     returns 2: -1
+
+	return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
 }

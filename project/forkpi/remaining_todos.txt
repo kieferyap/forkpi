@@ -5,13 +5,13 @@ SpoonPi
 	Investigate fingerprint suddenly failing bug
 	Fetch only keypairs that are mapped to this door
 ForkPi
-	[x] Enrolling the fingerprint visual! (that three-time thing)
-	[x] Do the same for the Edit Keypairs
-	[%] Don't put the information in the invisible
+	[x] Don't put the information in the invisible
+	[%] Just one textbox, but free to put anything
+	^ Above textbox should just do one scan for fingerprint
 	Initialize options table and ensure name is not modified
+	Visual cues on fingerprint enrollment: "Remove finger", etc.
 	Autohide messages
 	Name (and other required fields) - red asterisk
-	Just one textbox, but free to put anything
 	Print pdf is not supported in Pyhton 3.0-3.2
 	Keypair - last_edited_by field
 	BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users

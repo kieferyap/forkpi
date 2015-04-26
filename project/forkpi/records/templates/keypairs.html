@@ -13,6 +13,33 @@
 <input type="hidden" id="post-url-fingerprint" value="{% url 'edit keypair fingerprint' %}"/>
 <input type="hidden" id="post-url-pin" value="{% url 'edit keypair pin' %}"/>
 
+<!-- <div id="hidden-modal-header" class="invisible">
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		<span aria-hidden="true">&times;</span>	
+	</button>
+	<h4 class="modal-title" id="edit-modalLabel">Enter any credential of user (<span id="hidden-modal-header-name"></span>):</h4>
+</div>
+<div id="hidden-modal-body" class="invisible">
+	<div class="alert alert-error modal-error-credentials invisible">Incorrect credentials</div>
+	<span id="hidden-modal-body-parent" data-post-url="/keypairs/authenticate_pin" data-id="">
+		<input class="col-md-12" type="password" class="modal-credential" id="modal-credential" placeholder="Enter PIN, swipe RFID, or scan fingerprint of the user" />
+		<br/><br/>
+		Current active credential: <input type="text" data-id="" id="modal-active-field" value="pin" disabled="true"/>
+	</span>
+	<br/>
+</div>
+<div id="hidden-modal-footer" class="invisible">
+	<span class="col-md-3" data-target-textbox="#modal-credential">
+		<input type="button" class="btn expand btn-success modal-enter-pin" data-id="" id="btn-enter-pin" value="Enter PIN"/>
+	</span>
+	<span class="col-md-3" data-scan-url="{% url 'scan rfid' %}" data-field="rfid" data-target-textbox="#modal-credential">
+		<input type="button" class="btn expand btn-success scan-new" data-id="" id="btn-scan-rfid" value="Scan RFID" />
+	</span>
+	<span class="col-md-3" data-scan-url="% url 'scan fingerprint' %}" data-field="fingerprint" data-target-textbox="#modal-credential">
+		<input type="button" class="btn expand btn-success scan-new" data-id="" id="btn-scan-fingerprint" value="Scan Finger"/>
+	</span>
+</div> -->
+
 <!--ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
     <li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
     <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
