@@ -236,189 +236,74 @@ class FingerprintScanner(object):
                 return tid
         return -1
 
-    def enroll_template(self, tries=3, delay=1.5):
+    def enroll(self, stage, tid=-1, tries=3):
         """
-        Three-stage enrollment process.
-        For each stage, the light is turned on, a finger is captured, and the light is turned off.
-        At the end of stage 3, the three fingerprints are merged into one template, and returned.
+        Calling enroll with stage=1 starts the enrollment process, 
+        calling it with stage=3:
+            saves the merged template to the db (if tid>=0), or
+            returns the template (if tid==-1)
 
         Notes
         -----
-            You should present the same finger for all three stages.
-            You should remove and re-place your finger for all three stages.
-            This is to improve the quality of the merged template.
+        You have to call self.wait_to_remove_finger() after stage 1 and 2.
+        This is to get a better fingerprint template made from different angles.
 
-        Parameters
-        ----------
-        tries : int, optional
-            For each stage, number of times to try capturing a finger, defaults to 3.
-            If at any stage, the FPS failed to capture a finger for `tries` times, the enrollment is aborted.
-        delay : float, optional
-            Number of seconds to wait (do nothing) between stages, defaults to 1.5.
-            The user should remove and re-place his/her finger during this time.
-
-        Returns
-        -------
-        bytes (498)
-            The merged template, None if enroll failed.
-            Causes for failure: Exceeded number of tries.
-
-        """
-        if self.start_enroll(tid=-1, tries=tries, delay=1.5):
-            if self.debug:
-                print('Enrolling template')
-            template = self.complete_enroll(tid=-1, tries=tries)
-            if self.debug and template:
-                print('Enroll successful')
-            return template
-
-    def enroll_finger(self, tid=None, tries=3, delay=1.5):
-        """
-        Three-stage enrollment process.
-        For each stage, the light is turned on, a finger is captured, and the light is turned off.
-        At the end of stage 3, the three fingerprints are merged into one template.
-        The template is saved to the internal database.
-
-        Notes
-        -----
-            You should present the same finger for all three stages.
-            You should remove and re-place your finger for all three stages.
-            This is to improve the quality of the merged template.
-
-        Parameters
-        ----------
-        tid : int, optional
-            The template ID to store the enrolled finger in, defaults to None, must be from 0-199.
-            If None, tid is set to the first free template ID.
-        tries : int, optional
-            For each stage, number of times to try capturing a finger, defaults to 3.
-            If at any stage, the FPS failed to capture a finger for `tries` times, the enrollment is aborted.
-        delay : float, optional
-            Number of seconds to wait (do nothing) between stages, defaults to 1.5.
-            The user should remove and re-place his/her finger during this time.
-
-        Returns
-        -------
-        int
-            The template ID of the newly enrolled fingerprint if successful, -1 if failed.
-            Causes for failure:
-                specified tid is taken or invalid
-                db is full (if tid is None)
-                exceeded `tries`
-
-        """
-        if self.debug:
-            print('Place your finger on the scanner')
-
-        if tid: # user specified an ID
-            if self.is_enrolled(tid): # ID is already enrolled
-                if self.debug:
-                    print('ID %s is already enrolled' % tid)
-                return -1
-        else:
-            tid = self.find_free_tid()
-            if tid < 0: # database is full
-                return -1
-
-        if self.start_enroll(tid=tid, tries=tries, delay=1.5):
-            if self.debug:
-                print('Enrolling with id %s' % tid)
-            if self.complete_enroll(tid, tries=tries):
-                if self.debug:
-                    print('Enroll successful')
-                return tid
-
-        return -1
-
-    def start_enroll(self, tid, tries=3, delay=1.5):
-        """
-        First and second stage of enrollment process.
-
-        Parameters
-        ----------
-        tid : int
-            The template ID to be enrolled, must be from -1 to 199.
-            Set to -1 to return the template upon completion later (instead of saving to db).
-        tries : int, optional
-            For each stage, number of times to try capturing a finger, defaults to 3.
-            If at any stage, the FPS failed to capture a finger for `tries` times, the enrollment is aborted.
-        delay : float, optional
-            Number of seconds to wait (do nothing) after each stage, defaults to 1.5.
-            The user should remove and re-place his/her finger during this time.
-
-        Returns
-        -------
-        bool
-            True if successfully captured two fingers, False if not.
-
-        """
-        if self._run_command('EnrollStart', parameter=tid):
-            if self._enroll(1, tries):
-                self._wait(delay)
-                if self._enroll(2, tries):
-                    self._wait(delay)
-                    return True
-        return False
-
-    def complete_enroll(self, tid, tries=3):
-        """
-        Third stage of enrollment process.
-
-        Parameters
-        ----------
-        tid : int
-            The template ID to be enrolled.
-            This must be the same as the tid used in `start_enroll`.
-        tries : int, optional
-            Number of times to try capturing a finger, defaults to 3.
-
-        Returns
-        -------
-        bytes (if tid == -1)
-            The merged template, None if failed.
-        bool (if tid >= 0)
-            True if successfully saved to db, False if failed.
-
-        """
-        if tid >= 0:
-            ret = self._enroll(3, tries)
-        else: # id == -1
-            if self._capture_finger(tries):
-                self._send_command('Enroll3')
-                response = self._receive_response()
-                ret = self._receive_data(data_length=498)
-
-        self.backlight_off()
-        return ret
-
-
-    def _enroll(self, stage, tries=3):
-        """
         Parameters
         ----------
         stage : int
             Defines what command to send to the FPS, must be from 1 to 3 only.
+        tid : int
+            The template ID to be enrolled, must be from -1 to 199.
+            Set to -1 to return the template upon completion later (instead of saving to db).
         tries : int, optional
             Number of times to try capturing a finger, defaults to 3.
 
         Returns
         -------
-        bool
-            True if successful, False if not.
+        bytes (if stage==3 and tid==-1)
+            The merged template.
+        bool (all other cases)
+            True if success, False if failure.
 
         """
-        if self.debug:
-            print('Place your finger on the scanner')
-        ret = False
+        assert stage in [1, 2, 3]
+        assert tid >= -1 and tid <= 199
+
+        if stage == 1:
+            if self._run_command('EnrollStart', parameter=tid):
+                self.backlight_on() # proceed to capture finger
+            else:
+                return False
+
         if self._capture_finger(tries):
-            response = self._run_command('Enroll' + str(stage))
-            ret = response.ack
-            if ret and self.debug:
-                print('Remove your finger from the scanner')
-        if not ret and self.debug:
-            print('Enroll failed')
-        self.backlight_off()
-        return ret
+            if self._run_command('Enroll' + str(stage)):
+                pass # proceed to determine return value
+            else:
+                self.backlight_off()
+                return False
+        else:
+            self.backlight_off()
+            return False
+
+        if stage == 3:
+            self.backlight_off()
+            if tid == -1:
+                template = self._receive_data(data_length=498)
+                return template
+        return True
+
+    def wait_to_remove_finger(self, delay=0.25):
+        """
+        Loops forever until finger is removed from the scanner.
+
+        Parameters
+        ----------
+        delay : float, optional
+            Amount of time to wait between polls, defaults to 0.25s.
+
+        """
+        while self.is_finger_pressed():
+            self.wait(delay)
 
     def is_finger_pressed(self):
         """

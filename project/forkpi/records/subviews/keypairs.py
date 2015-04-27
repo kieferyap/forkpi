@@ -57,22 +57,30 @@ def scan_rfid(request):
     if rfid_uid:
         return HttpResponse(rfid_uid)
     else:
-        response = HttpResponse("No RFID tag detected")
+        response = HttpResponse('No RFID tag detected')
         response.status_code = 400
         return response
 
 @login_required
 def scan_fingerprint_3x(request):
     fps = FingerprintScanner(debug=False)
-    template = fps.enroll_template(tries=2)
-    # fps.backlight_off()
-    if template:
-        template = binascii.hexlify(template)
-        return HttpResponse(template)
-    else:
-        response = HttpResponse("No finger detected")
+    stage = request.POST['stage']
+    ret = fps.enroll(stage=stage)
+    if ret is False:
+        response = HttpResponse('No finger detected')
         response.status_code = 400
         return response
+    elif stage == 3:
+        template = binascii.hexlify(ret)
+        return HttpResponse(template)
+    else:
+        return HttpResponse('')
+
+@login_required
+def wait_to_remove_finger(request):
+    fps = FingerprintScanner(debug=False)
+    fps.wait_to_remove_finger()
+    return HttpResponse('')
 
 @login_required
 def scan_fingerprint_1x(request):

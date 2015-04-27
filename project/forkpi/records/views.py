@@ -47,7 +47,7 @@ def redirect_to_name(name):
 
 
 from .subviews.keypairs import (
-	keypairs_page, scan_rfid, scan_fingerprint_3x, scan_fingerprint_1x,
+	keypairs_page, scan_rfid, scan_fingerprint_3x, wait_to_remove_finger, scan_fingerprint_1x,
 	new_keypair, delete_keypair,
 	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, keypair_toggle_active,
 	link_door_to_keypair, unlink_door_from_keypair, search_keypairs,

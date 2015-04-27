@@ -164,21 +164,18 @@ $(document).ready(function() {
 		var target = parent.data('target-textbox');
 		var placeholder = '';
 		var field = parent.data('field');
+		var scanUrl = parent.data('scan-url');
+		var waitUrl = parent.data('wait-url');
 
-		if(strcmp('#modal-credential-text', target) == 0){
+		if(strcmp('#modal-credential-text', target) == 0){ // target is the textbox in authenticate modal
 			$(target).attr('type', 'text');
 			$('#modal-active-field').val(field);
 		}
 
 		if (field == 'rfid') {
-			placeholder = 'Waiting for RFID data...';
+			placeholder = 'Please swipe an RFID card.';
 		} else if (field == 'fingerprint') {
-			// alert("WARNING: Please pay close attention to the fingerprint scanner:\n"
-			// 	+"1. PRESS FINGER on the scanner when it LIGHTS UP. (Blue light)\n"
-			// 	+"2. REMOVE FINGER when the LIGHT GOES OFF.\n"
-			// 	+"3. You will need to press your finger THREE TIMES.\n"
-			// 	+"This is for a higher matching accuracy. Thank you very much for understanding.");
-			placeholder = 'Waiting for finger...';
+			placeholder = 'Please put your finger on the scanner.';
 		}
 
 		// Clear target textbox and replace with placeholder
@@ -186,23 +183,40 @@ $(document).ready(function() {
 		$(target).attr('placeholder', placeholder);
 
 		scanButton.hide(256);
-		$.ajax({
-			type: 'POST',
-			url: parent.data('scan-url'),
-			data: {
-				csrfmiddlewaretoken: getToken()
-			},
-			success: function(msg) {
-				scanButton.show(256);
-				$(target).val(msg);
-				$(target).attr('placeholder', '');
-			},
-			error: function(msg) {
-				// nothing was scanned: show error as textbox placeholder
-				scanButton.show(256);
-				$(target).attr('placeholder', msg['responseText'])
-			}
-		});
+		
+		onSuccess = function(msg) {
+			scanButton.show(256);
+			$(target).val(msg);
+			$(target).attr('placeholder', '');
+		};
+		
+		onError = function(msg) {
+			// nothing was scanned: show error as textbox placeholder
+			scanButton.show(256);
+			$(target).attr('placeholder', msg['responseText'])
+		};
+
+		if (field == 'rfid') {
+			postToUrl(scanUrl, {}, onSuccess, onError);
+		} else if (field == 'fingerprint') {
+			postToUrl(scanUrl, {'stage' : 1}, function(msg) {
+				// scanned the first finger
+				$(target).attr('placeholder', 'Please remove your finger from the scanner.');
+				postToUrl(waitUrl, {}, function(msg) {
+					// finger removed
+					$(target).attr('placeholder', 'Please scan the same finger again.');
+					postToUrl(scanUrl, {'stage' : 2}, function(msg) {
+						// scanned the second finger
+						$(target).attr('placeholder', 'Please remove your finger from the scanner.');
+						postToUrl(waitUrl, {}, function(msg) {
+							// finger removed
+							$(target).attr('placeholder', 'Please scan the same finger yet again.');
+							postToUrl(scanUrl, {'stage' : 3}, onSuccess, onError);
+						}, onError);
+					}, onError);
+				}, onError);
+			}, onError);
+		}
 	});
 
 	// Keypair and User Actions
@@ -235,8 +249,7 @@ $(document).ready(function() {
 		$('.modal-enter-pin').trigger('click');
 
 	}).on('click', '.modal-enter-pin', function(){
-		var parent = $('.edit-btn').parent();
-		var id = parent.data('id');
+		var id = $('.edit-btn').parent().data('id');
 		var name = $('#name-'+id).data('value');
 
 		$('#modal-credential-text').val('');
@@ -246,10 +259,10 @@ $(document).ready(function() {
 		$('#modal-credential-text').attr('type', 'password');
 
 	}).on('click', '.modal-authenticate-btn', function(){
-		var parent = $('.edit-btn').parent();
-		var id = parent.data('id');
+		var parent = $(this).parent();
+		var id = $('.edit-btn').parent().data('id');
 
-		postToUrl($('#auth-url').val(), {
+		postToUrl(parent.data('auth-url'), {
 			id : id,
 			val : $('#modal-credential-text').val(),
 			type: $('#modal-active-field').val()
