@@ -50,7 +50,6 @@ $(document).ready(function() {
 			editedTextInModal = true;
 		}
 
-
 		// generate the textbox that will replace this element
 		var currentValue = $(this).html().trim();
 		if (currentValue == '- - -') {
@@ -166,7 +165,7 @@ $(document).ready(function() {
 		var placeholder = '';
 		var field = parent.data('field');
 
-		if(strcmp('#modal-credential', target) == 0){
+		if(strcmp('#modal-credential-text', target) == 0){
 			$(target).attr('type', 'text');
 			$('#modal-active-field').val(field);
 		}
@@ -231,70 +230,34 @@ $(document).ready(function() {
 	}).on('click', '.edit-btn', function(){
 		var parent = $(this).parent();
 		var id = parent.data('id');
-		var name = $('#name-'+id).parent().data('value');
-
-		// Modal header stuff
-		var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
-		var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
-		var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">Enter any credential of user ('+name+'):</h4>';
-
-		// Modal footer stuff
-		var modalFooterSubmitBtn = '<button type="button" class="btn btn-primary modal-authenticate-btn">Submit</button>';
-		var modalFooterBtnRFID = '<input type="button" class="btn expand btn-success scan-new" value="Scan RFID" />';
-		var modalFooterBtnFING = '<input type="button" class="btn expand btn-success scan-new" value="Scan Finger"/>';
-		var modalFooterBtnPIN = '<input type="button" class="btn expand btn-success modal-enter-pin" value="Enter PIN"/>';
-		var modalFooterDivRFID =
-			'<span class="col-md-3" data-scan-url="'+$('#scan-url-rfid').val()+'"'+
-				'data-field="rfid" data-target-textbox="#modal-credential">'+
-				modalFooterBtnRFID+
-			'</span>';
-		var modalFooterDivFING =
-			'<span class="col-md-3" data-scan-url="'+$('#scan-url-fingerprint').val()+'"'+
-				'data-field="fingerprint" data-target-textbox="#modal-credential">'+
-				modalFooterBtnFING+
-			'</span>';
-		var modalFooterDivPIN = 
-			'<span class="col-md-3" data-target-textbox="#modal-credential">'+
-				modalFooterBtnPIN+
-			'</span>';
-
-		// Modal body stuff
-		var modalBodyError = '<div class="alert alert-error modal-error-credentials" style="display:none">Incorrect credentials</div>';
-		var modalBodyInput = '<input class="col-md-12" type="password" class="modal-credential" id="modal-credential" placeholder="Enter PIN, swipe RFID, or scan fingerprint of user ('+name+')" />';
-		var modalBodyType = 'Current active credential: <input type="text" data-id="'+id+'" id="modal-active-field" value="pin" disabled="true"/>';
-
-		// Altogether now
-		var modalBody = modalBodyError + '<span data-post-url="/keypairs/authenticate_pin" data-id="'+id+'">'+modalBodyInput+'<br/><br/>'+modalBodyType+'</span><br/>';
-		var modalFooter = modalFooterDivPIN + " " + modalFooterDivRFID + " " + modalFooterDivFING + " " + modalFooterSubmitBtn;
-		var modalHeader = modalHeaderCloseContainer + modalHeaderText;
-
-		$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
-		$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
-		$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
+		transformModalIntoAuthenticate(id);
+		// Default to PIN authentication
+		$('.modal-enter-pin').trigger('click');
 
 	}).on('click', '.modal-enter-pin', function(){
 		var parent = $('.edit-btn').parent();
 		var id = parent.data('id');
-		var name = $('#name-'+id).parent().data('value');
-		$('#modal-credential').val('');
+		var name = $('#name-'+id).data('value');
 
-		$('#modal-credential').focus();
+		$('#modal-credential-text').val('');
+		$('#modal-credential-text').focus();
 		$('#modal-active-field').val('pin');
-		$('#modal-credential').attr('placeholder', 'Enter PIN, swipe RFID, or scan fingerprint of user ('+name+')');
-		$('#modal-credential').attr('type', 'password');
+		$('#modal-credential-text').attr('placeholder', 'Enter PIN, swipe RFID, or scan fingerprint of user (' + name + ')');
+		$('#modal-credential-text').attr('type', 'password');
+
 	}).on('click', '.modal-authenticate-btn', function(){
-		var parent = $('#modal-credential').parent();
+		var parent = $('.edit-btn').parent();
 		var id = parent.data('id');
 
-		postToUrl('/keypairs/authenticate_pin', {id:id,val:$('#modal-credential').val(),type:$('#modal-active-field').val()}, function(msg) {
-			if(msg != ''){
-				// alert(msg);
-				editKeypair(id, msg);
-			}
-			else{
-				$('.modal-error-credentials').show();
-				$('#modal-credential').val();
-			}
+		postToUrl($('#auth-url').val(), {
+			id : id,
+			val : $('#modal-credential-text').val(),
+			type: $('#modal-active-field').val()
+		}, function(msg) {
+			transformModalIntoEditKeypair(id, msg);
+		}, function(msg) {
+			$('.modal-error-credentials').show();
+			$('#modal-credential-text').val();
 		});
 	});
 
@@ -344,37 +307,21 @@ $(document).ready(function() {
 	});
 });
 
-function getToken() {
-	return document.getElementsByName('csrfmiddlewaretoken')[0].value;
+
+function transformModalIntoAuthenticate(id) {
+	var name = $('#name-' + id).data('value').trim();
+
+	var modalTitle = 'Enter any credential of user (' + name + '):';
+
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html($('#authenticate-modal > .body').html());
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html($('#authenticate-modal > .footer').html());
+
 }
 
-function postToUrl(postUrl, data, onSuccess) {
-	data['csrfmiddlewaretoken'] = getToken();
-	$.ajax({
-		type: 'POST',
-		url: postUrl,
-		data: data,
-		success: onSuccess,
-		error: function(msg){
-			alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
-			location.reload();
-		}
-	});
-}
-
-function postIdToUrlInParent(element, onSuccess) {
-	var parent = element.parent();
-	var id = parent.data('id');
-	var postUrl = parent.data('post-url');
-	var val = $(element).val();
-	postToUrl(postUrl, {id:id, val:val}, onSuccess);
-}
-
-function editKeypair(id, msg){
-	var name = $('#name-'+id).html().trim();
-	var modalHeaderCloseBtn = '<span aria-hidden="true">&times;</span>';
-	var modalHeaderCloseContainer = '<button type="button" class="close" data-dismiss="modal" aria-label="Close">'+modalHeaderCloseBtn+'</button>';
-	var modalHeaderText = '<h4 class="modal-title" id="edit-modalLabel">'+name+'\'s Credentials</h4>';
+function transformModalIntoEditKeypair(id, msg){
+	var name = $('#name-'+id).data('value').trim();	
+	var modalTitle = name + '\'s Credentials';
 
 	var userPIN = msg['pin'];
 	var userRFID = msg['rfid_uid'];
@@ -384,49 +331,46 @@ function editKeypair(id, msg){
 	if(!userRFID){userRFID = '- - -';}
 	if(!userFING){userFING = '- - -';}
 
-	var bodyPIN = 
-		'<div style="font-weight: bold">PIN:</div>'+
-		'<span class="edit-pin"'+
-			'data-post-url="'+$('#post-url-pin').val()+'"'+
-			'data-field="pin"'+
-			'data-id="'+id+'" data-value="'+userPIN+'">'+
-			'<span class="editable-text" id="pin-'+id+'">'+
-				userPIN+
-			'</span>'+
-		'</span>'+
-		'<hr style="clear:both;"/>';
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html($('#edit-keypair-modal > .body').html());
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html($('#edit-keypair-modal > .footer').html());
 
-	var bodyRFID = 
-		'<div style="font-weight: bold">RFID UID:</div>'+
-		'<span class="edit-rfid"'+
-			'data-post-url="'+$('#post-url-rfid').val()+'" data-scan-url="'+$('#scan-url-rfid').val()+'"'+
-			'data-field="rfid" data-target-textbox=".editing-text"'+
-			'data-id="'+id+'" data-value="'+userRFID+'">'+
-			'<span class="editable-text">'+
-				userRFID+
-			'</span>'+
-		'</span>'+
-		'<hr style="clear:both;"/>';
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-pin').data('id', id);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-pin > span').html(userPIN);
 
-	var bodyFING = 
-		'<div style="font-weight: bold">Fingerprint:</div>'+
-		'<span class="edit-fingerprint"'+
-			'data-post-url="'+$('#post-url-fingerprint').val()+'" data-scan-url="'+$('#scan-url-fingerprint').val()+'"'+
-			'data-field="/keypairs/edit/fingerprint" data-target-textbox=".editing-text"'+
-			'data-id="'+id+'" data-value="'+userFING+'">'+
-			'<span class="editable-text">'+
-				userFING+
-			'</span>'+
-		'</span>'+
-		'<hr style="clear:both;"/>';
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-rfid').data('id', id);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-rfid > span').html(userRFID);
 
-	var modalBody = bodyPIN + bodyRFID + bodyFING
-	var modalHeader = modalHeaderCloseContainer + modalHeaderText;
-	var modalFooter = '<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>';
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-fingerprint').data('id', id);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-fingerprint > span').html(userFING);
 
-	$('#edit-modal > .modal-dialog > .modal-content > .modal-header').html(modalHeader);
-	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html(modalFooter);
-	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html(modalBody);
+}
+
+function getToken() {
+	return document.getElementsByName('csrfmiddlewaretoken')[0].value;
+}
+
+function postToUrl(postUrl, data, onSuccess, onError) {
+	data['csrfmiddlewaretoken'] = getToken();
+	onError = onError || function(msg) {
+		alert('Whoops, looks like something went wrong... \n Message: '+msg['responseText']+'\n Refreshing...');
+		location.reload();
+	};
+	$.ajax({
+		type: 'POST',
+		url: postUrl,
+		data: data,
+		success: onSuccess,
+		error: onError
+	});
+}
+
+function postIdToUrlInParent(element, onSuccess, onError) {
+	var parent = element.parent();
+	var id = parent.data('id');
+	var postUrl = parent.data('post-url');
+	var val = $(element).val();
+	postToUrl(postUrl, {id:id, val:val}, onSuccess, onError);
 }
 
 function strcmp ( str1, str2 ) {

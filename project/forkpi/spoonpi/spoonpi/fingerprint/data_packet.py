@@ -80,13 +80,13 @@ class DataPacket(object):
             Packed bytes in little endian order.
 
         """
-        return self._pack_bytes(little_endian=True)
+        return self._pack_bytes(is_little_endian=True)
 
-    def serialize_bytes(self, little_endian=False):
+    def serialize_bytes(self, is_little_endian=False):
         """
         Parameters
         ----------
-        little_endian : bool, optional
+        is_little_endian : bool, optional
             Byte order, defaults to False.
             True for little endian, False for big endian.
 
@@ -101,19 +101,19 @@ class DataPacket(object):
         >>> data_packet = DataPacket(bytes_=bytes_)
         >>> data_packet.serialize_bytes()
         '5A A5 00 01 01 00 01 01'
-        >>> data_packet.serialize_bytes(little_endian=True)
+        >>> data_packet.serialize_bytes(is_little_endian=True)
         '5A A5 01 00 01 00 01 01'
 
         """
-        return hexlify(self._pack_bytes(little_endian))
+        return hexlify(self._pack_bytes(is_little_endian))
 
-    def _pack_bytes(self, little_endian=True):
+    def _pack_bytes(self, is_little_endian=True):
         """
         Packs this object's attributes into bytes according to the specified format.
 
         Parameters
         ----------
-        little_endian : bool, optional
+        is_little_endian : bool, optional
             Byte order, defaults to True.
             True for little endian, False for big endian.
 
@@ -123,7 +123,7 @@ class DataPacket(object):
             Bytes of the data packet formatted in the byte order specified.
 
         """
-        if little_endian:
+        if is_little_endian:
             byte_order = '<'
         else: # big endian
             byte_order = '>'

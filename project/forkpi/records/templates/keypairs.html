@@ -8,48 +8,22 @@
 </ul>
 
 <input type="hidden" id="scan-url-rfid" value="{% url 'scan rfid' %}"/>
-<input type="hidden" id="scan-url-fingerprint" value="{% url 'scan fingerprint' %}"/>
-<input type="hidden" id="post-url-rfid" value="{% url 'edit keypair rfid' %}"/>
-<input type="hidden" id="post-url-fingerprint" value="{% url 'edit keypair fingerprint' %}"/>
-<input type="hidden" id="post-url-pin" value="{% url 'edit keypair pin' %}"/>
-
-<!-- <div id="hidden-modal-header" class="invisible">
-	<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-		<span aria-hidden="true">&times;</span>	
-	</button>
-	<h4 class="modal-title" id="edit-modalLabel">Enter any credential of user (<span id="hidden-modal-header-name"></span>):</h4>
-</div>
-<div id="hidden-modal-body" class="invisible">
-	<div class="alert alert-error modal-error-credentials invisible">Incorrect credentials</div>
-	<span id="hidden-modal-body-parent" data-post-url="/keypairs/authenticate_pin" data-id="">
-		<input class="col-md-12" type="password" class="modal-credential" id="modal-credential" placeholder="Enter PIN, swipe RFID, or scan fingerprint of the user" />
-		<br/><br/>
-		Current active credential: <input type="text" data-id="" id="modal-active-field" value="pin" disabled="true"/>
-	</span>
-	<br/>
-</div>
-<div id="hidden-modal-footer" class="invisible">
-	<span class="col-md-3" data-target-textbox="#modal-credential">
-		<input type="button" class="btn expand btn-success modal-enter-pin" data-id="" id="btn-enter-pin" value="Enter PIN"/>
-	</span>
-	<span class="col-md-3" data-scan-url="{% url 'scan rfid' %}" data-field="rfid" data-target-textbox="#modal-credential">
-		<input type="button" class="btn expand btn-success scan-new" data-id="" id="btn-scan-rfid" value="Scan RFID" />
-	</span>
-	<span class="col-md-3" data-scan-url="% url 'scan fingerprint' %}" data-field="fingerprint" data-target-textbox="#modal-credential">
-		<input type="button" class="btn expand btn-success scan-new" data-id="" id="btn-scan-fingerprint" value="Scan Finger"/>
-	</span>
-</div> -->
-
-<!--ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
-    <li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
-    <li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
-</ul-->
+<input type="hidden" id="scan-url-fingerprint-3x" value="{% url 'scan fingerprint 3x' %}"/>
+<input type="hidden" id="edit-url-rfid" value="{% url 'edit keypair rfid' %}"/>
+<input type="hidden" id="edit-url-fingerprint" value="{% url 'edit keypair fingerprint' %}"/>
+<input type="hidden" id="edit-url-pin" value="{% url 'edit keypair pin' %}"/>
+<input type="hidden" id="scan-url-fingerprint-1x" value="{% url 'scan fingerprint 1x' %}">
+<input type="hidden" id="auth-url" value="{% url 'authenticate credential' %}">
 
 <!-- Modal -->
 <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title"></h4>
 			</div>
 			<div class="modal-body">
 			</div>
@@ -58,7 +32,63 @@
 		</div>
 	</div>
 </div>
+<div id="authenticate-modal" class="invisible">
+	<div class="body">
+		<div class="alert alert-error modal-error-credentials" style="display:none">Incorrect credentials</div>
+		<div class="credential" data-post-url="{% url 'authenticate credential' %}">
+			<input class="col-md-12 modal-credential-text" id="modal-credential-text" />
+			<br/><br/>
+		   	Current active credential: <input type="text" id="modal-active-field" disabled="true" />
+		</div>
+	</div>
+	<div class="footer">
+		<span class="col-md-3" data-target-textbox="#modal-credential-text" data-field="pin">
+			<input type="button" class="btn expand btn-success modal-enter-pin" value="Enter PIN"/>
+		</span>
+		<span class="col-md-3" data-target-textbox="#modal-credential-text"
+			  data-field="rfid" data-scan-url="{% url 'scan rfid' %}">
+			<input type="button" class="btn expand btn-success scan-new" value="Scan RFID" />
+		</span>
+		<span class="col-md-3" data-scan-url="{% url 'scan fingerprint 1x' %}"
+			  data-field="fingerprint" data-target-textbox="#modal-credential-text">
+			<input type="button" class="btn expand btn-success scan-new" value="Scan Finger"/>	
+		</span>
+		<span class="col-md-3">
+			<button type="button" class="btn expand btn-primary modal-authenticate-btn">Submit</button>
+		</span>
+	</div>
+</div>
+<div id="edit-keypair-modal" class="invisible">
+	<div class="body">
+		<div style="font-weight: bold">PIN:</div>
+		<span class="edit-pin" data-post-url="{% url 'edit keypair pin' %}"
+			  data-field="pin">
+		  	<span class="editable-text">
+		  	</span>
+	  	</span>
+	  	<hr style="clear:both;"/>
+	  	<div style="font-weight: bold">RFID UID:</div>
+	  	<span class="edit-rfid" data-post-url="{% url 'edit keypair rfid' %}" data-scan-url="{% url 'scan rfid' %}"
+	  		  data-field="rfid" data-target-textbox=".editing-text">
+	  		<span class="editable-text">
+	  		</span>
+	  	</span>
+	  	<hr style="clear:both;"/>
+	  	<div style="font-weight: bold">Fingerprint:</div>
+	  	<span class="edit-fingerprint" data-post-url="{% url 'edit keypair fingerprint' %}" data-scan-url="{% url 'scan fingerprint 3x' %}"
+	  		  data-field="fingerprint" data-target-textbox=".editing-text">
+	  		<span class="editable-text">
+	  		</span>
+		</span>
+		<hr style="clear:both;"/>
+	</div>
+	<div class="footer">
+		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	</div>
+</div>
+</div>
 
+<!-- Content -->
 <div class="tab-content">
 	<div class="tab-pane" id="new-keypair">
 		<br/><br/>
@@ -108,7 +138,7 @@
 							   id="newFinger" name="fingerprint_template"
 							   placeholder="Scan for a finger. Place it on the scanner when the light's up and remove it when it's off." />
 					</div>
-					<div class="col-md-2" data-scan-url="{% url 'scan fingerprint' %}"
+					<div class="col-md-2" data-scan-url="{% url 'scan fingerprint 3x' %}"
 						 data-field="fingerprint" data-target-textbox="#newFinger">
 						<input type="button" class="btn expand btn-success scan-new"
 							   value="Scan Finger"/>
@@ -156,12 +186,12 @@
 							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="5">
 								<span class="glyphicon glyphicon-hand-up mouseover-text" title="Fingerprint"></span>
 							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="10">
+								Last Edited By
+							</th>
 							<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="7">
 								Actions
 							</th>
-							<!-- <th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="10">
-								Last Edited By
-							</th> -->
 						</tr>
 					</thead>
 					<tbody>
@@ -174,11 +204,12 @@
 							<td>{{ forloop.counter }}</td>
 
 							<!-- Name -->
-							<td data-post-url="{% url 'edit keypair name' %}"
+							<td id="name-{{ keypair.id }}"
+								data-edit-url="{% url 'edit keypair name' %}"
 								data-field="name"
 								data-id="{{ keypair.id }}" data-value="{{ keypair.name }}">
 
-								<span class="editable-text" id="name-{{ keypair.id }}">
+								<span class="editable-text">
 									{{ keypair.name }}
 								</span>
 							</td>
@@ -239,12 +270,21 @@
 									{% endif %}
 								</span>
 							</td>
+
+							<td>
+								<div>
+									{{ keypair.last_edited_by.username }}
+								</div>
+								<div class="small-text">
+									{{ keypair.last_edited_on | date:"Y-m-d H:i"}}
+								</div>
+							</td>
 							
 							<!-- Actions -->
 							<td id="action-{{ keypair.id }}">
 								<div class="btn-group btn-group-justified" role="group">
 									<div class="btn-group" role="group"
-										 data-post-url="{% url 'keypair toggle active' %}"
+										 data-edit-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
 
 										{% if keypair.is_active %}
@@ -258,14 +298,15 @@
 										{% endif %}
 									</div>
 									<div class="btn-group" role="group"
-										 data-post-url="{% url 'keypair toggle active' %}"
+										 data-edit-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
-											<button type="button" class="btn expand btn-primary task-edit edit-btn" data-toggle="modal" data-target="#edit-modal">
+											<button type="button" class="btn expand btn-primary task-edit edit-btn"
+													data-toggle="modal" data-target="#edit-modal">
 												Edit
 											</button>
 									</div>
 									<div class="btn-group" role="group"
-										 data-post-url="{% url 'delete keypair' %}"
+										 data-edit-url="{% url 'delete keypair' %}"
 										 data-id="{{ keypair.id }}">
 
 										<button class="btn btn-danger task-cancelbox delete-btn">
@@ -274,15 +315,6 @@
 									</div>
 								</div>
 							</td>
-
-							<!-- <td>
-								<div>
-									{{ keypair.last_edited_by.username }}
-								</div>
-								<div class="small-text">
-									{{ keypair.last_edited_on | date:"Y-m-d H:i"}}
-								</div>
-							</td> -->
 						</tr>
 						{% endfor %}
 					</tbody>

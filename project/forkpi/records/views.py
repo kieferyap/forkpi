@@ -46,17 +46,18 @@ def redirect_to_name(name):
 	return django_redirect(reverse(name))
 
 
-from .subviews.keypairs import keypairs_page, scan_rfid, scan_fingerprint, \
-	new_keypair, delete_keypair, \
-	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, \
-	keypair_toggle_active, print_pdf, \
-	link_door_to_keypair, unlink_door_from_keypair, search_keypairs, \
-	authenticate_pin
-from .subviews.doors import doors_page, edit_door_name, \
-	link_keypair_to_door, unlink_keypair_from_door, search_doors
-from .subviews.session import login_page, logging_in, logout, must_be_logged_in
-from .subviews.signup import signup_page, add_user
-from .subviews.logs import logs_page, delete_logs_older_than
-from .subviews.users import all_users, user_toggle_active, user_toggle_staff, delete_user, approve_user
-from .subviews.options import options_page, edit_option_value, regenerate_secret_key
+from .subviews.keypairs import (
+	keypairs_page, scan_rfid, scan_fingerprint_3x, scan_fingerprint_1x,
+	new_keypair, delete_keypair,
+	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, keypair_toggle_active,
+	link_door_to_keypair, unlink_door_from_keypair, search_keypairs,
+	print_pdf,
+	authenticate_credential)
+from .subviews.doors import (doors_page, edit_door_name,
+	link_keypair_to_door, unlink_keypair_from_door, search_doors)
+from .subviews.session import (login_page, logging_in, logout, must_be_logged_in)
+from .subviews.signup import (signup_page, add_user)
+from .subviews.logs import (logs_page, delete_logs_older_than)
+from .subviews.users import (all_users, user_toggle_active, user_toggle_staff, delete_user, approve_user)
+from .subviews.options import (options_page, edit_option_value, regenerate_secret_key)
 

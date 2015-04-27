@@ -684,7 +684,7 @@ class FingerprintScanner(object):
             elif i == tries - 1: # give up
                 return False
             else: # try again
-                self._wait(1.5)
+                self._wait(0.5)
 
     def _run_command(self, *args, **kwargs):
         """

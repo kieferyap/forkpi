@@ -3,19 +3,16 @@ SpoonPi
 	[x] Investigate fingerprint class separation bug
 	Put back lockouts for rfid and fingerprint
 	Investigate fingerprint suddenly failing bug
-	Fetch only keypairs that are mapped to this door
 ForkPi
 	[x] Don't put the information in the invisible
-	[%] Just one textbox, but free to put anything
-	^ Above textbox should just do one scan for fingerprint
-	Initialize options table and ensure name is not modified
+	[x] Just one textbox, but free to put anything
+	[x] ^ Above textbox should just do one scan for fingerprint
+	[x] refactor html in javascript
+	Initialize options table and ensure option name is not modified
 	Visual cues on fingerprint enrollment: "Remove finger", etc.
 	Autohide messages
 	Name (and other required fields) - red asterisk
 	Print pdf is not supported in Pyhton 3.0-3.2
-	Keypair - last_edited_by field
-	BUG: Can demote self -> if I am the only admin, will result in no admins able to approve new users
-	BUG: Multi-tab polling (former: Scan RFID close window while polling -> next poll causes crash)
 	Add door name to logs
 	Pageinate logs (and maybe keypairs)
 		https://djangosnippets.org/snippets/1391/
@@ -25,10 +22,8 @@ ForkPi
 Others
 	Separate Forkpi and Spoonpi users in database
 	Usability Test (April Week 03)
-	Put back lockouts for rfid and fingerprint
 	GitHub documentation
 	Dummy fingerprint and rfid scanner
-	Usability Test (April Week 03)
 	
 	
 	options table: applies_to
