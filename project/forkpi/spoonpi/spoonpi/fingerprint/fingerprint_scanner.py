@@ -266,6 +266,10 @@ class FingerprintScanner(object):
             True if success, False if failure.
 
         """
+        # Must convert to int first
+        stage = int(stage)
+        tid = int(tid)
+
         assert stage in [1, 2, 3]
         assert tid >= -1 and tid <= 199
 
@@ -277,18 +281,18 @@ class FingerprintScanner(object):
 
         if self._capture_finger(tries):
             if self._run_command('Enroll' + str(stage)):
+                if stage < 3:
+                    self.backlight_off()
                 pass # proceed to determine return value
             else:
-                self.backlight_off()
                 return False
         else:
-            self.backlight_off()
             return False
 
         if stage == 3:
-            self.backlight_off()
             if tid == -1:
                 template = self._receive_data(data_length=498)
+                self.backlight_off()
                 return template
         return True
 

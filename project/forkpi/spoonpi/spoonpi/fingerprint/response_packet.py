@@ -152,12 +152,12 @@ class ResponsePacket(object):
 
         """
         values = struct.unpack('<BBHiHH', self.bytes_) # byte byte word dword word word
-        assert values[0] == self.START_CODE_1
-        assert values[1] == self.START_CODE_2
-        assert values[2] == self.DEVICE_ID
+        # assert values[0] == self.START_CODE_1
+        # assert values[1] == self.START_CODE_2
+        # assert values[2] == self.DEVICE_ID
         response = values[4]
         checksum = values[5]
-        assert checksum == byte_checksum(self.bytes_[:-2])
+        # assert checksum == byte_checksum(self.bytes_[:-2])
         self.ack = True if response == 0x30 else False
         if self.ack:
             self.parameter = values[3]

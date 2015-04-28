@@ -194,28 +194,37 @@ $(document).ready(function() {
 			// nothing was scanned: show error as textbox placeholder
 			scanButton.show(256);
 			$(target).attr('placeholder', msg['responseText'])
+			alert(msg['responseText']);
 		};
 
 		if (field == 'rfid') {
 			postToUrl(scanUrl, {}, onSuccess, onError);
 		} else if (field == 'fingerprint') {
-			postToUrl(scanUrl, {'stage' : 1}, function(msg) {
-				// scanned the first finger
-				$(target).attr('placeholder', 'Please remove your finger from the scanner.');
-				postToUrl(waitUrl, {}, function(msg) {
-					// finger removed
-					$(target).attr('placeholder', 'Please scan the same finger again.');
-					postToUrl(scanUrl, {'stage' : 2}, function(msg) {
-						// scanned the second finger
-						$(target).attr('placeholder', 'Please remove your finger from the scanner.');
-						postToUrl(waitUrl, {}, function(msg) {
-							// finger removed
-							$(target).attr('placeholder', 'Please scan the same finger yet again.');
-							postToUrl(scanUrl, {'stage' : 3}, onSuccess, onError);
+			// If the target is 3x, then:
+			if(strcmp($('#scan-url-thrice').val(), scanUrl) == 0){
+				postToUrl(scanUrl, {'stage' : 1}, function(msg) {
+					// scanned the first finger
+					$(target).attr('placeholder', 'Please remove your finger from the scanner.');
+					postToUrl(waitUrl, {}, function(msg) {
+						// finger removed
+						$(target).attr('placeholder', 'Please scan the same finger again.');
+						postToUrl(scanUrl, {'stage' : 2}, function(msg) {
+							// scanned the second finger
+							$(target).attr('placeholder', 'Please remove your finger from the scanner.');
+							postToUrl(waitUrl, {}, function(msg) {
+								// finger removed
+								$(target).attr('placeholder', 'Please scan the same finger yet again.');
+								postToUrl(scanUrl, {'stage' : 3}, onSuccess, onError);
+							}, onError);
 						}, onError);
 					}, onError);
 				}, onError);
-			}, onError);
+			}
+
+			// Else if the target is just 1x then:
+			else{
+				postToUrl(scanUrl, {}, onSuccess, onError);
+			}
 		}
 	});
 

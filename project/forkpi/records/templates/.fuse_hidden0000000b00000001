@@ -6,8 +6,7 @@
 	<li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
 	<li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
 </ul>
-<input type="hidden" id="scan-url-thrice" value="{% url 'scan fingerprint 3x' %}" />
-
+<input type="hidden" id="scan-url-thrice" val="{% url 'scan fingerprint 3x' %}" />
 <!-- Modal -->
 <div class="modal fade" id="edit-modal" tabindex="-1" role="dialog" aria-labelledby="edit-modalLabel" aria-hidden="true">
 	<div class="modal-dialog">
