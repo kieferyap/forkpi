@@ -51,7 +51,6 @@ from .subviews.keypairs import (
 	new_keypair, delete_keypair,
 	edit_keypair_name, edit_keypair_pin, edit_keypair_rfid, edit_keypair_fingerprint, keypair_toggle_active,
 	link_door_to_keypair, unlink_door_from_keypair, search_keypairs,
-	print_pdf,
 	authenticate_credential)
 from .subviews.doors import (doors_page, edit_door_name,
 	link_keypair_to_door, unlink_keypair_from_door, search_doors)

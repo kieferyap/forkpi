@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import JsonResponse
 
 import hashlib
-import binascii
+import base64
 
 from records.views import render, redirect_to_name
 from records.models import Keypair, Door
@@ -27,7 +27,7 @@ def decrypt(value, key=None):
 	return AES(key).decrypt(value)
 
 def hash_string(value):
-	return hashlib.sha1((value).encode()).hexdigest()
+	return hashlib.sha1(value.encode()).hexdigest()
 
 @login_required
 def keypairs_page(request):
@@ -71,7 +71,7 @@ def scan_fingerprint_3x(request):
 		response.status_code = 400
 		return response
 	elif stage == 3:
-		template = binascii.hexlify(ret)		
+		template = base64.b64encode(ret)		
 		return HttpResponse(template)
 	else:
 		return HttpResponse('')
@@ -88,7 +88,7 @@ def scan_fingerprint_1x(request):
 	template = fps.make_template(tries=2)
 	fps.backlight_off()
 	if template:
-		template = binascii.hexlify(template)
+		template = base64.b64encode(template)
 		return HttpResponse(template)
 	else:
 		response = HttpResponse("No finger detected")
@@ -204,38 +204,6 @@ def keypair_toggle_active(request):
 	return HttpResponse("Successful.")
 
 @login_required
-def print_pdf(request):
-	from reportlab.lib import colors
-	from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
-	from reportlab.lib.pagesizes import letter
-	from reportlab.lib.styles import getSampleStyleSheet
-
-	response = HttpResponse(content_type='application/pdf')
-	response['Content-Disposition'] = 'attachment; filename="forkpi_keypairs.pdf"'
-
-	doc = SimpleDocTemplate(response, pagesize=letter)
-	elements = []
-	styles = getSampleStyleSheet()
-	style = styles['Normal']
-	keypairs = Keypair.objects.all()
-
-	data = []
-	data.append(['Name', 'RFID UID'])
-
-	for keypair in keypairs:
-		if keypair.is_active:
-			style.textColor = colors.black
-		else:
-			style.textColor = colors.gray
-		data.append([Paragraph(str(keypair.name), style), Paragraph(str(keypair.rfid_uid), style)])
-	
-	t = Table(data, colWidths=[300, 100])
-	t.setStyle(TableStyle([('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),('BOX', (0,0), (-1,-1), 0.25, colors.black),]))
-	elements.append(t)
-	doc.build(elements)
-	return response
-
-@login_required
 def link_door_to_keypair(request):
 	keypair = Keypair.objects.get(id = request.POST['my_id'])
 	door_id = request.POST['link_id']
@@ -280,16 +248,19 @@ def authenticate_credential(request):
 		elif auth_type == 'fingerprint':
 			keypair = Keypair.objects.get(id=kid)
 
+			template = keypair.fingerprint_template
+			if len(auth_val) != 664 or len(template) != 664:
+				raise ValueError("Template must be 664 characters long")
+
 			fps = FingerprintScanner(debug=False)
 			fps.delete_template(tid=0)
 
-			template = binascii.unhexlify(bytes(keypair.fingerprint_template, 'utf-8'))
+			# raises an error if it contains invalid characters
+			template = base64.b64decode(bytes(template, 'utf-8'), validate=True)
 			fps.upload_template(tid=0, template=template)
 
-			if len(auth_val) != 996:
-				raise ValueError("Template must be 996 characters long")
-			# raises an error if it contains non-hex digit
-			auth_val = binascii.unhexlify(bytes(auth_val, 'utf-8'))
+			# raises an error if it contains invalid characters
+			auth_val = base64.b64decode(bytes(auth_val, 'utf-8'), validate=True)
 			if fps.verify_template(tid=0, template=auth_val):
 				# templates match, verification ok
 				pass

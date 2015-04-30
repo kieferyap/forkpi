@@ -78,6 +78,10 @@ class ForkpiDB(object):
 
     def fetch_templates(self):
         c = self.conn.cursor()
-        c.execute("SELECT K.id, fingerprint_template FROM records_keypair K JOIN records_keypair_doors KD ON (K.id=KD.keypair_id) WHERE KD.door_id=%s AND fingerprint_template != ''" % self.door_id);
+        # Fetch active keypairs that are mapped to this door and have a non-blank fingerprint_template field
+        c.execute("""
+            SELECT K.id, K.fingerprint_template
+            FROM records_keypair K JOIN records_keypair_doors KD ON (K.id = KD.keypair_id)
+            WHERE K.is_active = TRUE AND K.fingerprint_template != '' AND KD.door_id = %s """ % self.door_id);
         result = c.fetchall()
         return result

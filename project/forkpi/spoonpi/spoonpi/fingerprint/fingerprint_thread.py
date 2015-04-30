@@ -1,6 +1,6 @@
-import time
+import base64
 import threading
-import binascii
+import time
 
 from .fingerprint_scanner import FingerprintScanner
 
@@ -37,12 +37,13 @@ class FingerprintThread(threading.Thread):
                         # fetch templates for this door from the forkpi db
                         for tid, template in self.db.fetch_templates():
                             # verify all templates against id=0
-                            if len(template) == 996:
+                            if len(template) == 664:
                                 try:
-                                    template = binascii.unhexlify(bytes(template, 'utf-8'))
+                                    template = base64.b64decode(bytes(template, 'utf-8'), validate=True)
                                 except Exception:
+                                     # invalid character encountered -> ignore this template
                                     pass
-                                else:
+                                else: # safely converted template string to bytes
                                     if self.fps.verify_template(tid=0, template=template):
                                         self._print('Match with id %s' % tid)
                                         # if template matches, add to list of keypair ids

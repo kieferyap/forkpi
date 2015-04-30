@@ -1,3 +1,4 @@
+.fuse_hidden*
 *.pyc
 *~
 *.raw

@@ -27,7 +27,6 @@ urlpatterns = patterns('',
     url(r'^keypairs/scan/fingerprint/3x$', scan_fingerprint_3x, name='scan fingerprint 3x'),
     url(r'^keypairs/scan/fingerprint/wait$', wait_to_remove_finger, name='wait to remove finger'),
     url(r'^keypairs/scan/fingerprint/1x$', scan_fingerprint_1x, name='scan fingerprint 1x'),
-    url(r'^keypairs/printpdf$', print_pdf, name='print pdf'),
     url(r'^keypairs/search', search_keypairs, name='search keypairs'),
     url(r'^keypairs/authenticate_credential$', authenticate_credential, name='authenticate credential'),
 
