@@ -281,12 +281,12 @@ class FingerprintScanner(object):
 
         if self._capture_finger(tries):
             if self._run_command('Enroll' + str(stage)):
-                if stage < 3:
-                    self.backlight_off()
                 pass # proceed to determine return value
             else:
+                self.backlight_off()
                 return False
         else:
+            self.backlight_off()
             return False
 
         if stage == 3:
