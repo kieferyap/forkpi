@@ -3,8 +3,9 @@
 {% block content%}
 
 <ul class="nav nav-tabs">
-	<li class="active"><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
-	<li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
+	<li class="active"><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
+	<li><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
+	<li><a href="#deactivated-keypairs" data-toggle="tab">Deactivated Keypairs</a></li>
 </ul>
 <input type="hidden" id="scan-url-thrice" value="{% url 'scan fingerprint 3x' %}" />
 
@@ -84,7 +85,7 @@
 
 <!-- Content -->
 <div class="tab-content">
-	<div class="tab-pane" id="new-keypair">
+	<div class="tab-pane active" id="new-keypair">
 		<br/><br/><br/>
 		<div class="col-md-10 col-md-offset-1">
 			<form class="form-horizontal" accept-charset="UTF-8" method="post" action="{% url 'add keypair' %}">
@@ -150,7 +151,7 @@
 			</form>
 		</div>
 	</div>
-	<div class="tab-pane active" id="edit-keypairs">
+	<div class="tab-pane" id="edit-keypairs">
 		<div class="col-md-12">
 			<br />
 			<div class="panel panel-primary">
@@ -162,9 +163,9 @@
 				<table id="keypairs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
 					<thead>
 						<tr>
-							<th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="1">
+							<!-- <th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="1">
 								#
-							</th>
+							</th> -->
 							<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
 								Name
 							</th>
@@ -190,12 +191,8 @@
 					</thead>
 					<tbody>
 						{% for keypair in keypairs %}
-						<tr class="
-							{% if not keypair.is_active %}
-								greyed
-							{% endif %}
-						">
-							<td>{{ forloop.counter }}</td>
+						<tr>
+							<!-- <td>{{ forloop.counter }}</td> -->
 
 							<!-- Name -->
 							<td id="name-{{ keypair.id }}"
@@ -275,21 +272,15 @@
 							</td>
 							
 							<!-- Actions -->
-							<td id="action-{{ keypair.id }}">
+							<td id="action-{{ keypair.id }}" class="activated-action">
 								<div class="btn-group btn-group-justified" role="group">
 									<div class="btn-group" role="group"
 										 data-post-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
 
-										{% if keypair.is_active %}
-											<button class="btn expand btn-warning task-cancelbox deactivate-btn">
+											<button class="btn expand btn-danger task-cancelbox deactivate-btn">
 												Deactivate
 											</button>
-										{% else %}
-											<button class="btn expand btn-success task-cancelbox activate-btn">
-												Activate
-											</button>
-										{% endif %}
 									</div>
 									<div class="btn-group" role="group"
 										 data-post-url="{% url 'keypair toggle active' %}"
@@ -299,14 +290,35 @@
 												Edit
 											</button>
 									</div>
-									<div class="btn-group" role="group"
+									<!-- Delete button -->
+									<!-- <div class="btn-group" role="group"
 										 data-post-url="{% url 'delete keypair' %}"
 										 data-id="{{ keypair.id }}">
 
 										<button class="btn btn-danger task-cancelbox delete-btn">
 											Delete
 										</button>
+									</div> -->
+								</div>
+							</td>
+							<td id="action-{{ keypair.id }}" class="deactivated-action invisible">
+								<div class="btn-group btn-group-justified" role="group">
+									<div class="btn-group" role="group"
+										 data-post-url="{% url 'keypair toggle active' %}"
+										 data-id="{{ keypair.id }}">
+											<button class="btn expand btn-success task-cancelbox activate-btn">
+												Activate
+											</button>
 									</div>
+									<!-- Delete button -->
+									<!-- <div class="btn-group" role="group"
+										 data-post-url="{% url 'delete keypair' %}"
+										 data-id="{{ keypair.id }}">
+
+										<button class="btn btn-danger task-cancelbox delete-btn">
+											Delete
+										</button>
+									</div> -->
 								</div>
 							</td>
 						</tr>
@@ -315,7 +327,184 @@
 				</table>
 			</div>
 		</div>
-		<button class="btn btn-primary col-md-2 col-md-offset-5" onclick="alert('haHA')">Download as PDF</button>
+		<!-- <button class="btn btn-primary col-md-2 col-md-offset-5" onclick="alert('haHA')">Download as PDF</button> -->
+	</div>
+
+	<div class="tab-pane" id="deactivated-keypairs">
+		<div class="col-md-12">
+			<br />
+			<div class="panel panel-primary">
+				<div class="panel-heading">
+					<h3 class="panel-title">Keypairs</b></h3>
+					<div class="pull-right">
+					</div>
+				</div>
+				<table id="deactivated-keypairs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
+					<thead>
+						<tr>
+							<!-- <th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="1">
+								#
+							</th> -->
+							<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
+								Name
+							</th>
+							<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="2">
+								Doors
+							</th>
+							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="3">
+								<span class="glyphicon glyphicon-th mouseover-text" title="PIN"></span>
+							</th>
+							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="4">
+								<span class="glyphicon glyphicon-credit-card mouseover-text" title="RFID UID"></span>
+							</th>
+							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="5">
+								<span class="glyphicon glyphicon-hand-up mouseover-text" title="Fingerprint"></span>
+							</th>
+							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="10">
+								Last Edited By
+							</th>
+							<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="7">
+								Actions
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for keypair in deactivated_keypairs %}
+						<tr>
+							<!-- <td>{{ forloop.counter }}</td> -->
+
+							<!-- Name -->
+							<td id="name-{{ keypair.id }}"
+								data-post-url="{% url 'edit keypair name' %}"
+								data-field="name"
+								data-id="{{ keypair.id }}" data-value="{{ keypair.name }}">
+
+								<span class="editable-text">
+									{{ keypair.name }}
+								</span>
+							</td>
+
+							<!-- Doors -->
+							<td data-search-url="{% url 'search doors' %}"
+								data-link-url="{% url 'link door to keypair' %}"
+								data-unlink-url="{% url 'unlink door from keypair' %}"
+								data-field="doors"
+								data-id="{{ keypair.id }}" data-value="{{ keypair.doors_json }}">
+								
+								<span class="editable-text">
+									{% if keypair.doors_json %}
+										{% for door in keypair.doors_json %}
+										<li class="token-input-token-facebook">
+											{{ door.name }}
+										</li>
+										{% endfor %}
+									{% else %}
+										- - -
+									{% endif %}
+								</span>
+							</td>
+
+							<!-- PIN -->
+							<td>
+								<span>
+									{% if keypair.pin %}
+										<span class="glyphicon glyphicon-ok"></span>
+										<span class="invisible">Yes</span>
+									{% else %}
+										<span class="invisible">No</span>
+									{% endif %}
+								</span>
+							</td>
+
+							<!-- RFID UID -->
+							<td>
+
+								<span>
+									{% if keypair.rfid_uid %}
+										<span class="glyphicon glyphicon-ok"></span>
+										<span class="invisible">Yes</span>
+									{% else %}
+										<span class="invisible">No</span>
+									{% endif %}
+								</span>
+							</td>
+
+							<!-- Fingerprint -->
+							<td>
+								<span>
+									{% if keypair.fingerprint_template %}
+										<span class="glyphicon glyphicon-ok"></span>
+										<span class="invisible">Yes</span>
+									{% else %}
+										<span class="invisible">No</span>
+									{% endif %}
+								</span>
+							</td>
+
+							<td>
+								<div>
+									{{ keypair.last_edited_by.username }}
+								</div>
+								<div class="small-text">
+									{{ keypair.last_edited_on | date:"Y-m-d H:i"}}
+								</div>
+							</td>
+							
+							<!-- Actions -->
+							<td id="action-{{ keypair.id }}" class="activated-action invisible">
+								<div class="btn-group btn-group-justified" role="group">
+									<div class="btn-group" role="group"
+										 data-post-url="{% url 'keypair toggle active' %}"
+										 data-id="{{ keypair.id }}">
+											<button class="btn expand btn-danger task-cancelbox deactivate-btn">
+												Deactivate
+											</button>
+									</div>
+									<div class="btn-group" role="group"
+										 data-post-url="{% url 'keypair toggle active' %}"
+										 data-id="{{ keypair.id }}">
+											<button type="button" class="btn expand btn-primary task-edit edit-btn"
+													data-toggle="modal" data-target="#edit-modal">
+												Edit
+											</button>
+									</div>
+									<!-- Delete button -->
+									<!-- <div class="btn-group" role="group"
+										 data-post-url="{% url 'delete keypair' %}"
+										 data-id="{{ keypair.id }}">
+
+										<button class="btn btn-danger task-cancelbox delete-btn">
+											Delete
+										</button>
+									</div> -->
+								</div>
+							</td>
+							<td id="action-{{ keypair.id }}" class="deactivated-action">
+								<div class="btn-group btn-group-justified" role="group">
+									<div class="btn-group" role="group"
+										 data-post-url="{% url 'keypair toggle active' %}"
+										 data-id="{{ keypair.id }}">
+											<button class="btn expand btn-success task-cancelbox activate-btn">
+												Activate
+											</button>
+									</div>
+									<!-- Delete button -->
+									<!-- <div class="btn-group" role="group"
+										 data-post-url="{% url 'delete keypair' %}"
+										 data-id="{{ keypair.id }}">
+
+										<button class="btn btn-danger task-cancelbox delete-btn">
+											Delete
+										</button>
+									</div> -->
+								</div>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
 	</div>
 </div>
 

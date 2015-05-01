@@ -31,7 +31,9 @@ def hash_string(value):
 
 @login_required
 def keypairs_page(request):
-	keypairs = Keypair.objects.all().order_by('-last_edited_on')
+	keypairs = Keypair.objects.filter(is_active=True).order_by('-last_edited_on')
+	deactivated_keypairs = Keypair.objects.filter(is_active=False).order_by('-last_edited_on')
+	
 	for keypair in keypairs:
 		keypair.pin = decrypt(keypair.pin)
 		keypair.rfid_uid = decrypt(keypair.rfid_uid)
@@ -39,7 +41,16 @@ def keypairs_page(request):
 		for door in keypair.doors.all():
 			doors.append({'id':door.id, 'name':door.name})
 		keypair.doors_json = doors
-	return render(request, 'keypairs.html',  {'keypairs': keypairs})
+
+	for keypair in deactivated_keypairs:
+		keypair.pin = decrypt(keypair.pin)
+		keypair.rfid_uid = decrypt(keypair.rfid_uid)
+		doors = []
+		for door in keypair.doors.all():
+			doors.append({'id':door.id, 'name':door.name})
+		keypair.doors_json = doors
+
+	return render(request, 'keypairs.html',  {'keypairs': keypairs, 'deactivated_keypairs': deactivated_keypairs})
 
 def reencrypt_keypairs(old_key, new_key):
 	keypairs = Keypair.objects.all()

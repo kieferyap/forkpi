@@ -282,18 +282,24 @@ $(document).ready(function() {
 	// Keypair and User Actions
 	$(document.body).on('click', '.activate-btn', function(){
 		var btn = $(this);
+		btn.html("Loading...");
 		postIdToUrlInParent(btn, function(msg) {
-			btn.closest('tr').removeClass('greyed'); // ungrey the corresponding row
-			btn.addClass('deactivate-btn btn-warning').removeClass('activate-btn btn-success');
-			btn.html("Deactivate");
+			btn.html("Activate");
+			var row = btn.closest('tr');
+			$('#keypairs-table tbody').append(row);
+			row.find('.activated-action').removeClass('invisible');
+			row.find('.deactivated-action').addClass('invisible');
 		});
 
 	}).on('click', '.deactivate-btn', function(){
 		var btn = $(this);
+		btn.html("Loading...");
 		postIdToUrlInParent(btn, function(msg) {
-			btn.closest('tr').addClass('greyed'); // grey out the corresponding row
-			btn.removeClass('deactivate-btn btn-warning').addClass('activate-btn btn-success');
-			btn.html("Activate");
+			btn.html("Deactivate");
+			var row = btn.closest('tr');
+			$('#deactivated-keypairs-table tbody').append(row);
+			row.find('.activated-action').addClass('invisible');
+			row.find('.deactivated-action').removeClass('invisible');
 		});
 
 	}).on('click', '.delete-btn, .deny-btn', function(){
