@@ -5,18 +5,18 @@ SpoonPi
 	Investigate fingerprint suddenly failing bug
 ForkPi
 	PIECE OF CAKE
+		[x] Autohide messages
+		[x] Add New Keypairs > PIN must be a password field
+		Line 81 of fetch_templates, forkpi_db.py, add "is_active = TRUE" --> wait to remove finger must work
+		Impose PIN length = 4
+	    Remove option to delete
+
+	MEDIUM
 		[x] Name (and other required fields) - red asterisk
 			[x] Add New Keypair
 			[x] Edit Keypair
 			[x] Signup
 			[x] Login
-		[x] Autohide messages
-		Line 81 of fetch_templates, forkpi_db.py, add "is_active = TRUE" --> wait to remove finger must work
-		Add New Keypairs > PIN must be a password field
-		Impose PIN length = 4
-	    Remove option to delete
-
-	MEDIUM
 	    Move deactivated keypairs to separate tab
 		Base64 encoding instead of base16
 		Initialize options table and ensure option name is not modified
