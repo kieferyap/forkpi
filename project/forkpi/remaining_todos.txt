@@ -5,37 +5,22 @@ SpoonPi
 	Investigate fingerprint suddenly failing bug
 ForkPi
 	PIECE OF CAKE
-		[x] Autohide messages
-		[x] Add New Keypairs > PIN must be a password field
-		Line 81 of fetch_templates, forkpi_db.py, add "is_active = TRUE" --> wait to remove finger must work
 		Impose PIN length = 4
-	    Remove option to delete
 
 	MEDIUM
-		[x] Name (and other required fields) - red asterisk
-			[x] Add New Keypair
-			[x] Edit Keypair
-			[x] Signup
-			[x] Login
-	    Move deactivated keypairs to separate tab
-		Base64 encoding instead of base16
 		Initialize options table and ensure option name is not modified
 		Disallow registering with only PIN / editing such that only PIN is left
-
-	DIFFICULT
 	    Authenticate modal
-	    	remove PIN (can be brute forced by admin)
+	    	[.] remove PIN (can be brute forced by admin)
 	    	only show what's available (if no RFID, do not show scan RFID button)
 	    Name should only editable in edit keypair
 	    	read-only in keypairs table
+
+	CHARENJI
 	    CSV file (No more PDF on keypairs) for logs table
 	    	Use search keywords to query from db (filter)
 	    	Do not include credentials
-		[.] Pageinate logs (and maybe keypairs) -- Conflicts with CSV requirement
-				https://djangosnippets.org/snippets/1391/
-				http://getbootstrap.com/components/#pagination
-				http://botmonster.com/jquery-bootpag/
-				http://www.phpfreaks.com/tutorial/basic-pagination
+		
 Others
     Manual: one is to one from user to rfid, deactivation mechanics
 	Separate Forkpi and Spoonpi users in database
@@ -189,3 +174,20 @@ Others
 [x] Visual cues on fingerprint enrollment: "Remove finger", etc.
 [.] Print pdf is not supported in Python 3.0-3.2 -> change to csv
 [x] Investigate fingerprint class separation bug
+[x] Autohide messages
+[x] Add New Keypairs > PIN must be a password field
+[x] Name (and other required fields) - red asterisk
+	[x] Add New Keypair
+	[x] Edit Keypair
+	[x] Signup
+	[x] Login
+[x] Move deactivated keypairs to separate tab
+[x] Base64 encoding instead of base16
+[.] Pageinate logs (and maybe keypairs) -- Conflicts with CSV requirement
+		https://djangosnippets.org/snippets/1391/
+		http://getbootstrap.com/components/#pagination
+		http://botmonster.com/jquery-bootpag/
+		http://www.phpfreaks.com/tutorial/basic-pagination
+
+[x] Line 81 of fetch_templates, forkpi_db.py, add "is_active = TRUE" --> wait to remove finger must work
+[x] Remove option to delete
