@@ -115,26 +115,26 @@
 				<div class="form-group">
 					<label for="rfid_uid" class="col-md-2 control-label">RFID UID</label>
 					<div class="col-md-8">
-						<input type="text" class="form-control required-rfid-fingerprint"
+						<input type="text" class="form-control"
 							   id="newRfid" name="rfid_uid"
 							   placeholder="Scan for an RFID tag or paste the UID here." />
 					</div>
 					<div class="col-md-2" data-scan-url="{% url 'scan rfid' %}"
 						 data-field="rfid" data-target-textbox="#newRfid">
-						<input type="button" class="btn expand btn-success scan-new"
+						<input type="button" class="btn expand btn-success scan-new required"
 							   value="Scan RFID" />
 					</div>
 				</div>
 				<div class="form-group">
 					<label for="fingerprint_template" class="col-md-2 control-label">Fingerprint</label>
 					<div class="col-md-8">
-						<input type="text" class="form-control required-rfid-fingerprint"
+						<input type="text" class="form-control"
 							   id="newFinger" name="fingerprint_template"
 							   placeholder="Scan for a finger or paste the template here." />
 					</div>
 					<div class="col-md-2" data-scan-url="{% url 'scan fingerprint 3x' %}"
 						 data-field="fingerprint" data-target-textbox="#newFinger">
-						<input type="button" class="btn expand btn-success scan-new"
+						<input type="button" class="btn expand btn-success scan-new required"
 							   value="Scan Finger"/>
 					</div>
 				</div>

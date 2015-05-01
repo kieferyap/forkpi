@@ -31,6 +31,36 @@ $(document).ready(function() {
 	// some editing text in the modal was opened
 	var editedTextInModal = false;
 
+	// asterisk inputbox
+	var asterisk = $('.required-invisible-container').html();
+	var specialAsterisk = $('.required-invisible-container-rfid-fingerprint').html();
+	
+	// required
+	$('.required').each(function(){
+		$(this).wrap('<div class="required-field-block"></div>');
+		$(this).after(asterisk);
+	});
+
+	// required-rfid-fingerprint
+	$('.required-rfid-fingerprint').each(function(){
+		$(this).wrap('<div class="required-field-block"></div>');
+		$(this).after(specialAsterisk);
+	})
+
+	$(function() {
+		$('.required-icon').tooltip({
+			placement: 'left',
+			title: 'Required field'
+		});
+	});
+
+	$(function() {
+		$('.required-icon-rfid-fingerprint').tooltip({
+			placement: 'left',
+			title: 'A fingerprint template OR an RFID card must be entered.'
+		});
+	});
+
 	// Editing text
 	$(document.body).on('click', '.editable-text', function(){
 		if (editableTextTrigger) { // some other text is already being edited; close that first
@@ -41,6 +71,8 @@ $(document).ready(function() {
 		editableTextTrigger = true;
 
 		var newHtml = ''; // the HTML that will replace this element
+		var requiredHtml = '';
+		var isRfidFingerprint = false;
 
 		var parent = $(this).parent();
 		var field = parent.data('field');
@@ -57,17 +89,36 @@ $(document).ready(function() {
 		} else if (field == 'doors' || field == 'keypairs') {
 			currentValue = ''; // the textbox should be empty because we will replace it later
 		}
-		newHtml += '<input type="text" class="editing-text col-md-8" value="' + currentValue + '" />';
-		
 		if (field == 'rfid' || field == 'fingerprint') {
+			requiredHtml = 'required-rfid-fingerprint';
+			isRfidFingerprint = true;
+		}
+		
+		newHtml += '<div class="col-md-8"><input type="text" class="editing-text form-control '+requiredHtml+'" value="' + currentValue + '" /></div>';
+
+		if(isRfidFingerprint){
 			var scanButton = '<div class="scan-edit"><span class="glyphicon glyphicon-search"></span></div>';
 			newHtml += scanButton;
 		}
 
 		var doneButton = '<div class="completed-check editable-done"><span class="glyphicon glyphicon-ok-sign"></span></div>';
 		newHtml += doneButton;
-
 		parent.html(newHtml);
+
+		if(isRfidFingerprint){
+			// required-rfid-fingerprint
+			$('.required-rfid-fingerprint').each(function(){
+				$(this).wrap('<div class="required-field-block"></div>');
+				$(this).after(specialAsterisk);
+			})
+
+			$(function() {
+				$('.required-icon-rfid-fingerprint').tooltip({
+					placement: 'left',
+					title: 'A fingerprint template OR an RFID card must be entered.'
+				});
+			});
+		}
 
 		if (field == 'doors' || field == 'keypairs') {
 			// replace the textbox with tokenInput
@@ -124,7 +175,7 @@ $(document).ready(function() {
 			// no need to send changes to server since it was already sent while editing (see onAdd and onDelete)
 
 		} else {
-			var newValue = parent.children('input').val().trim();
+			var newValue = parent.find('input').val().trim();
 			parent.data('value', newValue);
 			
 			if (newValue == '') {
