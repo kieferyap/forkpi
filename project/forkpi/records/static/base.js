@@ -331,6 +331,11 @@ $(document).ready(function() {
 		}, function(msg) {
 			$('.modal-error-credentials').show();
 			$('#modal-credential-text').val();
+			setTimeout(function() {
+				$('.alert').each(function(){
+					$(this).fadeOut(500);
+				});
+			}, 2000);
 		});
 	});
 
@@ -378,6 +383,13 @@ $(document).ready(function() {
 			btn.html("Demote");
 		});
 	});
+
+
+	setTimeout(function() {
+		$('.alert').each(function(){
+			$(this).fadeOut(500);
+		});
+	}, 2000);
 });
 
 
