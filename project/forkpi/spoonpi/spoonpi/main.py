@@ -1,4 +1,6 @@
 from forkpi_db import ForkpiDB
+from lockout_table import LockoutTable
+from door_lock import DoorLock
 
 from fingerprint.fingerprint_thread import FingerprintThread
 from oled import OLED
@@ -10,15 +12,14 @@ from math import ceil
 from threading import Timer
 
 class SpoonPi:
-    # LOCKOUT TABLE columns [rfid_uid, incorrect_streak, lockout]
-    COL_UID, COL_STREAK, COL_TIME_LEFT = list(range(3))
 
     def __init__(self):
         print('Loading the ForkPi database...')
         self.db = ForkpiDB()
         print('Loading options...')
-        self.attempt_limit = self.load_option('attempt_limit')
-        self.lockout_time = self.load_option('lockout_time_minutes') * 60
+        attempt_limit = self.load_option('attempt_limit')
+        lockout_time = self.load_option('lockout_time_minutes')
+        self.lockout_table = LockoutTable(attempt_limit, lockout_time)
         self.keypad_timeout = self.load_option('keypad_timeout_seconds')
         self.max_transaction_time = self.load_option('max_transaction_time_seconds')
         self.lock_release_time = self.load_option('lock_release_time_seconds')
@@ -32,15 +33,22 @@ class SpoonPi:
         print('Loading (K)eypad...')
         self.keypad_thread = KeypadThread()
 
+        print('Connecting to (dummy) door lock...')
+        self.door_lock = DoorLock()
+
         # maps RFID UIDs to incorrect streak and remaining lockout time
         self.lockout_table = list()
-        # ends a pending transaction after a timer if the current self.factors are not enough to be authenticated
-        self.new_timer = lambda: Timer(self.max_transaction_time, self.deny_then_end_transaction, kwargs={'reason':'insufficient credentials'})
         self.transaction_timer = self.new_timer()
+
         # start polling for cards and fingers
         self.rfid_thread.start()
         self.fingerprint_thread.start()
         self.keypad_thread.start()
+
+    def new_timer(self):
+        # ends a pending transaction after a timer if the current self.factors are not enough to be authenticated
+        # call the function `deny_then_end_transaction` after `max_transaction_time` seconds have elapsed
+        return Timer(self.max_transaction_time, self.deny_then_end_transaction, kwargs={'reason':'insufficient credentials'})
 
     def load_option(self, name):
         value, default = self.db.fetch_option(name)
@@ -59,10 +67,11 @@ class SpoonPi:
         names = ', '.join(names)
         print("> Allowed %s" % names)
         self.db.log_allowed(names=names, **kwargs)
-        # Unlock door; lock door upon being closed
+
+        self.door_lock.unlock()
         self.led.clear_then_puts("Access\n granted")
         time.sleep(self.lock_release_time)
-        # If door was not opened, lock door
+        self.door_lock.lock()
 
     def deny_access(self, reason, led_message="Access\n denied", *args, **kwargs):
         assert len(args) == 0
@@ -70,24 +79,6 @@ class SpoonPi:
         self.db.log_denied(reason=reason, **kwargs)
         self.led.clear_then_puts(led_message)
         time.sleep(0.5)
-
-    def find_lockout_row(self, rfid_uid):
-        lockout_row = None
-        for row in self.lockout_table:
-            if row[0] == rfid_uid:
-                lockout_row = row
-        if lockout_row is None:
-            lockout_row = [rfid_uid, 0, 0]
-            self.lockout_table.append(lockout_row)
-        return lockout_row
-
-    def update_lockout_timers(self, time_elapsed):
-        for row in self.lockout_table:
-            lockout_time_left = row[SpoonPi.COL_TIME_LEFT]
-            was_locked_out = (lockout_time_left > 0)
-            row[SpoonPi.COL_TIME_LEFT] = max(0, lockout_time_left - time_elapsed)
-            if was_locked_out and row[SpoonPi.COL_TIME_LEFT] == 0:
-                row[SpoonPi.COL_STREAK] = 0
 
     def single_factor_authentication(self, *args, **kwargs):
         assert len(args) == 0
@@ -100,13 +91,30 @@ class SpoonPi:
 
     def two_factor_authentication(self, *args, **kwargs):
         assert len(args) == 0
-        assert len(kwargs.keys()) == 2
+        assert len(kwargs) == 2
+
+        use_lockout_table = False
+        if 'pin' in kwargs and 'rfid_uid' in kwargs:
+            use_lockout_table = True
+
+        if use_lockout_table:
+            rfid_uid = kwargs['rfid_uid']
+            is_locked_out, time_left = self.lockout_table.get_lockout(rfid_uid)
+            if is_locked_out:
+                self.deny_access(
+                    reason="locked out", **kwargs,
+                    led_message="Locked out\n for %sm" % time_left)
+                return False
 
         is_authorized, names = self.db.authenticate(**kwargs)
         if is_authorized:
             self.allow_access(names=names, **kwargs)
+            if use_lockout_table:
+                self.lockout_table.reset_streak(rfid_uid)
         else:
             self.deny_access(reason='invalid keypair', **kwargs)
+            if use_lockout_table:
+                self.lockout_table.failed_attempt(rfid_uid)
         return is_authorized
 
     def pin_authentication(self):
@@ -166,6 +174,8 @@ class SpoonPi:
 
                 self.rfid_thread.stop_polling()
                 self.factors['rfid_uid'] = self.rfid_thread.get_rfid_uid()
+                
+                self.lockout_table.update_timers()
 
                 if self.single_factor_authentication(rfid_uid=self.factors['rfid_uid']):
                     # single factor succeeded; end transaction
