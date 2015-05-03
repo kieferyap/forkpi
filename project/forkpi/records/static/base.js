@@ -78,7 +78,7 @@ $(document).ready(function() {
 		var field = parent.data('field');
 		
 		// these fields are in the modal
-		if (field == 'pin' || field == 'rfid' || field == 'fingerprint') {
+		if (field == 'pin' || field == 'rfid' || field == 'fingerprint' || field == 'name') {
 			editedTextInModal = true;
 		}
 
@@ -465,6 +465,9 @@ function transformModalIntoEditKeypair(id, msg){
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html($('#edit-keypair-modal > .body').html());
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html($('#edit-keypair-modal > .footer').html());
+
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-name').data('id', id);
+	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-name > span').html(name);
 
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-pin').data('id', id);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body > .edit-pin > span').html(userPIN);

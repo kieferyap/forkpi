@@ -114,6 +114,12 @@ def is_valid_name(name, id=None):
 def is_valid_pin(pin):
 	return len(pin)>=4 and pin.isdigit()
 
+def is_valid_keypair_rfid(kid):
+	return not Keypair.objects.filter(id=kid, fingerprint_template='').count() > 0
+
+def is_valid_keypair_fingerprint(kid):
+	return not Keypair.objects.filter(id=kid, hash_rfid=hash_string('')).count() > 0
+
 @login_required
 def new_keypair(request):
 	name = request.POST['name']
@@ -129,6 +135,9 @@ def new_keypair(request):
 		is_error = True
 	if pin and not is_valid_pin(pin):
 		messages.add_message(request, messages.ERROR, 'PIN must be at least 4 numeric characters.')
+		is_error = True
+	if not(rfid_uid or fingerprint_template):
+		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID cardmust be entered.')
 		is_error = True
 
 	if is_error:
@@ -182,7 +191,14 @@ def edit_keypair_pin(request):
 @login_required
 def edit_keypair_rfid(request):
 	rfid_uid = request.POST['value']
-	keypair = Keypair.objects.get(id = request.POST['id'])
+	kid = request.POST['id']
+	keypair = Keypair.objects.get(id = kid)
+
+	if rfid_uid == '' and not is_valid_keypair_rfid(kid):
+		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID cardmust be entered.')
+		response = HttpResponse("Error: A fingerprint template OR an RFID cardmust be entered.")
+		response.status_code = 400
+		return response
 
 	keypair.last_edited_by = request.user
 	keypair.rfid_uid = encrypt(rfid_uid)
@@ -192,13 +208,20 @@ def edit_keypair_rfid(request):
 
 @login_required
 def edit_keypair_fingerprint(request):
+	kid = request.POST['id']
 	fingerprint_template = request.POST['value']
-	keypair = Keypair.objects.get(id = request.POST['id'])
+	keypair = Keypair.objects.get(id = kid)
+
+	if fingerprint_template == '' and not is_valid_keypair_fingerprint(kid):
+		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID cardmust be entered.')
+		response = HttpResponse("Error: A fingerprint template OR an RFID cardmust be entered.")
+		response.status_code = 400
+		return response
 
 	keypair.last_edited_by = request.user
 	keypair.fingerprint_template = fingerprint_template
 	keypair.save()
-	return HttpResponse("Successful.")
+	return HttpResponse("Successful.")	
 
 @login_required
 def delete_keypair(request):

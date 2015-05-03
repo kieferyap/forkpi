@@ -55,6 +55,12 @@
 </div>
 <div id="edit-keypair-modal" class="invisible">
 	<div class="body">
+		<div style="font-weight: bold">Name:</div>
+		<span class="edit-name" data-post-url="{% url 'edit keypair name' %}" data-field="name">
+	  		<span class="editable-text">
+		  	</span>
+	  	</span>
+	  	<hr style="clear:both;"/>
 		<div style="font-weight: bold">PIN:</div>
 		<span class="edit-pin" data-post-url="{% url 'edit keypair pin' %}"
 			  data-field="pin">
@@ -200,7 +206,7 @@
 								data-field="name"
 								data-id="{{ keypair.id }}" data-value="{{ keypair.name }}">
 
-								<span class="editable-text">
+								<span>
 									{{ keypair.name }}
 								</span>
 							</td>
@@ -378,7 +384,7 @@
 								data-field="name"
 								data-id="{{ keypair.id }}" data-value="{{ keypair.name }}">
 
-								<span class="editable-text">
+								<span>
 									{{ keypair.name }}
 								</span>
 							</td>
@@ -405,7 +411,7 @@
 
 							<!-- PIN -->
 							<td>
-								<span>
+								<span id="pin-{{ keypair.id }}">
 									{% if keypair.pin %}
 										<span class="glyphicon glyphicon-ok"></span>
 										<span class="invisible">Yes</span>
@@ -418,7 +424,7 @@
 							<!-- RFID UID -->
 							<td>
 
-								<span>
+								<span id="rfid-{{ keypair.id }}">
 									{% if keypair.rfid_uid %}
 										<span class="glyphicon glyphicon-ok"></span>
 										<span class="invisible">Yes</span>
@@ -430,7 +436,7 @@
 
 							<!-- Fingerprint -->
 							<td>
-								<span>
+								<span id="fingerprint-{{ keypair.id }}">
 									{% if keypair.fingerprint_template %}
 										<span class="glyphicon glyphicon-ok"></span>
 										<span class="invisible">Yes</span>
