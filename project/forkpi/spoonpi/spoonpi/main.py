@@ -38,7 +38,6 @@ class SpoonPi:
         self.door_lock = DoorLock()
 
         # maps RFID UIDs to incorrect streak and remaining lockout time
-        self.lockout_table = list()
         self.transaction_timer = self.new_timer()
 
         # start polling for cards and fingers

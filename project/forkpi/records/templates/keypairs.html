@@ -37,16 +37,16 @@
 	</div>
 	<div class="footer">
 		<span class="col-md-3" data-target-textbox="#modal-credential-text" data-field="pin">
-			<input type="button" class="btn expand btn-success modal-enter-pin" value="Enter PIN"/>
+			<input type="button" id="btn-modal-pin" class="btn expand btn-success modal-enter-pin" value="Enter PIN"/>
 		</span>
 		<span class="col-md-3" data-target-textbox="#modal-credential-text"
 			  data-field="rfid" data-scan-url="{% url 'scan rfid' %}">
-			<input type="button" class="btn expand btn-success scan-new" value="Scan RFID" />
+			<input type="button" id="btn-modal-rfid" class="btn expand btn-success scan-new" value="Scan RFID" />
 		</span>
 		<span class="col-md-3" data-scan-url="{% url 'scan fingerprint 1x' %}"
 			  data-wait-url="{% url 'wait to remove finger' %}"
 			  data-field="fingerprint" data-target-textbox="#modal-credential-text">
-			<input type="button" class="btn expand btn-success scan-new" value="Scan Finger"/>	
+			<input type="button" id="btn-modal-fingerprint" class="btn expand btn-success scan-new" value="Scan Finger"/>	
 		</span>
 		<span class="col-md-3" data-auth-url="{% url 'authenticate credential' %}">
 			<button type="button" class="btn expand btn-primary modal-authenticate-btn">Submit</button>
@@ -227,7 +227,7 @@
 
 							<!-- PIN -->
 							<td>
-								<span>
+								<span id="pin-{{ keypair.id }}">
 									{% if keypair.pin %}
 										<span class="glyphicon glyphicon-ok"></span>
 										<span class="invisible">Yes</span>
@@ -239,8 +239,7 @@
 
 							<!-- RFID UID -->
 							<td>
-
-								<span>
+								<span id="rfid-{{ keypair.id }}">
 									{% if keypair.rfid_uid %}
 										<span class="glyphicon glyphicon-ok"></span>
 										<span class="invisible">Yes</span>
@@ -252,7 +251,7 @@
 
 							<!-- Fingerprint -->
 							<td>
-								<span>
+								<span id="fingerprint-{{ keypair.id }}">
 									{% if keypair.fingerprint_template %}
 										<span class="glyphicon glyphicon-ok"></span>
 										<span class="invisible">Yes</span>

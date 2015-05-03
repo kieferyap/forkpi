@@ -1,22 +1,20 @@
 
 
 SpoonPi
-	[x] Put back lockouts for rfid
+	Put back lockouts for rfid
 	Investigate fingerprint suddenly failing bug
 ForkPi
-	PIECE OF CAKE
-		Impose PIN length = 4
 
 	MEDIUM
 		Initialize options table and ensure option name is not modified
 		Disallow registering with only PIN / editing such that only PIN is left
 			a.k.a.: Require RFID OR Fingerprint
-	    Authenticate modal
+	    [x] Authenticate modal
 	    	[.] remove PIN (can be brute forced by admin)
-	    	only show what's available (if no RFID, do not show scan RFID button)
+	    	[x] only show what's available (e.g.: if no RFID, do not show scan RFID button)
 	    Name should only editable in edit keypair
 	    	read-only in keypairs table
-	    Separate the keypairs table view
+	    [.] Separate the keypairs table view -- within each row, there are differences in the final column
 
 	CHARENJI
 	    CSV file (No more PDF on keypairs) for logs table
@@ -193,3 +191,4 @@ Others
 
 [x] Line 81 of fetch_templates, forkpi_db.py, add "is_active = TRUE" --> wait to remove finger must work
 [x] Remove option to delete
+[x] Impose PIN length = 4

@@ -310,9 +310,8 @@ $(document).ready(function() {
 	}).on('click', '.edit-btn', function(){
 		var parent = $(this).parent();
 		var id = parent.data('id');
+
 		transformModalIntoAuthenticate(id);
-		// Default to PIN authentication
-		$('.modal-enter-pin').trigger('click');
 
 	}).on('click', '.modal-enter-pin', function(){
 		var id = $("#authenticate-modal").data('id');
@@ -321,7 +320,6 @@ $(document).ready(function() {
 		$('#modal-credential-text').val('');
 		$('#modal-credential-text').focus();
 		$('#modal-active-field').val('pin');
-		$('#modal-credential-text').attr('placeholder', 'Enter PIN, swipe RFID, or scan fingerprint of user (' + name + ')');
 		$('#modal-credential-text').attr('type', 'password');
 
 	}).on('click', '.modal-authenticate-btn', function(){
@@ -403,10 +401,52 @@ function transformModalIntoAuthenticate(id) {
 	var name = $('#name-' + id).data('value').trim();
 	var modalTitle = 'Enter any credential of user (' + name + '):';
 	$("#authenticate-modal").data('id', id);
+	$('#modal-credential-text').attr('placeholder', 'Enter credential.');
+	// alert(name);
 
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html($('#authenticate-modal > .body').html());
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html($('#authenticate-modal > .footer').html());
+
+	var isPin = false;
+	var isRfid = false;
+	var isFingerprint = false;
+
+	var btnPin = $('.modal-footer > span > #btn-modal-pin');
+	var btnRfid = $('.modal-footer > span > #btn-modal-rfid');
+	var btnFingerprint = $('.modal-footer > span > #btn-modal-fingerprint');
+
+	if(strcmp($('#pin-'+id).text().trim(), "Yes") == 0)
+		isPin = true;
+	if(strcmp($('#rfid-'+id).text().trim(), "Yes") == 0)
+		isRfid = true;
+	if(strcmp($('#fingerprint-'+id).text().trim(), "Yes") == 0)	
+		isFingerprint = true;
+
+	if(isRfid){
+		$('#modal-active-field').val('rfid');
+		btnRfid.removeAttr('disabled');
+	}
+	else
+		btnRfid.attr('disabled', 'true');
+		// btnRfid.hide();
+	if(isFingerprint){
+		$('#modal-active-field').val('fingerprint');
+		btnFingerprint.removeAttr('disabled');
+	}
+	else
+		btnFingerprint.attr('disabled', 'true');
+		// btnFingerprint.hide();
+
+	if(isPin){
+		btnPin.removeAttr('disabled');
+		$('.modal-enter-pin').trigger('click');
+		$('#modal-credential-text').focus();
+		$('#modal-active-field').val('pin');
+	}
+	else
+		btnPin.attr('disabled', 'true');
+		// btnPin.hide();
 
 }
 
