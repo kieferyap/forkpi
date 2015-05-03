@@ -137,7 +137,7 @@ def new_keypair(request):
 		messages.add_message(request, messages.ERROR, 'PIN must be at least 4 numeric characters.')
 		is_error = True
 	if not(rfid_uid or fingerprint_template):
-		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID cardmust be entered.')
+		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID card must be entered.')
 		is_error = True
 
 	if is_error:
@@ -195,8 +195,8 @@ def edit_keypair_rfid(request):
 	keypair = Keypair.objects.get(id = kid)
 
 	if rfid_uid == '' and not is_valid_keypair_rfid(kid):
-		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID cardmust be entered.')
-		response = HttpResponse("Error: A fingerprint template OR an RFID cardmust be entered.")
+		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID card must be entered.')
+		response = HttpResponse("Error: A fingerprint template OR an RFID card must be entered.")
 		response.status_code = 400
 		return response
 
@@ -213,8 +213,8 @@ def edit_keypair_fingerprint(request):
 	keypair = Keypair.objects.get(id = kid)
 
 	if fingerprint_template == '' and not is_valid_keypair_fingerprint(kid):
-		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID cardmust be entered.')
-		response = HttpResponse("Error: A fingerprint template OR an RFID cardmust be entered.")
+		messages.add_message(request, messages.ERROR, 'A fingerprint template OR an RFID card must be entered.')
+		response = HttpResponse("Error: A fingerprint template OR an RFID card must be entered.")
 		response.status_code = 400
 		return response
 

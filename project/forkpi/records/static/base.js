@@ -1,5 +1,45 @@
 // For table sorting and filtering
 $(document).ready(function() {
+
+	// Download as CSV
+	$(".export-as-csv").on('click', function (event) {
+		// CSV
+		// Reconstruction needed because some of the cells are showing up weirdly. D:
+		$('.non-csv').hide();
+		var tableString = "<table><tr>";
+
+		// Header
+		$('th').each(function(){
+			if($(this).is(':visible')){
+				tableString += "<th>"+$(this).text().trim()+"</th>";
+			}
+		});
+		tableString += "</tr>";
+
+		// Rows
+		$('tbody > tr').each(function(){
+			// Check if row is visible
+			if($(this).is(':visible')){
+				tableString += "<tr>";
+
+				// Cells
+				$(this).find('td').each(function(){
+					if($(this).is(':visible')){
+						tableString += "<td>"+$(this).text().trim()+"</td>";
+					}
+				});
+
+				tableString += "</tr>";
+			}
+		});
+
+		$('#hidden-table-container').html(tableString);
+		$('.non-csv').show();
+		exportTableToCSV.apply(this, [$('#hidden-table-container > table'), 'logs.csv']);
+		// IF CSV, don't do event.preventDefault() or return false
+		// We actually need this to be a typical hyperlink
+	});
+
 	$(".tablesorter").tablesorter({
 		widgets: ["filter"],
 		sortReset      : true,
@@ -530,4 +570,44 @@ function strcmp ( str1, str2 ) {
 	// *     returns 2: -1
 
 	return ( ( str1 == str2 ) ? 0 : ( ( str1 > str2 ) ? 1 : -1 ) );
+}
+
+function exportTableToCSV($table, filename) {
+
+	var $rows = $table.find('tr:has(td)'),
+
+	// Temporary delimiter characters unlikely to be typed by keyboard
+	// This is to avoid accidentally splitting the actual contents
+	tmpColDelim = String.fromCharCode(11), // vertical tab character
+	tmpRowDelim = String.fromCharCode(0), // null character
+
+	// actual delimiter characters for CSV format
+	colDelim = '","',
+	rowDelim = '"\r\n"',
+
+	// Grab text from table into CSV formatted string
+	csv = '"' + $rows.map(function (i, row) {
+		var $row = $(row),
+			$cols = $row.find('td');
+
+		return $cols.map(function (j, col) {
+			var $col = $(col),
+				text = $col.text();
+
+			return text.replace(/"/g, '""'); // escape double quotes
+
+		}).get().join(tmpColDelim);
+
+	}).get().join(tmpRowDelim)
+		.split(tmpRowDelim).join(rowDelim)
+		.split(tmpColDelim).join(colDelim) + '"',
+
+	// Data URI
+	csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
+
+	$(this).attr({
+	    'download': filename,
+        'href': csvData,
+        'target': '_blank'
+	});
 }

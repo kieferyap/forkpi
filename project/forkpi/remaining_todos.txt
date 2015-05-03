@@ -4,15 +4,7 @@ SpoonPi
 	[%] Put back lockouts for rfid
 	Investigate fingerprint suddenly failing bug
 ForkPi
-
-	MEDIUM
-		Initialize options table and ensure option name is not modified    
-
-	CHARENJI
-	    CSV file (No more PDF on keypairs) for logs table
-	    	Parse logs table, write only visible rows to csv
-	    	Do not include credentials
-		
+	Initialize options table and ensure option name is not modified
 Others
     Manual: one is to one from user to rfid, deactivation mechanics
 	Separate Forkpi and Spoonpi users in database
@@ -193,4 +185,7 @@ Others
 	[x] Part 2: Editing
 [x] Name should only editable in edit keypair
 	[x] read-only in keypairs table	
-[x] Pressing [ENTER] on modal-credential-text should trigger the Submit button
+[x] Pressing [ENTER] on modal-credential-text now triggers the Submit button
+[x] CSV file (No more PDF on keypairs) for logs table
+	[x] Parse logs table, write only visible rows to csv
+	[x] Do not include credentials

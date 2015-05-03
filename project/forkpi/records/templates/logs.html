@@ -32,13 +32,13 @@
 					<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="3">
 						Details
 					</th>
-					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3 non-csv" data-placeholder="Search..." data-tablesaw-priority="4">
 						PIN
 					</th>
-					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3 non-csv" data-placeholder="Search..." data-tablesaw-priority="4">
 						RFID UID
 					</th>
-					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3 non-csv" data-placeholder="Search..." data-tablesaw-priority="4">
 						Fingerprint
 					</th>
 				</tr>
@@ -55,9 +55,9 @@
 						<td>{{ log.door.name }}
 						<td>{{ log.action }}</td>
 						<td>{{ log.details }}</td>
-						<td>{{ log.pin }}</td>
-						<td>{{ log.rfid_uid }}</td>
-						<td>
+						<td class="non-csv">{{ log.pin }}</td>
+						<td class="non-csv">{{ log.rfid_uid }}</td>
+						<td class="non-csv">
 						{% if log.used_fingerprint %}
 							Yes
 						{% else %}
@@ -86,6 +86,11 @@
 		</form>
 	</div>
 
+	<div id="hidden-table-container" style="display:none"> <!-- invisible does not work with the CSV. -->
+	</div>
 
+	<center><a href="#" class="export-as-csv">Export as CSV</a></center>
+
+	<!-- <input class="export-as-csv" value="Export as CSV" type="button" /> -->
 </div>
 {% endblock %}

@@ -3,9 +3,9 @@
 {% block content%}
 
 <ul class="nav nav-tabs">
-	<li class="active"><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
-	<li><a href="#activated-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
+	<li class="active"><a href="#activated-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
 	<li><a href="#deactivated-keypairs" data-toggle="tab">Deactivated Keypairs</a></li>
+	<li><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
 </ul>
 <input type="hidden" id="scan-url-thrice" value="{% url 'scan fingerprint 3x' %}" />
 
@@ -91,7 +91,7 @@
 
 <!-- Content -->
 <div class="tab-content">
-	<div class="tab-pane active" id="new-keypair">
+	<div class="tab-pane" id="new-keypair">
 		<br/><br/><br/>
 		<div class="col-md-10 col-md-offset-1">
 			<form class="form-horizontal" accept-charset="UTF-8" method="post" action="{% url 'add keypair' %}">
@@ -157,7 +157,7 @@
 			</form>
 		</div>
 	</div>
-	<div class="tab-pane" id="activated-keypairs">
+	<div class="tab-pane active" id="activated-keypairs">
 		<div class="col-md-12">
 			<br />
 			<div class="panel panel-primary">
