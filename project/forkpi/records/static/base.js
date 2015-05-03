@@ -245,7 +245,7 @@ $(document).ready(function() {
 			// nothing was scanned: show error as textbox placeholder
 			scanButton.show(256);
 			$(target).attr('placeholder', msg['responseText'])
-			alert(msg['responseText']);
+			// alert(msg['responseText']);
 		};
 
 		if (field == 'rfid') {
@@ -315,7 +315,7 @@ $(document).ready(function() {
 		$('.modal-enter-pin').trigger('click');
 
 	}).on('click', '.modal-enter-pin', function(){
-		var id = $(this).parent().parent().parent().data('id');
+		var id = $("#authenticate-modal").data('id');
 		var name = $('#name-'+id).data('value');
 
 		$('#modal-credential-text').val('');
@@ -325,26 +325,24 @@ $(document).ready(function() {
 		$('#modal-credential-text').attr('type', 'password');
 
 	}).on('click', '.modal-authenticate-btn', function(){
-		var parent = $(this).parent().parent().parent();
-		var id = parent.data('id');
-		alert(parent.html());
+		var id = $("#authenticate-modal").data('id');
+		var url = $('.credential').data('post-url');
 
-		// postToUrl(parent.data('auth-url'), {
-		// 	id : id,
-		// 	val : $('#modal-credential-text').val(),
-		// 	type: $('#modal-active-field').val()
-		// }, function(msg) {
-		// 	transformModalIntoEditKeypair(id, msg);
-		// }, function(msg) {
-		// 	alert(msg);
-		// 	$('.modal-error-credentials').show();
-		// 	$('#modal-credential-text').val();
-		// 	setTimeout(function() {
-		// 		$('.alert').each(function(){
-		// 			$(this).fadeOut(500);
-		// 		});
-		// 	}, 2000);
-		// });
+		postToUrl(url, {
+			id : id,
+			val : $('#modal-credential-text').val(),
+			type: $('#modal-active-field').val()
+		}, function(msg) {
+			transformModalIntoEditKeypair(id, msg);
+		}, function(msg) {
+			$('.modal-error-credentials').show();
+			$('#modal-credential-text').val();
+			setTimeout(function() {
+				$('.alert').each(function(){
+					$(this).fadeOut(500);
+				});
+			}, 2000);
+		});
 	});
 
 	// On edit modal close

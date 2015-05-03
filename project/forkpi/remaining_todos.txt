@@ -1,7 +1,7 @@
 
 
 SpoonPi
-	Put back lockouts for rfid and fingerprint
+	[x] Put back lockouts for rfid
 	Investigate fingerprint suddenly failing bug
 ForkPi
 	PIECE OF CAKE

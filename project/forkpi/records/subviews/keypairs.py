@@ -175,7 +175,7 @@ def edit_keypair_pin(request):
 		return HttpResponse("Successful.")
 	else:
 		messages.add_message(request, messages.ERROR, 'PIN must be at least 4 numeric characters.')
-		response = HttpResponse("Invalid PIN")
+		response = HttpResponse("Invalid PIN: PIN must be at least 4 numeric characters.")
 		response.status_code = 400
 		return response
 
@@ -253,8 +253,6 @@ def authenticate_credential(request):
 	try:
 		if auth_type == 'pin':
 			# raises an error if not found
-			response = HttpResponse(str(kid)+">>"+hash_string(auth_val))
-			return response
 			keypair = Keypair.objects.get(hash_pin=hash_string(auth_val), id=kid)
 		elif auth_type == 'rfid':
 			keypair = Keypair.objects.get(hash_rfid=hash_string(auth_val), id=kid)
