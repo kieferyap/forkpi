@@ -193,3 +193,4 @@ Others
 	[x] Part 2: Editing
 [x] Name should only editable in edit keypair
 	[x] read-only in keypairs table	
+[x] Pressing [ENTER] on modal-credential-text should trigger the Submit button

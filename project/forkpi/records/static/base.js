@@ -154,6 +154,10 @@ $(document).ready(function() {
 			textBox.select();
 		}
 		
+	}).on('keypress', '#modal-credential-text', function(e){
+		if(e.keyCode == 13) {
+			$('.modal-authenticate-btn').trigger('click');
+		}
 	}).on('click', '.editable-done', function() {
 		var parent = $(this).parent();
 		var field = parent.data('field');
@@ -402,6 +406,13 @@ function transformModalIntoAuthenticate(id) {
 	var modalTitle = 'Enter any credential of user (' + name + '):';
 	$("#authenticate-modal").data('id', id);
 	$('#modal-credential-text').attr('placeholder', 'Enter credential.');
+
+	// $('#modal-credential-text').keypress(function(e) {
+	// 	alert("Key pressed!");
+	// 	if(e.keyCode == 13) {
+	// 		alert('You pressed enter!');
+	// 	}
+	// });
 	// alert(name);
 
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
