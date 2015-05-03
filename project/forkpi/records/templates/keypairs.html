@@ -4,7 +4,7 @@
 
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#new-keypair" data-toggle="tab">Add New Keypair</a></li>
-	<li><a href="#edit-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
+	<li><a href="#activated-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
 	<li><a href="#deactivated-keypairs" data-toggle="tab">Deactivated Keypairs</a></li>
 </ul>
 <input type="hidden" id="scan-url-thrice" value="{% url 'scan fingerprint 3x' %}" />
@@ -110,7 +110,7 @@
 					<div class="col-md-10">
 						<input type="password" class="form-control"
 							   id="newPin" name="pin" 
-							   placeholder="Enter numeric PIN of any length."/>
+							   placeholder="Enter numeric PIN, 4 characters minimum."/>
 					</div>
 				</div>
 				<div class="form-group">
@@ -151,7 +151,7 @@
 			</form>
 		</div>
 	</div>
-	<div class="tab-pane" id="edit-keypairs">
+	<div class="tab-pane" id="activated-keypairs">
 		<div class="col-md-12">
 			<br />
 			<div class="panel panel-primary">

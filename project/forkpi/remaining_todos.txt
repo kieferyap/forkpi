@@ -10,15 +10,17 @@ ForkPi
 	MEDIUM
 		Initialize options table and ensure option name is not modified
 		Disallow registering with only PIN / editing such that only PIN is left
+			a.k.a.: Require RFID OR Fingerprint
 	    Authenticate modal
 	    	[.] remove PIN (can be brute forced by admin)
 	    	only show what's available (if no RFID, do not show scan RFID button)
 	    Name should only editable in edit keypair
 	    	read-only in keypairs table
+	    Separate the keypairs table view
 
 	CHARENJI
 	    CSV file (No more PDF on keypairs) for logs table
-	    	Use search keywords to query from db (filter)
+	    	Parse logs table, write only visible rows to csv
 	    	Do not include credentials
 		
 Others

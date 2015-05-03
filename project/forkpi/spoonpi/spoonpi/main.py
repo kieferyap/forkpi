@@ -16,6 +16,7 @@ class SpoonPi:
     def __init__(self):
         print('Loading the ForkPi database...')
         self.db = ForkpiDB()
+        
         print('Loading options...')
         attempt_limit = self.load_option('attempt_limit')
         lockout_time = self.load_option('lockout_time_minutes')
@@ -102,8 +103,10 @@ class SpoonPi:
             is_locked_out, time_left = self.lockout_table.get_lockout(rfid_uid)
             if is_locked_out:
                 self.deny_access(
-                    reason="locked out", **kwargs,
-                    led_message="Locked out\n for %sm" % time_left)
+                    reason="locked out",
+                    led_message="Locked out\n for %sm" % time_left,
+                    **kwargs
+                )
                 return False
 
         is_authorized, names = self.db.authenticate(**kwargs)

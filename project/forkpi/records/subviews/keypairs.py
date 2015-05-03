@@ -112,7 +112,7 @@ def is_valid_name(name, id=None):
 	return len(name)!=0 and not name_exists
 
 def is_valid_pin(pin):
-	return len(pin)==0 or pin.isdigit()
+	return len(pin)>=4 and pin.isdigit()
 
 @login_required
 def new_keypair(request):
@@ -127,8 +127,8 @@ def new_keypair(request):
 	if not is_valid_name(name):
 		messages.add_message(request, messages.ERROR, 'Name must be unique and not blank.')
 		is_error = True
-	if not is_valid_pin(pin):
-		messages.add_message(request, messages.ERROR, 'PIN must be blank or numeric.')
+	if pin and not is_valid_pin(pin):
+		messages.add_message(request, messages.ERROR, 'PIN must be at least 4 numeric characters.')
 		is_error = True
 
 	if is_error:
@@ -174,7 +174,7 @@ def edit_keypair_pin(request):
 		keypair.save()
 		return HttpResponse("Successful.")
 	else:
-		messages.add_message(request, messages.ERROR, 'PIN must be blank or numeric.')
+		messages.add_message(request, messages.ERROR, 'PIN must be at least 4 numeric characters.')
 		response = HttpResponse("Invalid PIN")
 		response.status_code = 400
 		return response
@@ -253,6 +253,8 @@ def authenticate_credential(request):
 	try:
 		if auth_type == 'pin':
 			# raises an error if not found
+			response = HttpResponse(str(kid)+">>"+hash_string(auth_val))
+			return response
 			keypair = Keypair.objects.get(hash_pin=hash_string(auth_val), id=kid)
 		elif auth_type == 'rfid':
 			keypair = Keypair.objects.get(hash_rfid=hash_string(auth_val), id=kid)

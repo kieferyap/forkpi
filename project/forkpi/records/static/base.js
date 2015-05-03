@@ -315,7 +315,7 @@ $(document).ready(function() {
 		$('.modal-enter-pin').trigger('click');
 
 	}).on('click', '.modal-enter-pin', function(){
-		var id = $('.edit-btn').parent().data('id');
+		var id = $(this).parent().parent().parent().data('id');
 		var name = $('#name-'+id).data('value');
 
 		$('#modal-credential-text').val('');
@@ -325,24 +325,26 @@ $(document).ready(function() {
 		$('#modal-credential-text').attr('type', 'password');
 
 	}).on('click', '.modal-authenticate-btn', function(){
-		var parent = $(this).parent();
-		var id = $('.edit-btn').parent().data('id');
+		var parent = $(this).parent().parent().parent();
+		var id = parent.data('id');
+		alert(parent.html());
 
-		postToUrl(parent.data('auth-url'), {
-			id : id,
-			val : $('#modal-credential-text').val(),
-			type: $('#modal-active-field').val()
-		}, function(msg) {
-			transformModalIntoEditKeypair(id, msg);
-		}, function(msg) {
-			$('.modal-error-credentials').show();
-			$('#modal-credential-text').val();
-			setTimeout(function() {
-				$('.alert').each(function(){
-					$(this).fadeOut(500);
-				});
-			}, 2000);
-		});
+		// postToUrl(parent.data('auth-url'), {
+		// 	id : id,
+		// 	val : $('#modal-credential-text').val(),
+		// 	type: $('#modal-active-field').val()
+		// }, function(msg) {
+		// 	transformModalIntoEditKeypair(id, msg);
+		// }, function(msg) {
+		// 	alert(msg);
+		// 	$('.modal-error-credentials').show();
+		// 	$('#modal-credential-text').val();
+		// 	setTimeout(function() {
+		// 		$('.alert').each(function(){
+		// 			$(this).fadeOut(500);
+		// 		});
+		// 	}, 2000);
+		// });
 	});
 
 	// On edit modal close
@@ -401,8 +403,8 @@ $(document).ready(function() {
 
 function transformModalIntoAuthenticate(id) {
 	var name = $('#name-' + id).data('value').trim();
-
 	var modalTitle = 'Enter any credential of user (' + name + '):';
+	$("#authenticate-modal").data('id', id);
 
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html($('#authenticate-modal > .body').html());
