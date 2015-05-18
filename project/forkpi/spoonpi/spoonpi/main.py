@@ -114,7 +114,7 @@ class SpoonPi:
             if use_lockout_table:
                 self.lockout_table.reset_streak(rfid_uid)
         else:
-            self.deny_access(reason='invalid keypair', **kwargs)
+            self.deny_access(reason='invalid key pair', **kwargs)
             if use_lockout_table:
                 self.lockout_table.failed_attempt(rfid_uid)
         return is_authorized

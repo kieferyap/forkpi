@@ -610,7 +610,7 @@ class FingerprintScanner(object):
             print('sent:', command.serialize_bytes(is_little_endian=self.is_little_endian))
         self._serial.write(bytes(command))
 
-    def _receive_response(self, timeout=None):
+    def _receive_response(self, timeout=3):
         """
         Reads 12 bytes from serial, then returns it as a ResponsePacket.
 

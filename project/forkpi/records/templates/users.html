@@ -89,11 +89,11 @@
 										<div class="btn-group" role="group"
 											 data-post-url="{% url 'user toggle active' %}" data-id="{{ user.id }}">
 											{% if user.is_active %}
-												<button class="btn btn-warning deactivate-btn">
+												<button class="btn btn-warning user-deactivate-btn deactivate-btn">
 													Deactivate
 												</button>
 											{% else %}
-												<button class="btn btn-success activate-btn">
+												<button class="btn btn-success user-activate-btn activate-btn">
 													Activate
 												</button>
 											{% endif %}

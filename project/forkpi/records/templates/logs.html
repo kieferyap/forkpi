@@ -5,6 +5,7 @@
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#view-logs" data-toggle="tab">View Logs</a></li>
 	<li><a href="#delete-logs" data-toggle="tab">Delete Logs</a></li>
+	<li><a href="#" class="export-as-csv">Export as CSV</a></li>
 </ul>
 
 <!--ul id="tabs" class="nav nav-pills nav-justified" data-tabs="tabs">
@@ -13,32 +14,31 @@
 </ul-->
 <div class="tab-content">
 	<div class="tab-pane active" id="view-logs">
-		<table id="logs-table" class="table table-hover tablesorter tablesaw"
-			data-tablesaw-minimap data-tablesaw-mode="columntoggle" data-sortList="[[0,0]]">
+		<table id="logs-table" class="table table-hover tablesorter" data-sortList="[[0,0]]">
 			<thead>
 				<tr>
-					<th class="col-md-1" data-placeholder="Search..." data-tablesaw-priority="2">
+					<th class="col-md-2" data-placeholder="Search...">
 						#
 					</th>
-					<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="persist">
+					<th class="col-md-5" data-placeholder="Search...">
 						Date
 					</th>
-					<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
+					<th class="col-md-4" data-placeholder="Search...">
 						Door
 					</th>
-					<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="1">
+					<th class="col-md-3" data-placeholder="Search...">
 						Action
 					</th>
-					<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="3">
+					<th class="col-md-5" data-placeholder="Search...">
 						Details
 					</th>
-					<th class="col-md-3 non-csv" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3 non-csv" data-placeholder="Search...">
 						PIN
 					</th>
-					<th class="col-md-3 non-csv" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3 non-csv" data-placeholder="Search...">
 						RFID UID
 					</th>
-					<th class="col-md-3 non-csv" data-placeholder="Search..." data-tablesaw-priority="4">
+					<th class="col-md-3 non-csv" data-placeholder="Search...">
 						Fingerprint
 					</th>
 				</tr>
@@ -53,16 +53,22 @@
 						<td>{{ forloop.counter }}</td>
 						<td>{{ log.created_on | date:"Y-m-d H:i:s" }}</td>
 						<td>{{ log.door.name }}
-						<td>{{ log.action }}</td>
+						<td>
+							{% if log.was_allowed %}
+								Allowed
+							{% else %}
+								Denied
+							{% endif %}
+						</td>
 						<td>{{ log.details }}</td>
 						<td class="non-csv">{{ log.pin }}</td>
 						<td class="non-csv">{{ log.rfid_uid }}</td>
 						<td class="non-csv">
-						{% if log.used_fingerprint %}
-							Yes
-						{% else %}
-							
-						{% endif %}
+							{% if log.used_fingerprint %}
+								Yes
+							{% else %}
+								
+							{% endif %}
 						</td>
 					</tr>
 				{% endfor %}
@@ -88,8 +94,6 @@
 
 	<div id="hidden-table-container" style="display:none"> <!-- invisible does not work with the CSV. -->
 	</div>
-
-	<center><a href="#" class="export-as-csv">Export as CSV</a></center>
 
 	<!-- <input class="export-as-csv" value="Export as CSV" type="button" /> -->
 </div>

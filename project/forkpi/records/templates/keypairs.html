@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block content%}
+{% block content %}
 
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#activated-keypairs" data-toggle="tab">View and Edit Keypairs</a></li>
@@ -172,25 +172,25 @@
 							<!-- <th class="col-md-1" data-placeholder="S..." data-tablesaw-priority="1">
 								#
 							</th> -->
-							<th class="col-md-4" data-placeholder="Search..." data-tablesaw-priority="persist">
+							<th class="col-md-4" data-placeholder="Search...">
 								Name
 							</th>
-							<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="2">
+							<th class="col-md-5" data-placeholder="Search...">
 								Doors
 							</th>
-							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="3">
+							<th class="col-md-1" data-placeholder="Y/N">
 								<span class="glyphicon glyphicon-th mouseover-text" title="PIN"></span>
 							</th>
-							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="4">
+							<th class="col-md-1" data-placeholder="Y/N">
 								<span class="glyphicon glyphicon-credit-card mouseover-text" title="RFID UID"></span>
 							</th>
-							<th class="col-md-1" data-placeholder="Y/N" data-tablesaw-priority="5">
+							<th class="col-md-1" data-placeholder="Y/N">
 								<span class="glyphicon glyphicon-hand-up mouseover-text" title="Fingerprint"></span>
 							</th>
-							<th class="col-md-3" data-placeholder="Search..." data-tablesaw-priority="10">
+							<th class="col-md-3" data-placeholder="Search...">
 								Last Edited By
 							</th>
-							<th class="col-md-5" data-placeholder="Search..." data-tablesaw-priority="7">
+							<th class="col-md-5" data-placeholder="Search...">
 								Actions
 							</th>
 						</tr>
@@ -283,7 +283,7 @@
 										 data-post-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
 
-											<button class="btn expand btn-danger task-cancelbox deactivate-btn">
+											<button class="btn expand btn-danger task-cancelbox keypair-deactivate-btn deactivate-btn">
 												Deactivate
 											</button>
 									</div>
@@ -295,35 +295,18 @@
 												Edit
 											</button>
 									</div>
-									<!-- Delete button -->
-									<!-- <div class="btn-group" role="group"
-										 data-post-url="{% url 'delete keypair' %}"
-										 data-id="{{ keypair.id }}">
-
-										<button class="btn btn-danger task-cancelbox delete-btn">
-											Delete
-										</button>
-									</div> -->
 								</div>
 							</td>
+
 							<td id="action-{{ keypair.id }}" class="deactivated-action invisible">
 								<div class="btn-group btn-group-justified" role="group">
 									<div class="btn-group" role="group"
 										 data-post-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
-											<button class="btn expand btn-success task-cancelbox activate-btn">
+											<button class="btn expand btn-success task-cancelbox keypair-activate-btn activate-btn">
 												Activate
 											</button>
 									</div>
-									<!-- Delete button -->
-									<!-- <div class="btn-group" role="group"
-										 data-post-url="{% url 'delete keypair' %}"
-										 data-id="{{ keypair.id }}">
-
-										<button class="btn btn-danger task-cancelbox delete-btn">
-											Delete
-										</button>
-									</div> -->
 								</div>
 							</td>
 						</tr>
@@ -461,7 +444,7 @@
 									<div class="btn-group" role="group"
 										 data-post-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
-											<button class="btn expand btn-danger task-cancelbox deactivate-btn">
+											<button class="btn expand btn-danger task-cancelbox keypair-deactivate-btn deactivate-btn">
 												Deactivate
 											</button>
 									</div>
@@ -473,35 +456,18 @@
 												Edit
 											</button>
 									</div>
-									<!-- Delete button -->
-									<!-- <div class="btn-group" role="group"
-										 data-post-url="{% url 'delete keypair' %}"
-										 data-id="{{ keypair.id }}">
-
-										<button class="btn btn-danger task-cancelbox delete-btn">
-											Delete
-										</button>
-									</div> -->
 								</div>
 							</td>
+							
 							<td id="action-{{ keypair.id }}" class="deactivated-action">
 								<div class="btn-group btn-group-justified" role="group">
 									<div class="btn-group" role="group"
 										 data-post-url="{% url 'keypair toggle active' %}"
 										 data-id="{{ keypair.id }}">
-											<button class="btn expand btn-success task-cancelbox activate-btn">
+											<button class="btn expand btn-success task-cancelbox keypair-activate-btn activate-btn">
 												Activate
 											</button>
 									</div>
-									<!-- Delete button -->
-									<!-- <div class="btn-group" role="group"
-										 data-post-url="{% url 'delete keypair' %}"
-										 data-id="{{ keypair.id }}">
-
-										<button class="btn btn-danger task-cancelbox delete-btn">
-											Delete
-										</button>
-									</div> -->
 								</div>
 							</td>
 						</tr>

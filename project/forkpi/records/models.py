@@ -25,7 +25,7 @@ class Log(Model):
 	created_on = DateTimeField(default=datetime.now, auto_now_add=True, null=False, blank=False)
 	door = ForeignKey('Door')
 
-	action = TextField(default='')
+	was_allowed = BooleanField(default=False)
 	details = TextField(default='', null=True, blank=True)
 
 	pin = TextField(default='', null=True, blank=True)

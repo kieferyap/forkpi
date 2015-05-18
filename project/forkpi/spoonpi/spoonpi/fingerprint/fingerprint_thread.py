@@ -58,7 +58,8 @@ class FingerprintThread(threading.Thread):
                         self.finger_scanned = True
 
                 except Exception:
-                    self.fps = FingerprintScanner(debug=False)
+                    print("Exception occured in fingerprint thread! Restarting ...")
+                    self.fps = FingerprintScanner(debug=True)
             time.sleep(0.5)
 
     def _print(self, *args):

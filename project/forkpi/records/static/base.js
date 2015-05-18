@@ -323,8 +323,8 @@ $(document).ready(function() {
 		}
 	});
 
-	// Keypair and User Actions
-	$(document.body).on('click', '.activate-btn', function(){
+	// Keypair Actions
+	$(document.body).on('click', '.keypair-activate-btn', function(){
 		var btn = $(this);
 		btn.html("Loading...");
 		postIdToUrlInParent(btn, function(msg) {
@@ -335,7 +335,7 @@ $(document).ready(function() {
 			row.find('.deactivated-action').addClass('invisible');
 		});
 
-	}).on('click', '.deactivate-btn', function(){
+	}).on('click', '.keypair-deactivate-btn', function(){
 		var btn = $(this);
 		btn.html("Loading...");
 		postIdToUrlInParent(btn, function(msg) {
@@ -346,6 +346,29 @@ $(document).ready(function() {
 			row.find('.deactivated-action').removeClass('invisible');
 		});
 
+	// User Actions
+	}).on('click', '.user-activate-btn', function(){
+		var btn = $(this);
+		btn.html("Loading...");
+		postIdToUrlInParent(btn, function(msg) {
+			btn.html("Deactivate");
+			btn.removeClass('user-activate-btn activate-btn btn-success');
+			btn.addClass('user-deactivate-btn deactivate-btn btn-warning');
+
+			var row = btn.closest('tr');
+			row.removeClass('greyed');
+		});
+	}).on('click', '.user-deactivate-btn', function(){
+		var btn = $(this);
+		btn.html("Loading...");
+		postIdToUrlInParent(btn, function(msg) {
+			btn.html("Activate");
+			btn.removeClass('user-deactivate-btn deactivate-btn btn-warning');
+			btn.addClass('user-activate-btn activate-btn btn-success');
+
+			var row = btn.closest('tr');
+			row.addClass('greyed');
+		});
 	}).on('click', '.delete-btn, .deny-btn', function(){
 		var btn = $(this);
 		postIdToUrlInParent(btn, function(msg) {
@@ -447,57 +470,50 @@ function transformModalIntoAuthenticate(id) {
 	$("#authenticate-modal").data('id', id);
 	$('#modal-credential-text').attr('placeholder', 'Enter credential.');
 
-	// $('#modal-credential-text').keypress(function(e) {
-	// 	alert("Key pressed!");
-	// 	if(e.keyCode == 13) {
-	// 		alert('You pressed enter!');
-	// 	}
-	// });
-	// alert(name);
-
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-header > .modal-title').html(modalTitle);
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-body').html($('#authenticate-modal > .body').html());
 	$('#edit-modal > .modal-dialog > .modal-content > .modal-footer').html($('#authenticate-modal > .footer').html());
 
-	var isPin = false;
-	var isRfid = false;
-	var isFingerprint = false;
+	var hasPin = false;
+	var hasRfid = false;
+	var hasFingerprint = false;
 
 	var btnPin = $('.modal-footer > span > #btn-modal-pin');
 	var btnRfid = $('.modal-footer > span > #btn-modal-rfid');
 	var btnFingerprint = $('.modal-footer > span > #btn-modal-fingerprint');
 
 	if(strcmp($('#pin-'+id).text().trim(), "Yes") == 0)
-		isPin = true;
+		hasPin = true;
 	if(strcmp($('#rfid-'+id).text().trim(), "Yes") == 0)
-		isRfid = true;
+		hasRfid = true;
 	if(strcmp($('#fingerprint-'+id).text().trim(), "Yes") == 0)	
-		isFingerprint = true;
+		hasFingerprint = true;
 
-	if(isRfid){
+	if (hasRfid) {
 		$('#modal-active-field').val('rfid');
 		btnRfid.removeAttr('disabled');
 	}
-	else
+	else {
+		// user has no rfid credential
 		btnRfid.attr('disabled', 'true');
-		// btnRfid.hide();
-	if(isFingerprint){
+	}
+	if (hasFingerprint){
 		$('#modal-active-field').val('fingerprint');
 		btnFingerprint.removeAttr('disabled');
 	}
-	else
+	else {
 		btnFingerprint.attr('disabled', 'true');
-		// btnFingerprint.hide();
+	}
 
-	if(isPin){
+	if (hasPin) {
 		btnPin.removeAttr('disabled');
 		$('.modal-enter-pin').trigger('click');
 		$('#modal-credential-text').focus();
 		$('#modal-active-field').val('pin');
 	}
-	else
+	else {
 		btnPin.attr('disabled', 'true');
-		// btnPin.hide();
+	}
 
 }
 

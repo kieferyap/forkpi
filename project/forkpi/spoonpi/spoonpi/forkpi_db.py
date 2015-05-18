@@ -46,16 +46,16 @@ class ForkpiDB(object):
         return is_authorized, names
 
     def log_allowed(self, names, **kwargs):
-        self.log("Allowed", details=names, **kwargs)
+        self.log(was_allowed=True, details=names, **kwargs)
 
     def log_denied(self, reason, **kwargs):
-        self.log("Denied", details=reason, **kwargs)
+        self.log(was_allowed=False, details=reason, **kwargs)
 
-    def log(self, action, details='', pin='', rfid_uid='', fingerprint_matches=[]):
+    def log(self, was_allowed, details='', pin='', rfid_uid='', fingerprint_matches=[]):
         used_fingerprint = len(fingerprint_matches) > 0
         c = self.conn.cursor()
-        c.execute("INSERT INTO records_log(created_on, door_id, action, details, pin, rfid_uid, used_fingerprint) \
-                     VALUES (now(), %s, '%s', '%s', '%s', '%s', %s)" % (self.door_id, action, details, pin, rfid_uid, used_fingerprint))
+        c.execute("INSERT INTO records_log(created_on, door_id, was_allowed, details, pin, rfid_uid, used_fingerprint) \
+                     VALUES (now(), %s, '%s', '%s', '%s', '%s', %s)" % (self.door_id, was_allowed, details, pin, rfid_uid, used_fingerprint))
 
     def fetch_option(self, name):
         c = self.conn.cursor()

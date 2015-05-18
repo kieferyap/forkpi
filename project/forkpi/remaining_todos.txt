@@ -1,18 +1,22 @@
 
 
 SpoonPi
-	[%] Put back lockouts for rfid
-	Investigate fingerprint suddenly failing bug
+	[x] Investigate fingerprint suddenly failing bug -> adding a timeout to read seems to have solved the problem
 ForkPi
 	Initialize options table and ensure option name is not modified
 Others
-    Manual: one is to one from user to rfid, deactivation mechanics
+	[x] Change field action string on logs to was_allowed boolean
+	refactor denied reason strings to new table
+	Shoebox
 	Separate Forkpi and Spoonpi users in database
-	SpoonPi Usability Test (May Week 01)
+		SpoonPi: read-only permission on all tables except logs
+		ForkPi:  read and write permission on all tables, but no update permission on column records_option.name
+	SpoonPi Usability Test (May Week 02)
 	ForkPi Usability Test (May Week 03)
 	Dummy fingerprint and rfid scanner
-	Hash Fingerprint and let it have its own table
+    Manual: one is to one from user to rfid, deactivation mechanics
 	GitHub documentation
+	[.] Hash Fingerprint and let it have its own table
 
 
 	
@@ -20,11 +24,11 @@ Others
 	options table: applies_to
 		Attempt Limit
 			The max streak of failed attempts where an RFID tag or fingerprint is presented and the wrong PIN is entered.<br/>This is to prevent guessing the PIN via brute force.
-			Applies to: RFID+PIN users, Fingerprint+PIN users
+			Applies to: RFID+PIN users
 
 		Lockout Time
 			The amount of time to block the RFID tag or fingerprint from further use once the incorrect streak reaches the attempt limit.
-			Applies to: RFID+PIN users, Fingerprint+PIN users
+			Applies to: RFID+PIN users
 
 		Keypad Timeout
 			The max amount of time between key presses. Exceed this and the attempt will be considered as failed.
@@ -189,3 +193,4 @@ Others
 [x] CSV file (No more PDF on keypairs) for logs table
 	[x] Parse logs table, write only visible rows to csv
 	[x] Do not include credentials
+[x] Put back lockouts for rfid
