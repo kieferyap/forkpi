@@ -1,0 +1,130 @@
+\section{Introduction}
+\subsection{Introduction}
+\begin{frame}{Introduction}
+\begin{itemize}
+    \item<1-> The following are properties of modern keyless door access control systems:
+    \begin{itemize}
+    	\item<2-> They are still largely inaccessible, primarily due to their high cost \footfullcite{KeylessDoorProsCons}.
+    	\item<3-> Their code is closed to the public.
+    	\item<4-> Their components are non-removable, and non-interchangeable.
+    \end{itemize}
+    \item<5-> As a result:
+    \begin{itemize}
+    	\item<6-> End users cannot tweak the code to suit their private needs.
+    	% Note: Component failure doesn't result to replacement outright. It depends on the failure.
+    	\item<7-> Component failure results to contacting the manufacturing company, potentially resulting to replacing the entire unit.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Overview}
+\begin{frame}{Overview (1 of 5)}
+\begin{itemize}
+    \item<1-> The goal of this study is to make a hardware-based authentication system that is more accessible to the public, implementing the following characteristics:
+    \begin{itemize}
+    	\item<2-> \textbf{Do-it-yourself}: The system can be replicated by assembling the components, and running our code. This is to improve overall transparency -- users are more likely to trust a system if they know how exactly it was made.
+    	\item<3-> \textbf{Open Source Code}: We have documented our code extensively so that users can easily modify or extend the system functionality. Hoepman and Jacobs \footfullcite{hoepman2007increased} found that keeping the source open improves security, because all interested parties can test for vulnerabilities, and promptly fix them.
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Overview (2 of 5)}
+\begin{itemize}
+	\item<1-> \textbf{Increased Flexibility}: Although our system supports multiple authentication methods, users do not have to buy a component they will not use. However, should the need arise, they can easily connect the said component later on. This is an advantage over propriety systems, which typically come as a package and can no longer be modified or extended.
+	\item<2-> \textbf{Can run on top of existing networks}: Our system uses plain local ethernet for communication between the server and the door controllers. This lessens the cost of hardware set-up and maintainance, and also makes the system more scalable because there is no hard limit on the number of controllable doors.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Overview (3 of 5)}
+\begin{itemize}
+	\item<1-> \textbf{Encrypted database and data transmission}: We have designed the system such that no sensitive information is transmitted in plaintext over the network. In the door controller, the data is hashed first before being sent to the server; while in the database, credentials are not stored in plaintext; Instead, they are hashed or symmetrically encrypted.
+	\item<2-> \textbf{Low Acquisition Cost}: The cost of a single access control device typically ranges from \$100 to \$350 (based on the prices listed at the online store BarcodesInc \footfullcite{AccessControlDeviceCost}). The combined cost of our system's components falls within the lower end of that range.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Overview (4 of 5)}
+\begin{itemize}
+	\item<1-> There are two main components to our system:
+	\begin{itemize}
+		\item<2-> \textbf{SpoonPi}: the application that controls the door locks; it is responsible for allowing or denying users access.
+		\item<3-> \textbf{ForkPi}: the web application that is responsible for registering new users, and for maintaining the database that all the SpoonPis will access.
+	\end{itemize}
+	\item<4-> There are as many SpoonPis as there are doors to be secured, but only one ForkPi for the entire network.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Overview (5 of 5)}
+\begin{itemize}
+	\item<1-> Our system supports five authentication mechanisms:
+	\begin{itemize}
+		\item<2-> Single-Factor RFID
+		\item<3-> Single-Factor Fingerprint
+		\item<4-> Two-Factor RFID and PIN
+		\item<5-> Two-Factor Fingerprint and PIN
+		\item<6-> Two-Factor Fingerprint and RFID
+	\end{itemize}
+	\item<7->  There are no system-wide constraints with regards to the mechanism to be used. Each user can choose to authenticate using any combination they wish; SpoonPi can handle all five mechanisms by default.
+\end{itemize}
+\end{frame}
+
+\subsection{Authentication Factors}
+\begin{frame}{Three Major Factors}
+Authentication is performed using various \textbf{factor}s, which can be classified into three major types:
+\begin{enumerate}
+    \item \textbf{Knowledge}: Something the entity knows (e.g. passwords)
+    \item \textbf{Biometrics}: Something the entity is (e.g. fingerprints)
+    \item \textbf{Possession}: Something the entity has (e.g. RFID tags)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Factor Strengths and Weaknesses}
+Each factor type has its own strengths and weaknesses, as illustrated in the following table. For consistency, each criterion is stated such that a Y is an advantage.
+
+\scriptsize{
+\begin{table}[ht]
+	\begin{threeparttable}
+		\begin{tabular}{|l|c|c|c|}
+			\hline		                                & Knowledge & Possession & Inherence  \\ \hline
+			{\pause} Does not generate false positives/negatives & Y         & Y          &            \\
+			{\pause} Does not have to be carried around          & Y         &            & Y          \\
+			{\pause} Cannot be cloned or stolen                  & Y         &            & Y\tnote{3} \\
+			{\pause} Cannot be guessed by brute force            &           & Y\tnote{1} & Y          \\
+			{\pause} Fast input and processing time              &           & Y\tnote{2} &            \\
+			{\pause} Cannot be lost or forgotten                 &           &            & Y\tnote{4} \\ \hline
+		\end{tabular}
+		\begin{tablenotes}
+		    {\pause}\item[1] RFID security can be brute forced if the RFID reader can be spoofed by cards with reprogrammed UIDs (unique identifiers). If that is the case, the attacker can simply try all possible UIDs by repeatedly changing the UID on the same card.
+            {\pause}\item[2] In the case of RFID
+		    {\pause}\item[3] Fingerprints can be cloned if the scanner cannot distinguish between real and replicated fingerprints.
+		    {\pause}\item[4] People can lose their fingerprints, but it is a much rarer event than losing keys or forgetting passwords.
+		\end{tablenotes}
+	\end{threeparttable}
+\end{table}
+}
+\end{frame}
+
+
+\subsection{Authentication Mechanisms}
+\begin{frame}{Authentication Mechanisms}
+\begin{itemize}
+    \item<1-> \textbf{Knowledge-Based}: PINs were chosen over passwords due to its more specialized key set, which means the SpoonPi units do not require a full keyboard for input.
+    \item<2-> \textbf{Possession-Based}: RFID cards were chosen because they are cheaper than smart cards, and more difficult to replicate than barcodes.
+    \item<3-> \textbf{Inherence-based}: Fingerprint was chosen because it is the most prevalent and well-supported biometric.
+\end{itemize}
+\end{frame}
+
+\subsection{Raspberry Pi}
+\begin{frame}{Why Raspberry Pi (1 of 2)}
+\begin{itemize}
+    \item<1-> After deciding the authentication mechanism/s to be used, a device would be needed to control all the necessary peripherals.
+    \item<2-> This device can be either a computer or a microcontroller, and should preferably be cheap and small since one unit would have to be embedded on each door.
+    \item<3-> The Raspberry Pi is an example of one such device. It is a credit-card sized computer that comes with pins that can be used to communicate with or provide power to peripherals.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why Raspberry Pi (2 of 2)}
+\begin{itemize}
+    \item<1->  The Raspberry Pi model we used for development, Model B \footfullcite{RPi1ModelB}, is an outdated model that costs \$35, uses an SD card for storage, and comes with 26 pins, 2 USB ports and 512 MB RAM.
+    \item<2-> For the same price, one can buy the newer and better Raspberry Pi 2 Model B \footfullcite{RPi2ModelB} instead, which uses a micro SD card for storage, comes with 40 pins, 4 USB ports and 1 GB RAM. Both models have an ethernet port and an HDMI port for video output.
+\end{itemize}
+\end{frame}

@@ -1,0 +1,146 @@
+\section{Related Work}
+\subsection{Related Work}
+\begin{frame}{Related Work (1 of 2)}
+\begin{itemize}
+    \item<1-> In this section, we look at existing and similar door access control systems, and compare their features with ours.
+    \item<2-> The main specifications we will be looking at are the following:
+    \begin{itemize}
+    	\item<3-> Supported factors
+    	\item<4-> User capacity
+    	\item<5-> Fingerprint accuracy
+    	\item<6-> PIN lengths supported
+    	\item<7-> Target platform
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Related Work (2 of 2)}
+\begin{itemize}
+	\item<1-> Definitions:
+    \begin{itemize}
+    	\item<2-> \textbf{Capacity} maximum number of users that can be registered
+    	\item<3-> \textbf{FAR} (False Acceptance Rate): the rate at which fingerprints are accepted despite not having registered
+    	\item<4-> \textbf{FRR} (False Rejection Rate): the rate at which fingerprints are rejected despite having registered
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Commercial Systems}
+\begin{frame}{Commercial Systems}
+\begin{itemize}
+    \item<1-> The access control systems we will be looking at are the following:
+    \begin{itemize}
+    	\item<2-> F6 Fingerprint Access Control 
+    	\item<3-> CD-R King 2.8'' Full Colored Biometric
+    	\item<4-> HID iCLASS RPK40 Access Control Device
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{F6 Fingerprint Access Control}
+\begin{itemize}
+    \item<1-> \textbf{Supported Factors}: RFID, Fingerprint, PIN
+    \item<2-> \textbf{Capacity}: 500 users
+    \item<3-> \textbf{Fingerprint Accuracy}: FAR $<$ 0.0001\%, FRR $<$ 0.01\%
+    \item<4-> \textbf{PIN Length}: 4-6 digits
+    \item<5-> \textbf{Description}: 
+    \begin{itemize}
+	    \item<6-> \scriptsize{F6 Fingerprint Access Control is a product of Secukey \footfullcite{Secukey_F6}, and supports authentication using all three factors that we implemented for our system.}
+	    \item<7-> \scriptsize{Its price, \$30 in ECPlaza \footfullcite{Secukey_ezplaza}, is much lower than our system's. It also supports uploading and downloading user keys through a USB flash drive.}
+	    \item<8-> \scriptsize{However, since it is a standalone device, there is no way to manage users over a network, which limits its scalability.}
+	    \item<9-> \scriptsize{If there is a new user, one would have to manually add that user to each door, and the reverse if a user leaves permanently.} 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{CD-R King 2.8'' Full Colored Biometric}
+\begin{itemize}
+    \item<1-> \textbf{Supported Factors}: RFID, Fingerprint, PIN 
+    \item<2-> \textbf{Capacity}: 2000 users
+    \item<3-> \textbf{Fingerprint Accuracy}: FAR $<$ 0.0001\%, FRR $<$ 0.1\%
+    \item<4-> \textbf{PIN Length}: Unspecified
+    \item<5-> \textbf{Description}:
+    \begin{itemize}
+	    \item<6-> \scriptsize{The CDR-King 2.8'' Full Colored Biometric \footfullcite{CDRKing_Biometric}, costs \$67.}
+	    \item<7-> \scriptsize{This offers support for backing up user data through USB.}
+	    \item<8-> \scriptsize{It can log up to 100,000 events}
+	    \item<9-> \scriptsize{We tried multiple times to buy this product in order to compare it with ours, but unfortunately it was always out of stock. We found the documentation in the product page to be lacking important details, such as how to set-up the system for networked access (if it is even possible), and if the system also supports one, or two-factor authentication.} 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{HID iCLASS RPK40 Access Control Device}
+\begin{itemize}
+    \item<1-> \textbf{Supported Factors}: RFID, PIN
+    \item<2-> \textbf{Capacity}: 100 users
+    \item<3-> \textbf{PIN Length}: Unspecified
+    \item<4-> \textbf{Description}:
+    \begin{itemize}
+	    \item<6-> \scriptsize{The iCLASS RPK40 \footfullcite{HID_RPK40}, is a product of HID Global, one of the leaders in secure identity solutions \footfullcite{HID_About}.}
+	    \item<7-> \scriptsize{It has a very steep cost, starting at \$380 in BarcodesInc \footfullcite{HID_RPK40_Price}}
+	    \item<8-> \scriptsize{However, the system has been reported to be unable to enroll new RFID cards, lose communication with the controller. Furthermore, the data stored in the system is volatile.} 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Open Source Systems}
+\begin{frame}{Open Source Systems}
+\begin{itemize}
+    \item<1-> Open Source systems, as opposed to commercial systems, allow users to first inspect the code, find out exactly what the system can and cannot do, before determining whether to assemble the system or not.
+    \item<2-> The access control systems we will be looking at are the following:
+    \begin{itemize}
+    	\item<3-> Open Access Control
+    	\item<4-> Pi-Lock
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Open Access Control}
+\begin{itemize}
+    \item<1-> \textbf{Supported Factors}: RFID, PIN
+    \item<2-> \textbf{Capacity}: Arduino
+    \item<3-> \textbf{Fingerprint Accuracy}: 200 users
+    \item<4-> \textbf{PIN Length}: Any length
+    \item<5-> \textbf{Description}:
+    \begin{itemize}
+% 	    \item<6-> \scriptsize{Open Access Control is an Arduino-based RFID access control system for hacker spaces \footfullcite{OpenAccessControl}.}
+	    \item<6-> \scriptsize{Open Access Control is an Arduino-based RFID access control system for hacker spaces.}
+% 	    \item<7-> \scriptsize{According to Orsini \footfullcite{ArduinoVsPi}, the Arduino is the better platform for pure hardware projects, i.e. controlling physical sensors. However, the Arduino is just a microcontroller, while the Pi is a fully functional computer.}
+	    \item<7-> \scriptsize{According to Orsini, the Arduino is the better platform for pure hardware projects, i.e. controlling physical sensors. However, the Arduino is just a microcontroller, while the Pi is a fully functional computer.}
+	    \item<8-> \scriptsize{The question is whether an access control system warrants more power on the hardware (Arduino) or the software (Pi) side. In our case, door controllers need to be able to communicate with the server over a network, in addition to their main function of controlling the door lock, so we find Raspberry Pi to be the more suitable platform.} 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Pi-Lock}
+\begin{itemize}
+    \item<1-> \textbf{Supported Factors}: RFID, PIN 
+    \item<2-> \textbf{Capacity}: Raspberry Pi
+    \item<3-> \textbf{Fingerprint Accuracy}: Depends on SD card capacity
+    \item<4-> \textbf{PIN Length}: 4 digits
+    \item<5-> \textbf{Description}:
+    \begin{itemize}
+	%     % \item<6-> \scriptsize{Pi-Lock is an automated door security system built around the Raspberry Pi \footfullcite{PiLock}.}
+	    \item<6-> \scriptsize{Pi-Lock is an automated door security system built around the Raspberry Pi.}
+	    \item<7-> \scriptsize{It is similar to our system in that it runs on Raspberry Pi, is written in Python, and comes with a front-end user management web app.}
+	    \item<8-> \scriptsize{However, the fixed length of four for the PIN is too short for it to be used in settings that call for a higher level of security.} 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\subsection{Our System: ForkPi and SpoonPi}
+\begin{frame}{Our System: ForkPi and SpoonPi}
+\begin{itemize}
+    \item<1-> \textbf{Supported Factors}: RFID, Fingerprint, PIN
+    \item<2-> \textbf{Platform}: Raspberry Pi
+    \item<3-> \textbf{Capacity}: Depends on SD card capacity
+    \item<4-> \textbf{Fingerprint Accuracy}: FAR $<$ 0.00001\%, FRR $<$ 0.01\%
+    \item<5-> \textbf{PIN Length}: Any length (at least 4 digits)
+    \item<6-> \textbf{Description}:
+    \begin{itemize}
+	    % \item<7-> \scriptsize{Our system tries to combine the strengths of the other systems mentioned above. The fingerprint scanner we used, the SparkFun fingerprint scanner TTL model GT-511C3 \footfullcite{SparkfunFingerprint}, uses a fingerprint matching algorithm called the ``SmackFinger 3.0 Algorithm'', which claims to have the accuracy described above \footfullcite{SmackFingerSDK}.}
+	    \item<7-> \scriptsize{Our system tries to combine the strengths of the other systems mentioned above. The fingerprint scanner we used, the SparkFun fingerprint scanner TTL model GT-511C3, uses a fingerprint matching algorithm called the ``SmackFinger 3.0 Algorithm'', which claims to have the accuracy described above.}
+	    \item<8-> \scriptsize{This is more accurate than all the other fingerprint-based systems we looked at. It can accommodate a large number of users, provided that the SD card used also has a large capacity.}
+	\end{itemize}
+\end{itemize}
+\end{frame}
