@@ -51,7 +51,7 @@ The SpoonPi units serve as the media for door authentication, and are responsibl
 
 #### Authenticating with SpoonPi
 
-Each SpoonPi unit needs to register itselfrst with the ForkPi unit before any authentication can be done. SpoonPi performs authentication by communicating with the hardware components (e.g. RFID scanner) to get the input credentials (e.g. RFID UID), then querying the ForkPi database to check if it is valid. For fingerprint authentication, the verification is done at the SpoonPi side instead of the ForkPi side, because the matching is not a simple string comparison; fingerprint templates have to be uploaded to the scanner, where the actual matching takes place.
+Each SpoonPi unit needs to register itself first with the ForkPi unit before any authentication can be done. SpoonPi performs authentication by communicating with the hardware components (e.g. RFID scanner) to get the input credentials (e.g. RFID UID), then querying the ForkPi database to check if it is valid. For fingerprint authentication, the verification is done at the SpoonPi side instead of the ForkPi side, because the matching is not a simple string comparison; fingerprint templates have to be uploaded to the scanner, where the actual matching takes place.
 
 #### Feasibility of ForkPi and SpoonPi in the same Raspberry Pi
 
