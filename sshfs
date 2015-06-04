@@ -1,1 +1,0 @@
-sshfs -o idmap=user -o allow_root pi@forkpi.local:/home/pi ~/Pi

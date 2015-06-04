@@ -1,4 +1,0 @@
-git config --global http.proxy http://proxy.upd.edu.ph:8080
-git config --global https.proxy http://proxy.upd.edu.ph:8080
-
-git config --global --unset core.gitproxy
