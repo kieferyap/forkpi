@@ -24,7 +24,7 @@ We chose the Raspberry Pi for our platform because it is open-source, accessible
 
 Our system has two types of Raspberry Pis: the ForkPi and the SpoonPis. There is only one ForkPi unit in the system, and it has multiple SpoonPi units associated with it, with each SpoonPi associated with each door to be secured. All Raspberry Pis, and the admin's computer, are connected to the same network, either wirelessly or through a cable.
 
-[show image]
+![forkpi-spoonpi-architecture](https://github.com/crentagon/forkpi/blob/master/images/forkpi-spoonpi-architecture.png)
 
 ### ForkPi (Python 3.0, Django 2.0)
 
