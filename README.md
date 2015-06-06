@@ -206,35 +206,34 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 1.	Run the following commands in the terminal. (Make sure that you're connected to the internet first.)
 
-	1.1.	sudo apt-get update
-	1.2.	sudo apt-get install git
+		sudo apt-get update
+		sudo apt-get install git
 
 2.	Create a new folder, and navigate to that folder in the terminal.
 
-	2.1.	git clone https://github.com/crentagon/forkpi
+		git clone https://github.com/crentagon/forkpi
 
 3.	Setting the resolution of your monitor, if need to:
 
-	3.1.	tvservice -d edid
-	3.2.	edidparser edid
-	3.3.	Before the line "HDMI:EDID preferred mode remained as..." at the bottom of edid, select the resolution that you desire.
-	3.4.	In my case, I want my resolution to be:
+   1.	tvservice -d edid
+   2.	edidparser edid
+   3.	Before the line "HDMI:EDID preferred mode remained as..." at the bottom of edid, select the resolution that you desire.
+   4.	In my case, I want my resolution to be:
 
-			`HDMI:EDID CEA mode (4) 1280x720p @ 60 Hz with pixel clock...`
+			HDMI:EDID CEA mode (4) 1280x720p @ 60 Hz with pixel clock...
 
-	3.5.	`sudo nano /boot/config.txt`
-	3.6.	Look for the lines
+   5.	`sudo nano /boot/config.txt`
+   6.	Look for the lines
 
-			`# hdmi_group = x`
-			`# hdmi_mode = y`
+			# hdmi_group = x
+			# hdmi_mode = y
 
-	3.7.	Take out the hashtags and then:
+   7.	Take out the hashtags and then:
 
-		3.7.1.	Change x to 1 if it's CEA
-		3.7.2.	Change x to 2 if it's DMT
-		3.7.3.	Change y to the number in parenthesis, in my case, 4.
-
-	3.8.	Press CTRL+X to close nano and reboot with sudo reboot. Your monitor should be at the right resolution right now.
+      1. Change x to 1 if it's CEA
+      2. Change x to 2 if it's DMT
+      3. Change y to the number in parenthesis, in my case, 4.
+   8.	Press CTRL+X to close nano and reboot with sudo reboot. Your monitor should be at the right resolution right now.
 
 4.	Changing the Keyboard Layout
 
@@ -301,6 +300,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 	2.2. `sudo insserv avahi-daemon`
 	2.3. `sudo nano /etc/avahi/services/multiple.service`
 
+		```html
 		<?xml version="1.0" standalone='no'?>
 		<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 		<service-group>
@@ -315,6 +315,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 		                <port>22</port>
 		        </service>
 		</service-group>
+		```
 
 	2.4. `sudo nano /etc/hostname` and Change "raspberrypi" to "forkpi"
 	2.5. `sudo /etc/init.d/avahi-daemon restart`
