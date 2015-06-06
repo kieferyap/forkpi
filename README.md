@@ -181,7 +181,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 2.	The SD Card must have the following specifications:
 
-   1.	At least 8GB of data
+   1.	At least 4GB of data
    3.	Format system: FAT32
    3.	Allocation unit size: 8192 bytes
 
