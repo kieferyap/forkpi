@@ -151,25 +151,25 @@ The flowchart below gives an overview of the main transaction loop. The process 
 ![spoonpi-flowchart](https://github.com/crentagon/forkpi/blob/master/images/spoonpi-flowchart.png)
 
 #### Default Screen
-![spoon-initial](https://github.com/crentagon/forkpi/blob/master/images/spoon-initial.png)
+![spoon-initial](https://github.com/crentagon/forkpi/blob/master/images/spoon-initial.jpg)
 
 #### Entering the PIN
-![spoon-pin](https://github.com/crentagon/forkpi/blob/master/images/spoon-pin.png)
+![spoon-pin](https://github.com/crentagon/forkpi/blob/master/images/spoon-pin.jpg)
 
 #### Swiping the RFID Card
-![spoon-rfid](https://github.com/crentagon/forkpi/blob/master/images/spoon-rfid.png)
+![spoon-rfid](https://github.com/crentagon/forkpi/blob/master/images/spoon-rfid.jpg)
 
 The RFID security we implemented is simple in that only the UID is retrieved from the tag. Hence, a combination of RFID and PIN may be vulnerable to brute force attacks. To prevent this, we defined an attempt limit of 5 (which can be reconfigured via ForkPi options). If a registered RFID tag is presented but the wrong PIN is entered, the failed attempt streak counter will increment, and if this reaches 5, the SpoonPi unit will reject all further log-in attempts from that RFID tag. 
 
 This lockout will expire after a certain amount of time, after which the RFID tag can be used normally again. Note that lockouts are local to a SpoonPi unit; an RFID tag locked out for a certain door can still be used in other doors.
 
 #### Scanning Fingerprint
-![spoon-fingerprint](https://github.com/crentagon/forkpi/blob/master/images/spoon-fingerprint.png)
+![spoon-fingerprint](https://github.com/crentagon/forkpi/blob/master/images/spoon-fingerprint.jpg)
 
 In finding keypairs whose fingerprint template matches that of the finger presented to SpoonPi, the fingerprint thread queries ForkPi for all keypairs that have a non-blank fingerprint template field, and are linked to its door. Then, it registers the presented template onto the fingerprint scanner's onboard memory. It uploads the queried templates, and matches it with the presented template using the scanner's internal matching algorithm. It stores the keypair IDs of all matches in a list, then returns that to the main transaction process, which queries for keypairs whose ID is in the list of fingerprint matches.
 
 #### Access Granted
-![spoon-granted](https://github.com/crentagon/forkpi/blob/master/images/spoon-granted.png)
+![spoon-granted](https://github.com/crentagon/forkpi/blob/master/images/spoon-granted.jpg)
 
 -----------------------
 
