@@ -230,9 +230,9 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
    7.	Take out the hashtags and then:
 
-      1. Change x to 1 if it's CEA
-      2. Change x to 2 if it's DMT
-      3. Change y to the number in parenthesis, in my case, 4.
+      1. Change `x` to 1 if it's CEA
+      2. Change `x` to 2 if it's DMT
+      3. Change `y` to the number in parenthesis, in my case, 4.
 
    8.	Press CTRL+X to close nano and reboot with sudo reboot. Your monitor should be at the right resolution right now.
 
@@ -246,8 +246,10 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 1.	Installation for the OLED
 
-   1.	`sudo apt-get install git-core`
-   2.	`sudo nano /etc/modprobe.d/raspi-blacklist.conf`
+   ```
+   	sudo apt-get install git-core
+   	sudo nano /etc/modprobe.d/raspi-blacklist.conf
+   ```
 
       1.	Comment out the following line by adding a hashtag before it:
 
@@ -257,51 +259,61 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 			# blacklist spi-bcm2708
 
-   3.	`git clone https://github.com/the-raspberry-pi-guy/OLED` Make sure to navigate to the right folder first.
-   4.	`cd OLED`
-
-   5.	`sh OLEDinstall.sh`
+   ```
+   	git clone https://github.com/the-raspberry-pi-guy/OLED
+   	cd OLED
+   	sh OLEDinstall.sh
+   ```
 
 2.	Installation for the RFID
 
-   1.  `sudo raspi-config`
-			Use the arrow keys to navigate to: 8 Advanced Options
-			Choose "A7 Serial"
-			Choose No
+	1. Disable the serial
+	   ```
+	   sudo raspi-config
+	   ```
+		1. Use the arrow keys to navigate to: 8 Advanced Options
+		2. Choose "A7 Serial"
+		3. Choose No
+	
+	<!--
+   ```
+	wget https://libnfc.googlecode.com/archive/libnfc-1.7.0.tar.gz
+	tar -xvzf libnfc-1.7.0.tar.gz
+	cd libnfc-libnfc-1.7.0
+	sudo mkdir /etc/nfc
+	sudo mkdir /etc/nfc/devices.d
+	sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf
+	sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
+	```
+	1. Add the following line
+		
+		allow_intrusive_scan = true
 
-   2.	`wget https://libnfc.googlecode.com/archive/libnfc-1.7.0.tar.gz`
-			Make sure to navigate to the right folder first.
-
-   3.	`tar -xvzf libnfc-1.7.0.tar.gz`
-
-   4.	`cd libnfc-libnfc-1.7.0`
-   5. `sudo mkdir /etc/nfc`
-   6. `sudo mkdir /etc/nfc/devices.d`
-   7. `sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf`
-
-   8.	`sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
-			allow_intrusive_scan = true`
-
-   9.	`sudo apt-get install autoconf`
-   10.	`sudo apt-get install libtool`
-   11.	`sudo apt-get install libpcsclite-dev libusb-dev`
-   12.	`autoreconf -vis`
-   13.	`./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr`
+   ```
+	sudo apt-get install autoconf libtool libpcsclite-dev libusb-dev
+	autoreconf -vis
+	./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr
+	```
+	-->
 
 ### `forkpi.local`
 
-1. Add 2 lines to /etc/resolv.conf to solve the apt-get DNS issue over ssh
+1. Add these 2 lines to `/etc/resolv.conf` to solve the apt-get DNS issue over ssh
 
+	```
 	nameserver 8.8.8.8
 	nameserver 8.8.4.4
+	```
 
-2. Install avahi-daemon to enable us to refer to the pi using <hostname>.local
+2. Install avahi-daemon to enable us to refer to the Pi using `<hostname>.local`
 	
-   1. `sudo apt-get install avahi-daemon`
-   2. `sudo insserv avahi-daemon`
-   3. `sudo nano /etc/avahi/services/multiple.service`
-
-		```html
+	```
+	sudo apt-get install avahi-daemon
+	sudo insserv avahi-daemon
+	sudo nano /etc/avahi/services/multiple.service
+	```
+	Paste the following:
+	
 		<?xml version="1.0" standalone='no'?>
 		<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
 		<service-group>
@@ -316,29 +328,38 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 		                <port>22</port>
 		        </service>
 		</service-group>
-		```
+	
+3. In the file `/etc/hostname`, change the hostname from `raspberrypi` to `forkpi`.
 
-   4. `sudo nano /etc/hostname` and Change "raspberrypi" to "forkpi"
-   5. `sudo /etc/init.d/avahi-daemon restart`
-   6. `sudo reboot`
+4. Reboot the Pi for changes to take effect
+   	```
+	sudo /etc/init.d/avahi-daemon restart
+	sudo reboot
+	```
 
 ### PostgreSQL Server Setup
+1. Install PostgreSQL and create the database
+	```
+	sudo apt-get install postgresql-9.1 postgresql-contrib-9.1 pgadmin3 python-psycopg2 libpq-dev
+	sudo pip-2.7 install psycopg2
+	sudo -u postgres createuser --superuser pi
+	createdb pi
+	createdb forkpi
+	sudo su - postgres
+	```
+2. Make PostgreSQL accept connections from all IP addresses
+	1. In the file `/etc/postgresql/9.1/main/pg_hba.conf`, add this line in the IPv4 section:
+			
+			host    all             all             0.0.0.0/0            md5
 
-1. `sudo apt-get install postgresql-9.1 postgresql-contrib-9.1 pgadmin3 python-psycopg2 libpq-dev`
-2. `sudo pip-2.7 install psycopg2`
-3. `sudo -u postgres createuser --superuser pi`
-4. `createdb pi`
-5. `createdb forkpi`
-6. `sudo su - postgres`
-7. `nano /etc/postgresql/9.1/main/pg_hba.conf`
-   1. Add this line in the IPv4 section:
-			`host    all             all             0.0.0.0/0            md5`
-8. `nano /etc/postgresql/9.1/main/postgresql.conf`
-	Edit the first line:
+	2. In the file `/etc/postgresql/9.1/main/postgresql.conf`, edit the first line:
 	
-	listen_addresses = '*'
-9. `service postgresql restart`
+			listen_addresses = '*'
 
+	3. Restart PostgreSQL
+
+			service postgresql restart
+			
 ### Wiring
 
 All wiring information can be found [here](https://docs.google.com/spreadsheets/d/18gbAtkJim4ELeVOZZ6gl_lr4D322EA_XIP6L-TsU24I/edit?usp=sharing).
