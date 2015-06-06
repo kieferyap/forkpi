@@ -181,9 +181,9 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 2.	The SD Card must have the following specifications:
 
-	2.1.	At least 8GB of data
-	2.3.	Format system: FAT32
-	2.3.	Allocation unit size: 8192 bytes
+   1.	At least 8GB of data
+   3.	Format system: FAT32
+   3.	Allocation unit size: 8192 bytes
 
 3.	Insert SD Card to Raspberry Pi and boot
 
@@ -191,16 +191,16 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 5.	Default login information:
 
-	5.1.	username: `pi`
-	5.2.	password: `raspberry`
+   1.	username: `pi`
+   2.	password: `raspberry`
 
 6.	After the installation, a menu in blue background will pop up. (To access this menu again in the future, do `sudo raspi-config`) Do the following:
 
-	6.1.	Go to Option 3: "Enable Boot to Desktop/Scratch Choose whether to boot into a desktop environment, Scratch, or the command line" and hit enter.
+   1.	Go to Option 3: "Enable Boot to Desktop/Scratch Choose whether to boot into a desktop environment, Scratch, or the command line" and hit enter.
 
-	6.2.	Select the boot option "Desktop Log in as user `pi` at the graphical desktop."
+   2.	Select the boot option "Desktop Log in as user `pi` at the graphical desktop."
 
-	6.3.	Hit "FINISH" and reboot. Congrats! Your desktop should be all set and you're ready to go.
+   3.	Hit "FINISH" and reboot. Congrats! Your desktop should be all set and you're ready to go.
 
 ### Preliminaries
 
@@ -246,8 +246,8 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 1.	Installation for the OLED
 
-	1.1.	`sudo apt-get install git-core`
-	1.2.	`sudo nano /etc/modprobe.d/raspi-blacklist.conf`
+   1.	`sudo apt-get install git-core`
+   2.	`sudo nano /etc/modprobe.d/raspi-blacklist.conf`
 
 		1.2.1.	Comment out the following line by adding a hashtag before it:
 
@@ -257,33 +257,32 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 			`# blacklist spi-bcm2708`
 
-	1.3.	`git clone https://github.com/the-raspberry-pi-guy/OLED` Make sure to navigate to the right folder first.
+   3.	`git clone https://github.com/the-raspberry-pi-guy/OLED` Make sure to navigate to the right folder first.
+   4.	`cd OLED`
 
-	1.4.	`cd OLED`
-
-	1.5.	`sh OLEDinstall.sh`
+   5.	`sh OLEDinstall.sh`
 
 2.	Installation for the RFID
 
-	2.0.  `sudo raspi-config`
+   1.  `sudo raspi-config`
 			Use the arrow keys to navigate to: 8 Advanced Options
 			Choose "A7 Serial"
 			Choose No
 
-	2.1.	`wget https://libnfc.googlecode.com/archive/libnfc-1.7.0.tar.gz`
+   2.	`wget https://libnfc.googlecode.com/archive/libnfc-1.7.0.tar.gz`
 			Make sure to navigate to the right folder first.
 
-	2.2.	`tar -xvzf libnfc-1.7.0.tar.gz`
+   3.	`tar -xvzf libnfc-1.7.0.tar.gz`
 
-	2.3.	`cd libnfc-libnfc-1.7.0`
+   4.	`cd libnfc-libnfc-1.7.0`
 			`sudo mkdir /etc/nfc`
 			`sudo mkdir /etc/nfc/devices.d`
 			`sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf`
 
-	2.4.	`sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
+   5.	`sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
 			allow_intrusive_scan = true`
 
-	2.5.	`sudo apt-get install autoconf`
+   6.	`sudo apt-get install autoconf`
 			`sudo apt-get install libtool`
 			`sudo apt-get install libpcsclite-dev libusb-dev`
 			`autoreconf -vis`
@@ -297,9 +296,9 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 2. Install avahi-daemon to enable us to refer to the pi using <hostname>.local
 	
-	2.1. `sudo apt-get install avahi-daemon`
-	2.2. `sudo insserv avahi-daemon`
-	2.3. `sudo nano /etc/avahi/services/multiple.service`
+   1. `sudo apt-get install avahi-daemon`
+   2. `sudo insserv avahi-daemon`
+   3. `sudo nano /etc/avahi/services/multiple.service`
 
 		```html
 		<?xml version="1.0" standalone='no'?>
@@ -318,26 +317,28 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 		</service-group>
 		```
 
-	2.4. `sudo nano /etc/hostname` and Change "raspberrypi" to "forkpi"
-	2.5. `sudo /etc/init.d/avahi-daemon restart`
-	2.6. `sudo reboot`
+   4. `sudo nano /etc/hostname` and Change "raspberrypi" to "forkpi"
+   5. `sudo /etc/init.d/avahi-daemon restart`
+   6. `sudo reboot`
 
 ### PostgreSQL Server Setup
 
-	1. `sudo apt-get install postgresql-9.1 postgresql-contrib-9.1 pgadmin3 python-psycopg2 libpq-dev`
-	2. `sudo pip-2.7 install psycopg2`
-	3. `sudo -u postgres createuser --superuser pi`
-	4. `createdb pi`
-	5. `createdb forkpi`
+1. `sudo apt-get install postgresql-9.1 postgresql-contrib-9.1 pgadmin3 python-psycopg2 libpq-dev`
+2. `sudo pip-2.7 install psycopg2`
+3. `sudo -u postgres createuser --superuser pi`
+4. `createdb pi`
+5. `createdb forkpi`
 
-	6. `sudo su - postgres`
-	7. `nano /etc/postgresql/9.1/main/pg_hba.conf`
-		7.1. Add this line in the IPv4 section:
+6. `sudo su - postgres`
+7. `nano /etc/postgresql/9.1/main/pg_hba.conf`
+   1. Add this line in the IPv4 section:
 			`host    all             all             0.0.0.0/0            md5`
-	8. `nano /etc/postgresql/9.1/main/postgresql.conf`
-		Edit the first line:
-			`listen_addresses = '*'`
-	9. `service postgresql restart`
+8. `nano /etc/postgresql/9.1/main/postgresql.conf`
+	Edit the first line:
+	
+		`listen_addresses = '*'`
+		
+9. `service postgresql restart`
 
 ### Wiring
 
