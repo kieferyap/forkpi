@@ -181,7 +181,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 2.	The SD Card must have the following specifications:
 
-   1.	At least 8GB of data
+   1.	At least 4GB of data
    3.	Format system: FAT32
    3.	Allocation unit size: 8192 bytes
 
@@ -329,7 +329,6 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 3. `sudo -u postgres createuser --superuser pi`
 4. `createdb pi`
 5. `createdb forkpi`
-
 6. `sudo su - postgres`
 7. `nano /etc/postgresql/9.1/main/pg_hba.conf`
    1. Add this line in the IPv4 section:
@@ -337,8 +336,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 8. `nano /etc/postgresql/9.1/main/postgresql.conf`
 	Edit the first line:
 	
-		`listen_addresses = '*'`
-
+	listen_addresses = '*'
 9. `service postgresql restart`
 
 ### Wiring
