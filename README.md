@@ -341,4 +341,4 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
 ### Wiring
 
-	[in progress]
+All wiring information can be found [here](https://docs.google.com/spreadsheets/d/18gbAtkJim4ELeVOZZ6gl_lr4D322EA_XIP6L-TsU24I/edit?usp=sharing).
