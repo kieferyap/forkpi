@@ -233,13 +233,14 @@ In finding keypairs whose fingerprint template matches that of the finger presen
       1. Change x to 1 if it's CEA
       2. Change x to 2 if it's DMT
       3. Change y to the number in parenthesis, in my case, 4.
+
    8.	Press CTRL+X to close nano and reboot with sudo reboot. Your monitor should be at the right resolution right now.
 
 4.	Changing the Keyboard Layout
 
-	4.1.	`sudo raspi-config`
-	4.2.	Select the fourth option and choose keyboard settings.
-	4.3.	Reboot for the changes to take effect.
+   1.	`sudo raspi-config`
+   2.	Select the fourth option and choose keyboard settings.
+   3.	Reboot for the changes to take effect.
 
 ### Required Installation
 
