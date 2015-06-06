@@ -174,5 +174,169 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 -----------------------
 
 ## Installation Guide
-[In progress]
 
+### Installing the OS
+
+1.	Download NOOBS_vX_X_XX.zip from http://www.raspberrypi.org/downloads/ and send these files to your SD.
+
+2.	The SD Card must have the following specifications:
+
+	2.1.	At least 8GB of data
+	2.3.	Format system: FAT32
+	2.3.	Allocation unit size: 8192 bytes
+
+3.	Insert SD Card to Raspberry Pi and boot
+
+4.	Once the installation window shows up, click on the checkbox for "Raspbian" and hit "I" (Install)
+
+5.	Default login information:
+
+	5.1.	username: `pi`
+	5.2.	password: `raspberry`
+
+6.	After the installation, a menu in blue background will pop up. (To access this menu again in the future, do `sudo raspi-config`) Do the following:
+
+	6.1.	Go to Option 3: "Enable Boot to Desktop/Scratch Choose whether to boot into a desktop environment, Scratch, or the command line" and hit enter.
+
+	6.2.	Select the boot option "Desktop Log in as user `pi` at the graphical desktop."
+
+	6.3.	Hit "FINISH" and reboot. Congrats! Your desktop should be all set and you're ready to go.
+
+### Preliminaries
+
+1.	Run the following commands in the terminal. (Make sure that you're connected to the internet first.)
+
+	1.1.	sudo apt-get update
+	1.2.	sudo apt-get install git
+
+2.	Create a new folder, and navigate to that folder in the terminal.
+
+	2.1.	git clone https://github.com/crentagon/forkpi
+
+3.	Setting the resolution of your monitor, if need to:
+
+	3.1.	tvservice -d edid
+	3.2.	edidparser edid
+	3.3.	Before the line "HDMI:EDID preferred mode remained as..." at the bottom of edid, select the resolution that you desire.
+	3.4.	In my case, I want my resolution to be:
+
+			`HDMI:EDID CEA mode (4) 1280x720p @ 60 Hz with pixel clock...`
+
+	3.5.	`sudo nano /boot/config.txt`
+	3.6.	Look for the lines
+
+			`# hdmi_group = x`
+			`# hdmi_mode = y`
+
+	3.7.	Take out the hashtags and then:
+
+		3.7.1.	Change x to 1 if it's CEA
+		3.7.2.	Change x to 2 if it's DMT
+		3.7.3.	Change y to the number in parenthesis, in my case, 4.
+
+	3.8.	Press CTRL+X to close nano and reboot with sudo reboot. Your monitor should be at the right resolution right now.
+
+4.	Changing the Keyboard Layout
+
+	4.1.	`sudo raspi-config`
+	4.2.	Select the fourth option and choose keyboard settings.
+	4.3.	Reboot for the changes to take effect.
+
+### Required Installation
+
+1.	Installation for the OLED
+
+	1.1.	`sudo apt-get install git-core`
+	1.2.	`sudo nano /etc/modprobe.d/raspi-blacklist.conf`
+
+		1.2.1.	Comment out the following line by adding a hashtag before it:
+
+			`blacklist spi-bcm2708`
+
+		1.2.1.	It should look like this:
+
+			`# blacklist spi-bcm2708`
+
+	1.3.	`git clone https://github.com/the-raspberry-pi-guy/OLED` Make sure to navigate to the right folder first.
+
+	1.4.	`cd OLED`
+
+	1.5.	`sh OLEDinstall.sh`
+
+2.	Installation for the RFID
+
+	2.0.  `sudo raspi-config`
+			Use the arrow keys to navigate to: 8 Advanced Options
+			Choose "A7 Serial"
+			Choose No
+
+	2.1.	`wget https://libnfc.googlecode.com/archive/libnfc-1.7.0.tar.gz`
+			Make sure to navigate to the right folder first.
+
+	2.2.	`tar -xvzf libnfc-1.7.0.tar.gz`
+
+	2.3.	`cd libnfc-libnfc-1.7.0`
+			`sudo mkdir /etc/nfc`
+			`sudo mkdir /etc/nfc/devices.d`
+			`sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf`
+
+	2.4.	`sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
+			allow_intrusive_scan = true`
+
+	2.5.	`sudo apt-get install autoconf`
+			`sudo apt-get install libtool`
+			`sudo apt-get install libpcsclite-dev libusb-dev`
+			`autoreconf -vis`
+			`./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr`
+
+### `forkpi.local`
+
+1. Add 2 lines to /etc/resolv.conf to solve the apt-get DNS issue over ssh
+	nameserver 8.8.8.8
+	nameserver 8.8.4.4
+
+2. Install avahi-daemon to enable us to refer to the pi using <hostname>.local
+	
+	2.1. `sudo apt-get install avahi-daemon`
+	2.2. `sudo insserv avahi-daemon`
+	2.3. `sudo nano /etc/avahi/services/multiple.service`
+
+		<?xml version="1.0" standalone='no'?>
+		<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+		<service-group>
+		        <name replace-wildcards="yes">%h</name>
+		        <service>
+		                <type>_device-info._tcp</type>
+		                <port>0</port>
+		                <txt-record>model=RackMac</txt-record>
+		        </service>
+		        <service>
+		                <type>_ssh._tcp</type>
+		                <port>22</port>
+		        </service>
+		</service-group>
+
+	2.4. `sudo nano /etc/hostname` and Change "raspberrypi" to "forkpi"
+	2.5. `sudo /etc/init.d/avahi-daemon restart`
+	2.6. `sudo reboot`
+
+### PostgreSQL Server Setup
+
+	1. `sudo apt-get install postgresql-9.1 postgresql-contrib-9.1 pgadmin3 python-psycopg2 libpq-dev`
+	2. `sudo pip-2.7 install psycopg2`
+	3. `sudo -u postgres createuser --superuser pi`
+	4. `createdb pi`
+	5. `createdb forkpi`
+
+	6. `sudo su - postgres`
+	7. `nano /etc/postgresql/9.1/main/pg_hba.conf`
+		7.1. Add this line in the IPv4 section:
+			`host    all             all             0.0.0.0/0            md5`
+	8. `nano /etc/postgresql/9.1/main/postgresql.conf`
+		Edit the first line:
+			`listen_addresses = '*'`
+	9. `service postgresql restart`
+
+### Wiring
+
+	[in progress]
