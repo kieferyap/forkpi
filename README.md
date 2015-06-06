@@ -230,9 +230,9 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
    7.	Take out the hashtags and then:
 
-      1. Change x to 1 if it's CEA
-      2. Change x to 2 if it's DMT
-      3. Change y to the number in parenthesis, in my case, 4.
+      1. Change `x` to 1 if it's CEA
+      2. Change `x` to 2 if it's DMT
+      3. Change `y` to the number in parenthesis, in my case, 4.
 
    8.	Press CTRL+X to close nano and reboot with sudo reboot. Your monitor should be at the right resolution right now.
 
@@ -253,11 +253,11 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 
       1.	Comment out the following line by adding a hashtag before it:
 
-			`blacklist spi-bcm2708`
+			blacklist spi-bcm2708
 
       2.	It should look like this:
 
-			`# blacklist spi-bcm2708`
+			# blacklist spi-bcm2708
 
    ```
    	git clone https://github.com/the-raspberry-pi-guy/OLED
@@ -287,7 +287,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 	```
 	1. Add the following line
 		
-		`allow_intrusive_scan = true`
+		allow_intrusive_scan = true
 
    ```
 	sudo apt-get install autoconf libtool libpcsclite-dev libusb-dev
@@ -329,11 +329,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 		        </service>
 		</service-group>
 	
-3. Change the hostname
-	```
-	sudo nano /etc/hostname
-	```
-	1. Change "raspberrypi" to "forkpi"
+3. In the file `/etc/hostname`, change the hostname from `raspberrypi` to `forkpi`.
 
 4. Reboot the Pi for changes to take effect
    	```
