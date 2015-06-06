@@ -249,13 +249,13 @@ In finding keypairs whose fingerprint template matches that of the finger presen
    1.	`sudo apt-get install git-core`
    2.	`sudo nano /etc/modprobe.d/raspi-blacklist.conf`
 
-		1.2.1.	Comment out the following line by adding a hashtag before it:
+      1.	Comment out the following line by adding a hashtag before it:
 
-			`blacklist spi-bcm2708`
+			blacklist spi-bcm2708
 
-		1.2.1.	It should look like this:
+      2.	It should look like this:
 
-			`# blacklist spi-bcm2708`
+			# blacklist spi-bcm2708
 
    3.	`git clone https://github.com/the-raspberry-pi-guy/OLED` Make sure to navigate to the right folder first.
    4.	`cd OLED`
@@ -275,22 +275,23 @@ In finding keypairs whose fingerprint template matches that of the finger presen
    3.	`tar -xvzf libnfc-1.7.0.tar.gz`
 
    4.	`cd libnfc-libnfc-1.7.0`
-			`sudo mkdir /etc/nfc`
-			`sudo mkdir /etc/nfc/devices.d`
-			`sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf`
+   5. `sudo mkdir /etc/nfc`
+   6. `sudo mkdir /etc/nfc/devices.d`
+   7. `sudo cp contrib/libnfc/pn532_uart_on_rpi.conf.sample /etc/nfc/devices.d/pn532_uart_on_rpi.conf`
 
-   5.	`sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
+   8.	`sudo nano /etc/nfc/devices.d/pn532_uart_on_rpi.conf
 			allow_intrusive_scan = true`
 
-   6.	`sudo apt-get install autoconf`
-			`sudo apt-get install libtool`
-			`sudo apt-get install libpcsclite-dev libusb-dev`
-			`autoreconf -vis`
-			`./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr`
+   9.	`sudo apt-get install autoconf`
+   10.	`sudo apt-get install libtool`
+   11.	`sudo apt-get install libpcsclite-dev libusb-dev`
+   12.	`autoreconf -vis`
+   13.	`./configure --with-drivers=pn532_uart --sysconfdir=/etc --prefix=/usr`
 
 ### `forkpi.local`
 
 1. Add 2 lines to /etc/resolv.conf to solve the apt-get DNS issue over ssh
+
 	nameserver 8.8.8.8
 	nameserver 8.8.4.4
 
@@ -337,7 +338,7 @@ In finding keypairs whose fingerprint template matches that of the finger presen
 	Edit the first line:
 	
 		`listen_addresses = '*'`
-		
+
 9. `service postgresql restart`
 
 ### Wiring
