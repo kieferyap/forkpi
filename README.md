@@ -2,9 +2,20 @@
 
 ForkPi: A door access control system that is more accessible to the world. ForkPi stands for **F**ingerprint, **O**LED, **R**FID, **K**eypad, and Raspberry **Pi**.
 
+A video demonstration of the project can be found [here](https://vimeo.com/).
+
 -----------------------
 
 ## Overview
+
+### What You'll Need:
+1. A Raspberry Pi
+2. Fingerprint Scanner: [Fingerprint Scanner - TTL (GT-511C3)](https://www.sparkfun.com/products/11792)
+3. RFID Scanner: [PN532 NFC/RFID Controller Breakout Board](http://www.adafruit.com/products/364)
+5. RFID Card: [MiFare Classic (13.56MHz RFID/NFC) Card](http://www.adafruit.com/product/359)
+6. Display: [Monochrome SPI OLED Graphic Display](http://www.adafruit.com/products/661)
+4. Keypad: [Membrane 3x4 Matrix Keypad](http://www.adafruit.com/products/419)
+7. Wires: [Premium Female/Male Jumper Wires](http://www.adafruit.com/product/825)
 
 ### Motivation
 
