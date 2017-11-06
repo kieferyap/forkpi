@@ -1,5 +1,7 @@
 # ForkPi 
 
+**Important note**: We do not have the materials at the moment (Raspberry Pi, Fingerprint Scanner, etc.), so we could not test the system or reproduce any bugs at the moment. Sorry for any inconvenience this may cause.
+
 ForkPi: A door access control system that is more accessible to the world. ForkPi stands for **F**ingerprint, **O**LED, **R**FID, **K**eypad, and Raspberry **Pi**.
 
 A video demonstration of the project can be found [here](https://vimeo.com/130016480).
